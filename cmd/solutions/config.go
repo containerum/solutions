@@ -1,0 +1,74 @@
+package main
+
+import (
+	"errors"
+
+	"git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/models/postgres"
+	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/server/impl"
+	"github.com/urfave/cli"
+)
+
+const (
+	debugFlag        = "debug"
+	solutionsFlag    = "solutions"
+	textlogFlag      = "textlog"
+	dbFlag           = "db"
+	dbURLFlag        = "db_url"
+	dbMigrationsFlag = "db_migrations"
+)
+
+var flags = []cli.Flag{
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS",
+		Name:   solutionsFlag,
+		Value:  "impl",
+		Usage:  "Solutions impl",
+	},
+	cli.BoolFlag{
+		EnvVar: "CH_SOLUTIONS_DEBUG",
+		Name:   debugFlag,
+		Usage:  "Start the server in Debug mode",
+	},
+	cli.BoolFlag{
+		EnvVar: "CH_SOLUTIONS_TEXTLOG",
+		Name:   textlogFlag,
+		Usage:  "Display output log in text format",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_DB",
+		Name:   dbFlag,
+		Value:  "postgres",
+		Usage:  "DB for project",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_DB_URL",
+		Name:   dbURLFlag,
+		Usage:  "DB URL",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_MIGRATIONS_PATH",
+		Name:   dbMigrationsFlag,
+		Value:  "../../pkg/migrations/",
+		Usage:  "Location of DB migrations",
+	},
+}
+
+func getSolutionsSrv(c *cli.Context, services server.Services) (server.SolutionsService, error) {
+	switch c.String(solutionsFlag) {
+	case "impl":
+		return impl.NewSolutionsImpl(services), nil
+	default:
+		return nil, errors.New("invalid solutions impl")
+	}
+}
+
+func getDB(c *cli.Context) (models.DB, error) {
+	switch c.String(dbFlag) {
+	case "postgres":
+		return postgres.DBConnect(c.String(dbURLFlag), c.String(dbMigrationsFlag))
+	default:
+		return nil, errors.New("invalid db")
+	}
+}

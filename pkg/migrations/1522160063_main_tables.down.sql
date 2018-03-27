@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS solutions;
+DROP TABLE IF EXISTS parameters;
+DROP TABLE IF EXISTS deployments;
+DROP TABLE IF EXISTS services;
