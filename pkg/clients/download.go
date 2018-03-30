@@ -7,9 +7,10 @@ import (
 	"io"
 	"strings"
 
+	"errors"
+
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"github.com/go-resty/resty"
-	"github.com/go-siris/siris/core/errors"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
 )
@@ -39,7 +40,7 @@ type httpDownloadClient struct {
 
 // NewHTTPResourceServiceClient returns client for resource-service working via restful api
 func NewHTTPDownloadClient(serverURL string) DownloadClient {
-	log := logrus.WithField("component", "csv_download_client")
+	log := logrus.WithField("component", "download_client")
 	client := resty.New().
 		SetLogger(log.WriterLevel(logrus.DebugLevel))
 	client.JSONMarshal = jsoniter.Marshal
@@ -68,7 +69,7 @@ func (c *httpDownloadClient) DownloadCSV(ctx context.Context) ([]stypes.Availabl
 	reader := csv.NewReader(resp.RawBody())
 	defer resp.RawBody().Close()
 	var solutions []stypes.AvailableSolution
-	firstline := true
+	header := true
 	for {
 		line, err := reader.Read()
 		if err == io.EOF {
@@ -77,7 +78,7 @@ func (c *httpDownloadClient) DownloadCSV(ctx context.Context) ([]stypes.Availabl
 			return nil, err
 		}
 
-		if !firstline {
+		if !header {
 			solutions = append(solutions, stypes.AvailableSolution{
 				Name: line[0],
 				Limits: &stypes.Limits{
@@ -88,7 +89,7 @@ func (c *httpDownloadClient) DownloadCSV(ctx context.Context) ([]stypes.Availabl
 				URL:    line[4],
 			})
 		}
-		firstline = false
+		header = false
 	}
 	return solutions, nil
 }
@@ -104,10 +105,6 @@ func (c *httpDownloadClient) DownloadSolutionJSON(ctx context.Context, url strin
 
 	if err != nil {
 		return nil, err
-	}
-
-	if resp.Error() != nil {
-		return nil, resp.Error().(error)
 	}
 
 	if resp.StatusCode() < 399 {
