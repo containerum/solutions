@@ -28,7 +28,6 @@ type ConfigFile struct {
 
 // ResourceServiceClient is an interface to resource-service.
 type DownloadClient interface {
-	// GetUserAccess returns information about user access to resources (namespace, volumes) needed for token creation.
 	DownloadCSV(ctx context.Context) ([]stypes.AvailableSolution, error)
 	DownloadSolutionJSON(ctx context.Context, url string) (*Solution, error)
 }
@@ -101,7 +100,6 @@ func (c *httpDownloadClient) DownloadSolutionJSON(ctx context.Context, url strin
 
 	resp, err := c.rest.R().
 		SetContext(ctx).
-		ExpectContentType("application/json").
 		Get(url)
 
 	if err != nil {
