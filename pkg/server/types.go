@@ -5,18 +5,23 @@ import (
 
 	"io"
 
+	stypes "git.containerum.net/ch/json-types/solutions"
+
+	"git.containerum.net/ch/solutions/pkg/clients"
 	"git.containerum.net/ch/solutions/pkg/models"
 )
 
 // SolutionsService is an interface for server "business logic"
 type SolutionsService interface {
-	Test1(ctx context.Context) error
-	Test2(ctx context.Context) error
-
+	UpdateAvailableSolutionsList(ctx context.Context) error
+	GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error)
+	GetAvailableSolutionEnv(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error)
+	GetAvailableSolutionResources(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error)
 	io.Closer
 }
 
 // Services is a collection of resources needed for server functionality.
 type Services struct {
-	DB models.DB
+	DB             models.DB
+	DownloadClient clients.DownloadClient
 }

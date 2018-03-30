@@ -44,8 +44,10 @@ func initRoutes(app *gin.Engine) {
 	//	requireLoginHeaders := m.RequireHeaders(umtypes.UserAgentHeader, umtypes.FingerprintHeader, umtypes.ClientIPHeader)
 	//	requireLogoutHeaders := m.RequireHeaders(umtypes.TokenIDHeader, umtypes.SessionIDHeader)
 
-	root := app.Group("/")
+	solutions := app.Group("/solutions")
 	{
-		root.GET("/", h.GetList)
+		solutions.GET("", h.UpdateSolutions, h.GetSolutionsList)
+		solutions.GET("/:solution/env", h.GetSolutionEnv)
+		solutions.GET("/:solution/resources", h.GetSolutionResources)
 	}
 }

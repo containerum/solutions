@@ -6,6 +6,8 @@ import (
 	"context"
 
 	"errors"
+
+	stypes "git.containerum.net/ch/json-types/solutions"
 )
 
 // Errors which may occur in transactional operations
@@ -17,7 +19,9 @@ var (
 
 // DB is an interface for persistent data storage (also sometimes called DAO).
 type DB interface {
-	DoSMTH(ctx context.Context) error
+	SaveAvailableSolutionsList(ctx context.Context, solution stypes.AvailableSolutionsList) error
+	GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error)
+	GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error)
 
 	// Perform operations inside transaction
 	// Transaction commits if `f` returns nil error, rollbacks and forwards error otherwise

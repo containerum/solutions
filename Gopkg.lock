@@ -6,9 +6,10 @@
   name = "git.containerum.net/ch/json-types"
   packages = [
     "misc",
+    "solutions",
     "user-manager"
   ]
-  revision = "bacd09385ad4f2d0593c5ad22a8a5b0bd40b3ae1"
+  revision = "599b891f00ceb949969b66d8a62b8fc881e3fe7e"
 
 [[projects]]
   name = "git.containerum.net/ch/kube-client"
@@ -18,8 +19,8 @@
     "pkg/cherry/adaptors/gonic",
     "pkg/cherry/user-manager"
   ]
-  revision = "71af0d6313bebf8b9aa8a969a72f4ba928c41691"
-  version = "v0.3.1"
+  revision = "ee63238440a7f4051f8c93417603918326bf10dc"
+  version = "v0.7.0"
 
 [[projects]]
   branch = "master"
@@ -69,6 +70,12 @@
   packages = ["."]
   revision = "65798e030a35b911602b4d1d743d6f50ac93b665"
   version = "v1.3"
+
+[[projects]]
+  name = "github.com/go-siris/siris"
+  packages = ["core/errors"]
+  revision = "d6bc3df4b216199bec985043ca6c3e5c00232fd5"
+  version = "v7.4.0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -131,6 +138,12 @@
   version = "1.0.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "36e9d2ebbde5e3f13ab2e25625fd453271d6522e"
+
+[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
@@ -170,7 +183,7 @@
     "unix",
     "windows"
   ]
-  revision = "13d03a9a82fba647c21a0ef8fba44a795d0f0835"
+  revision = "378d26f46672a356c46195c28f61bdb4c0a781dd"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -208,12 +221,12 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
-  version = "v2.2.0"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4203d200c9acc0282cedeaf0f522aa779b0b933fb92c972d927a0492f59563be"
+  inputs-digest = "630388810aaaf25e8717745de4528da251e8ddf0be6732db620684ddc5bbc3f7"
   solver-name = "gps-cdcl"
   solver-version = 1

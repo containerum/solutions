@@ -15,6 +15,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"git.containerum.net/ch/solutions/pkg/clients"
 	"github.com/urfave/cli"
 )
 
@@ -44,7 +45,8 @@ func initServer(c *cli.Context) error {
 	}
 
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
-		DB: getService(getDB(c)).(models.DB),
+		DB:             getService(getDB(c)).(models.DB),
+		DownloadClient: clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
 	})
 	exitOnErr(err)
 
