@@ -2,16 +2,18 @@ package impl
 
 import (
 	"context"
-
 	"net/url"
 
 	"strings"
 
+	"fmt"
+
 	stypes "git.containerum.net/ch/json-types/solutions"
+	"git.containerum.net/ch/solutions/pkg/server"
+	"github.com/json-iterator/go"
 )
 
 func (s *serverImpl) UpdateAvailableSolutionsList(ctx context.Context) error {
-	//TODO: Don't download CSV every time
 	solutions, err := s.svc.DownloadClient.DownloadCSV(ctx)
 	if err != nil {
 		return err
@@ -33,7 +35,7 @@ func (s *serverImpl) GetAvailableSolutionsList(ctx context.Context) (*stypes.Ava
 	return resp, nil
 }
 
-func (s *serverImpl) GetAvailableSolutionEnv(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error) {
+func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error) {
 	solution, err := s.svc.DB.GetAvailableSolution(ctx, name)
 	if err != nil {
 		return nil, err
@@ -53,21 +55,28 @@ func (s *serverImpl) GetAvailableSolutionEnv(ctx context.Context, name string, b
 
 	containerumJSONURL := "https://raw.githubusercontent.com/" + sName + "/" + sBranch + "/" + sFile
 
-	solutionJSON, err := s.svc.DownloadClient.DownloadSolutionJSON(ctx, containerumJSONURL)
+	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, containerumJSONURL)
+	if err != nil {
+		return nil, err
+	}
+
+	var solutionStr server.Solution
+
+	err = jsoniter.Unmarshal(solutionJSON, &solutionStr)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := stypes.SolutionEnv{}
 
-	for e, _ := range solutionJSON.Env {
+	for e, _ := range solutionStr.Env {
 		resp.Env = append(resp.Env, e)
 	}
 
 	return &resp, nil
 }
 
-func (s *serverImpl) GetAvailableSolutionResources(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error) {
+func (s *serverImpl) GetAvailableSolutionResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error) {
 	solution, err := s.svc.DB.GetAvailableSolution(ctx, name)
 	if err != nil {
 		return nil, err
@@ -78,23 +87,28 @@ func (s *serverImpl) GetAvailableSolutionResources(ctx context.Context, name str
 		return nil, err
 	}
 
-	sBranch := "master"
 	if branch != "" {
-		sBranch = strings.TrimSpace(branch)
+		branch = strings.TrimSpace(branch)
+	} else {
+		branch = "master"
 	}
 	sName := strings.TrimSpace(url.Path[1:])
-	sFile := ".containerum.json"
 
-	containerumJSONURL := "https://raw.githubusercontent.com/" + sName + "/" + sBranch + "/" + sFile
+	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, branch))
+	if err != nil {
+		return nil, err
+	}
 
-	solutionJSON, err := s.svc.DownloadClient.DownloadSolutionJSON(ctx, containerumJSONURL)
+	var solutionStr server.Solution
+
+	err = jsoniter.Unmarshal(solutionJSON, &solutionStr)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := stypes.SolutionResources{map[string]int{}}
 
-	for _, r := range solutionJSON.Run {
+	for _, r := range solutionStr.Run {
 		resp.Resources[r.Type]++
 	}
 

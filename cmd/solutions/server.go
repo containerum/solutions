@@ -47,6 +47,7 @@ func initServer(c *cli.Context) error {
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
 		DB:             getService(getDB(c)).(models.DB),
 		DownloadClient: clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
+		KubeAPI:        clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag)),
 	})
 	exitOnErr(err)
 

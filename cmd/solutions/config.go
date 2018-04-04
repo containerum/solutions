@@ -18,6 +18,7 @@ const (
 	dbURLFlag        = "db_url"
 	dbMigrationsFlag = "db_migrations"
 	csvURLFlag       = "csv_url"
+	kubeURLFlag      = "kube_url"
 )
 
 var flags = []cli.Flag{
@@ -59,6 +60,12 @@ var flags = []cli.Flag{
 		Name:   csvURLFlag,
 		Value:  "https://raw.githubusercontent.com/containerum/solution-list/master/containerum-solutions.csv",
 		Usage:  "Solutions list CSV file URL",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_KUBE_API_URL",
+		Name:   kubeURLFlag,
+		Value:  "kube-api:8111",
+		Usage:  "Kube-API service URL",
 	},
 }
 

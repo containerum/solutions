@@ -17,20 +17,10 @@ import (
 
 var csvURL string
 
-type Solution struct {
-	Env map[string]string `json:"env"`
-	Run []ConfigFile      `json:"run,omitempty"`
-}
-
-type ConfigFile struct {
-	Name string `json:"config_file"`
-	Type string `json:"type"`
-}
-
 // ResourceServiceClient is an interface to resource-service.
 type DownloadClient interface {
 	DownloadCSV(ctx context.Context) ([]stypes.AvailableSolution, error)
-	DownloadSolutionJSON(ctx context.Context, url string) (*Solution, error)
+	DownloadFile(ctx context.Context, url string) ([]byte, error)
 }
 
 type httpDownloadClient struct {
@@ -55,7 +45,7 @@ func NewHTTPDownloadClient(serverURL string) DownloadClient {
 }
 
 func (c *httpDownloadClient) DownloadCSV(ctx context.Context) ([]stypes.AvailableSolution, error) {
-	c.log.Info("Downloading CSV")
+	c.log.Infoln("Downloading CSV")
 
 	resp, err := c.rest.R().
 		SetContext(ctx).
@@ -94,26 +84,18 @@ func (c *httpDownloadClient) DownloadCSV(ctx context.Context) ([]stypes.Availabl
 	return solutions, nil
 }
 
-func (c *httpDownloadClient) DownloadSolutionJSON(ctx context.Context, url string) (*Solution, error) {
-	c.log.Info("Downloading solution config")
-
-	solution := Solution{}
+func (c *httpDownloadClient) DownloadFile(ctx context.Context, url string) ([]byte, error) {
+	c.log.WithField("URL", url).Infoln("Downloading file")
 
 	resp, err := c.rest.R().
 		SetContext(ctx).
 		Get(url)
-
 	if err != nil {
 		return nil, err
 	}
 
 	if resp.StatusCode() < 399 {
-		err = jsoniter.Unmarshal(resp.Body(), &solution)
-		if err != nil {
-			return nil, err
-		}
-
-		return &solution, nil
+		return resp.Body(), nil
 	} else {
 		return nil, errors.New("Unable to download file")
 	}
