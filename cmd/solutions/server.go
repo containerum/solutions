@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"text/tabwriter"
 	"time"
 
 	"git.containerum.net/ch/solutions/pkg/models"
@@ -39,10 +40,11 @@ func initServer(c *cli.Context) error {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
 
-	log.Debugln("Flags:")
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.TabIndent|tabwriter.Debug)
 	for _, f := range c.GlobalFlagNames() {
-		log.Debugf("%+v: %v", f, c.String(f))
+		fmt.Fprintf(w, "Flag: %s\t Value: %s\n", f, c.String(f))
 	}
+	w.Flush()
 
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
 		DB:             getService(getDB(c)).(models.DB),

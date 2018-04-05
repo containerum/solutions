@@ -46,9 +46,6 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	}
 	sName := strings.TrimSpace(solurl.Path[1:])
 
-	//TODO
-	sName = "Iliad/redmine-postgresql-solution"
-
 	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, solutionReq.Branch))
 	if err != nil {
 		return err
