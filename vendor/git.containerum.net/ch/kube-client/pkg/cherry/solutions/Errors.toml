@@ -1,0 +1,85 @@
+# File for noice errors generation
+
+Name = "sErrors"
+SID = 11
+
+# errors
+[[error]]
+    Name = "ErrAdminRequired"
+    StatusHTTP = 403
+    Message = "Admin access required"
+    Kind = 1
+
+[[error]]
+    Name = "ErrPermissionsError"
+    StatusHTTP = 403
+    Message = "Unable to verify permissions"
+    Kind = 2
+
+[[error]]
+    Name = "ErrRequiredHeadersNotProvided"
+    StatusHTTP = 400
+    Message = "Required headers not provided"
+    Kind = 3
+
+[[error]]
+    Name = "ErrUnableUpdateSolutionsList"
+    StatusHTTP = 500
+    Message = "Unable to update solutions template list"
+    Kind = 4
+
+[[error]]
+    Name = "ErrUnableGetSolutionsTemplatesList"
+    StatusHTTP = 500
+    Message = "Unable to get solutions templates list"
+    Kind = 5
+
+[[error]]
+    Name = "ErrUnableGetSolutionTemplate"
+    StatusHTTP = 500
+    Message = "Unable to get solutions template"
+    Kind = 6
+
+[[error]]
+    Name = "ErrUnableGetSolutionsList"
+    StatusHTTP = 500
+    Message = "Unable to get user solutions list"
+    Kind = 7
+
+[[error]]
+    Name = "ErrUnableGetSolution"
+    StatusHTTP = 500
+    Message = "Unable to get user solution"
+    Kind = 8
+
+[[error]]
+    Name = "ErrUnableCreateSolution"
+    StatusHTTP = 500
+    Message = "Unable to create solution"
+    Kind = 9
+
+[[error]]
+    Name = "ErrUnableDeleteSolution"
+    StatusHTTP = 500
+    Message = "Unable to delete solution"
+    Kind = 10
+
+
+[[error]]
+    Name = "ErrSolutionAlreadyExists"
+    StatusHTTP = 409
+    Message = "Solution with this name already exists"
+    Kind = 11
+
+
+[[error]]
+    Name = "ErrSolutionNotExist"
+    StatusHTTP = 404
+    Message = "Solution with this name doesn't exist"
+    Kind = 12
+
+[[error]]
+    Name = "ErrInternalError"
+    StatusHTTP = 500
+    Message = "Internal error"
+    Kind = 13

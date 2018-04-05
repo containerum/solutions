@@ -4,27 +4,74 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-resty/resty"
-	"github.com/json-iterator/go"
-	"github.com/sirupsen/logrus"
+
+	"time"
+
+	"fmt"
+
+	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
+	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+	m "git.containerum.net/ch/solutions/pkg/router/middleware"
+	"git.containerum.net/ch/solutions/pkg/server"
 )
 
-const serverURL = "https://github.com/containerum/solution-list/blob/master/containerum-solutions.csv"
+var lastchecktime time.Time
 
-func GetList(ctx *gin.Context) {
-	log := logrus.WithField("component", "user_manager_client")
+const checkinterval = 6 * time.Hour
 
-	client := resty.New().
-		SetLogger(log.WriterLevel(logrus.DebugLevel)).
-		SetHostURL(serverURL).
-		SetDebug(true)
-	client.JSONMarshal = jsoniter.Marshal
-	client.JSONUnmarshal = jsoniter.Unmarshal
+func UpdateSolutions(ctx *gin.Context) {
+	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
+	ss := *ssp
+	fmt.Println(lastchecktime)
 
-	client.R().
-		SetContext(ctx).
-		SetOutput("solutions.csv").
-		Get(serverURL)
+	if lastchecktime.Add(checkinterval).Before(time.Now()) || ctx.Query("forceupdate") == "true" {
+		fmt.Println("Updating solutions")
+		err := ss.UpdateAvailableSolutionsList(ctx.Request.Context())
+		if err != nil {
+			ctx.Error(err)
+			gonic.Gonic(cherry.ErrUnableUpdateSolutionsList(), ctx)
+			return
+		}
+		lastchecktime = time.Now()
+	} else {
+		fmt.Println("Solutions list is still actual")
+	}
+	ctx.Status(http.StatusAccepted)
+}
 
-	ctx.Status(http.StatusOK)
+func GetSolutionsList(ctx *gin.Context) {
+	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
+	ss := *ssp
+	resp, err := ss.GetAvailableSolutionsList(ctx.Request.Context())
+	if err != nil {
+		ctx.Error(err)
+		gonic.Gonic(cherry.ErrUnableGetSolutionsTemplatesList(), ctx)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func GetSolutionEnv(ctx *gin.Context) {
+	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
+	ss := *ssp
+	resp, err := ss.GetAvailableSolutionEnvList(ctx.Request.Context(), ctx.Param("solution"), ctx.Query("branch"))
+	if err != nil {
+		ctx.Error(err)
+		gonic.Gonic(cherry.ErrUnableGetSolutionTemplate(), ctx)
+		return
+	}
+	ctx.JSON(http.StatusOK, resp)
+}
+
+func GetSolutionResources(ctx *gin.Context) {
+	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
+	ss := *ssp
+	resp, err := ss.GetAvailableSolutionResourcesList(ctx.Request.Context(), ctx.Param("solution"), ctx.Query("branch"))
+	if err != nil {
+		ctx.Error(err)
+		gonic.Gonic(cherry.ErrUnableGetSolutionTemplate(), ctx)
+		return
+	}
+	ctx.JSON(http.StatusOK, resp)
 }

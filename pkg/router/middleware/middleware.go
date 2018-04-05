@@ -5,7 +5,7 @@ import (
 
 	umtypes "git.containerum.net/ch/json-types/user-manager"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
-	cherryusr "git.containerum.net/ch/kube-client/pkg/cherry/user-manager"
+	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +29,7 @@ func RequireHeaders(headers ...string) gin.HandlerFunc {
 			}
 		}
 		if len(notFoundHeaders) > 0 {
-			gonic.Gonic(cherryusr.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
+			gonic.Gonic(cherry.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
 		}
 	}
 }

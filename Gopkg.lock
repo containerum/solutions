@@ -6,9 +6,10 @@
   name = "git.containerum.net/ch/json-types"
   packages = [
     "misc",
+    "solutions",
     "user-manager"
   ]
-  revision = "bacd09385ad4f2d0593c5ad22a8a5b0bd40b3ae1"
+  revision = "36190bd3a045c3e3e7464862a8cb63061f48870e"
 
 [[projects]]
   name = "git.containerum.net/ch/kube-client"
@@ -16,10 +17,10 @@
     "pkg/cherry",
     "pkg/cherry/adaptors/cherrylog",
     "pkg/cherry/adaptors/gonic",
-    "pkg/cherry/user-manager"
+    "pkg/cherry/solutions"
   ]
-  revision = "71af0d6313bebf8b9aa8a969a72f4ba928c41691"
-  version = "v0.3.1"
+  revision = "5028d0b31a8738c807c7f95738da368dfceed95b"
+  version = "v0.8.4"
 
 [[projects]]
   branch = "master"
@@ -75,6 +76,12 @@
   packages = ["proto"]
   revision = "925541529c1fa6821df4e44ce2723319eb2be768"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/google/uuid"
+  packages = ["."]
+  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
+  version = "0.2"
 
 [[projects]]
   branch = "master"
@@ -152,7 +159,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "88942b9c40a4c9d203b82b3731787b672d6e809b"
+  revision = "b2aa35443fbc700ab74c586ae79b81c171851023"
 
 [[projects]]
   branch = "master"
@@ -161,7 +168,7 @@
     "idna",
     "publicsuffix"
   ]
-  revision = "6078986fec03a1dcc236c34816c71b0e05018fda"
+  revision = "b68f30494add4df6bd8ef5e82803f308e7f7c59c"
 
 [[projects]]
   branch = "master"
@@ -170,7 +177,7 @@
     "unix",
     "windows"
   ]
-  revision = "13d03a9a82fba647c21a0ef8fba44a795d0f0835"
+  revision = "f67933eaf9e2f750f58a234209a11ebc1107be38"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -208,12 +215,12 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "86f5ed62f8a0ee96bd888d2efdfd6d4fb100a4eb"
-  version = "v2.2.0"
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4203d200c9acc0282cedeaf0f522aa779b0b933fb92c972d927a0492f59563be"
+  inputs-digest = "ebfd90231088ba2063d926a72d0442410c237b5e0cec4d7dfddd68fa60b96d0b"
   solver-name = "gps-cdcl"
   solver-version = 1

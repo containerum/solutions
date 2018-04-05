@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	//	umtypes "git.containerum.net/ch/json-types/user-manager"
+	umtypes "git.containerum.net/ch/json-types/user-manager"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	h "git.containerum.net/ch/solutions/pkg/router/handlers"
@@ -17,7 +17,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 
-	cherryusr "git.containerum.net/ch/kube-client/pkg/cherry/user-manager"
+	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
 )
 
 //CreateRouter initialises router and middlewares
@@ -31,7 +31,7 @@ func CreateRouter(ss *server.SolutionsService) http.Handler {
 func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 	/* System */
 	e.Use(ginrus.Ginrus(logrus.WithField("component", "gin"), time.RFC3339, true))
-	e.Use(gonic.Recovery(cherryusr.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
+	e.Use(gonic.Recovery(cherry.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
 	/* Custom */
 	e.Use(m.RegisterServices(ss))
 	e.Use(m.PrepareContext)
@@ -40,12 +40,20 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 
 // SetupRoutes sets up http router needed to handle requests from clients.
 func initRoutes(app *gin.Engine) {
-	//	requireIdentityHeaders := m.RequireHeaders(umtypes.UserIDHeader, umtypes.UserRoleHeader)
-	//	requireLoginHeaders := m.RequireHeaders(umtypes.UserAgentHeader, umtypes.FingerprintHeader, umtypes.ClientIPHeader)
-	//	requireLogoutHeaders := m.RequireHeaders(umtypes.TokenIDHeader, umtypes.SessionIDHeader)
+	requireIdentityHeaders := m.RequireHeaders(umtypes.UserIDHeader, umtypes.UserRoleHeader)
 
-	root := app.Group("/")
+	solutions := app.Group("/solutions")
 	{
-		root.GET("/", h.GetList)
+		solutions.GET("", h.UpdateSolutions, h.GetSolutionsList)
+		solutions.GET("/:solution/env", h.UpdateSolutions, h.GetSolutionEnv)
+		solutions.GET("/:solution/resources", h.UpdateSolutions, h.GetSolutionResources)
+	}
+	userSolutions := app.Group("/user_solutions")
+	{
+		userSolutions.GET("", requireIdentityHeaders, h.GetUserSolutionsList)
+		userSolutions.GET("/:solution/deployments", requireIdentityHeaders, h.GetUserSolutionsDeployments)
+		userSolutions.GET("/:solution/services", requireIdentityHeaders, h.GetUserSolutionsServices)
+		userSolutions.POST("", requireIdentityHeaders, h.UpdateSolutions, h.RunSolution)
+		userSolutions.DELETE("/:solution", h.DeleteSolution)
 	}
 }
