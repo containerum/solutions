@@ -34,7 +34,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		return cherry.ErrSolutionNotExist()
 	}
 
-	url, err := url.Parse(solutionAvailable.URL)
+	solurl, err := url.Parse(solutionAvailable.URL)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	} else {
 		solutionReq.Branch = "master"
 	}
-	sName := strings.TrimSpace(url.Path[1:])
+	sName := strings.TrimSpace(solurl.Path[1:])
 
 	//TODO
 	sName = "Iliad/redmine-postgresql-solution"
@@ -171,7 +171,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
 		var err error
-		depl, ns, err = s.svc.DB.GetUserSolutionsServices(ctx, solution)
+		depl, ns, err = s.svc.DB.GetUserSolutionsDeployments(ctx, solution)
 		return err
 	})
 	if err := s.handleDBError(err); err != nil {
@@ -228,6 +228,10 @@ func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionNam
 		return nil, err
 	}
 
+	if ns == nil || len(depl) == 0 {
+		return &stypes.DeploymentsList{make([]*interface{}, 0)}, nil
+	}
+
 	userdepl, err := s.svc.KubeAPI.GetUserDeployments(ctx, *ns, depl)
 	if err != nil {
 		return nil, err
@@ -237,12 +241,16 @@ func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionNam
 }
 
 func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName string) (*stypes.ServicesList, error) {
-	depl, ns, err := s.svc.DB.GetUserSolutionsServices(ctx, solutionName)
+	svc, ns, err := s.svc.DB.GetUserSolutionsServices(ctx, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
-	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, depl)
+	if ns == nil || len(svc) == 0 {
+		return &stypes.ServicesList{make([]*interface{}, 0)}, nil
+	}
+
+	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, svc)
 	if err != nil {
 		return nil, err
 	}

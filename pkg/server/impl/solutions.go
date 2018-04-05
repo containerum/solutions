@@ -15,7 +15,7 @@ import (
 )
 
 func (s *serverImpl) UpdateAvailableSolutionsList(ctx context.Context) error {
-	solutions, err := s.svc.DownloadClient.DownloadCSV(ctx)
+	solutions, err := s.svc.DownloadClient.DownloadSolutionsCSV(ctx)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 		return nil, cherry.ErrSolutionNotExist()
 	}
 
-	url, err := url.Parse(solution.URL)
+	solurl, err := url.Parse(solution.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 	if branch != "" {
 		sBranch = strings.TrimSpace(branch)
 	}
-	sName := strings.TrimSpace(url.Path[1:])
+	sName := strings.TrimSpace(solurl.Path[1:])
 	sFile := ".containerum.json"
 
 	containerumJSONURL := "https://raw.githubusercontent.com/" + sName + "/" + sBranch + "/" + sFile
@@ -72,7 +72,7 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 
 	resp := stypes.SolutionEnv{}
 
-	for e, _ := range solutionStr.Env {
+	for e := range solutionStr.Env {
 		resp.Env = append(resp.Env, e)
 	}
 
@@ -88,7 +88,7 @@ func (s *serverImpl) GetAvailableSolutionResourcesList(ctx context.Context, name
 		return nil, cherry.ErrSolutionNotExist()
 	}
 
-	url, err := url.Parse(solution.URL)
+	urlcsv, err := url.Parse(solution.URL)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (s *serverImpl) GetAvailableSolutionResourcesList(ctx context.Context, name
 	} else {
 		branch = "master"
 	}
-	sName := strings.TrimSpace(url.Path[1:])
+	sName := strings.TrimSpace(urlcsv.Path[1:])
 
 	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, branch))
 	if err != nil {

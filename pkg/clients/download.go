@@ -19,7 +19,7 @@ var csvURL string
 
 // ResourceServiceClient is an interface to resource-service.
 type DownloadClient interface {
-	DownloadCSV(ctx context.Context) ([]stypes.AvailableSolution, error)
+	DownloadSolutionsCSV(ctx context.Context) ([]stypes.AvailableSolution, error)
 	DownloadFile(ctx context.Context, url string) ([]byte, error)
 }
 
@@ -44,7 +44,7 @@ func NewHTTPDownloadClient(serverURL string) DownloadClient {
 	}
 }
 
-func (c *httpDownloadClient) DownloadCSV(ctx context.Context) ([]stypes.AvailableSolution, error) {
+func (c *httpDownloadClient) DownloadSolutionsCSV(ctx context.Context) ([]stypes.AvailableSolution, error) {
 	c.log.Infoln("Downloading CSV")
 
 	resp, err := c.rest.R().
