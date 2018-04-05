@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 
+	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/server"
@@ -25,11 +27,14 @@ const (
 
 func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSolution) error {
 	solutionAvailable, err := s.svc.DB.GetAvailableSolution(ctx, solutionReq.Template)
-	if err != nil {
+	if err := s.handleDBError(err); err != nil {
 		return err
 	}
+	if solutionAvailable == nil {
+		return cherry.ErrSolutionNotExist()
+	}
 
-	url, err := url.Parse(solutionAvailable.URL)
+	solurl, err := url.Parse(solutionAvailable.URL)
 	if err != nil {
 		return err
 	}
@@ -39,10 +44,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	} else {
 		solutionReq.Branch = "master"
 	}
-	sName := strings.TrimSpace(url.Path[1:])
-
-	//TODO
-	sName = "Iliad/redmine-postgresql-solution"
+	sName := strings.TrimSpace(solurl.Path[1:])
 
 	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, solutionReq.Branch))
 	if err != nil {
@@ -89,7 +91,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		err := s.svc.DB.AddSolution(ctx, solutionReq, server.MustGetUserID(ctx), solutionUUID, string(enviroments))
 		return err
 	})
-	if err != nil {
+	if err := s.handleDBError(err); err != nil {
 		return err
 	}
 
@@ -125,13 +127,11 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 				return err
 			}
 
-			fmt.Println("TEST", resParsed.String())
-
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
 				err := s.svc.DB.AddDeployment(ctx, resMetaJSON.Metadata.Name, solutionUUID)
 				return err
 			})
-			if err != nil {
+			if err := s.handleDBError(err); err != nil {
 				return err
 			}
 		case "service":
@@ -144,7 +144,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 				err := s.svc.DB.AddService(ctx, resMetaJSON.Metadata.Name, solutionUUID)
 				return err
 			})
-			if err != nil {
+			if err := s.handleDBError(err); err != nil {
 				return err
 			}
 		default:
@@ -168,10 +168,10 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
 		var err error
-		depl, ns, err = s.svc.DB.GetUserSolutionsServices(ctx, solution)
+		depl, ns, err = s.svc.DB.GetUserSolutionsDeployments(ctx, solution)
 		return err
 	})
-	if err != nil {
+	if err := s.handleDBError(err); err != nil {
 		return err
 	}
 
@@ -180,7 +180,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		svc, _, err = s.svc.DB.GetUserSolutionsServices(ctx, solution)
 		return err
 	})
-	if err != nil {
+	if err := s.handleDBError(err); err != nil {
 		return err
 	}
 
@@ -203,7 +203,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		err = s.svc.DB.DeleteSolution(ctx, solution)
 		return err
 	})
-	if err != nil {
+	if err := s.handleDBError(err); err != nil {
 		return err
 	}
 
@@ -221,8 +221,12 @@ func (s *serverImpl) GetUserSolutionsList(ctx context.Context) (*stypes.UserSolu
 
 func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionName string) (*stypes.DeploymentsList, error) {
 	depl, ns, err := s.svc.DB.GetUserSolutionsDeployments(ctx, solutionName)
-	if err != nil {
+	if err := s.handleDBError(err); err != nil {
 		return nil, err
+	}
+
+	if ns == nil || len(depl) == 0 {
+		return &stypes.DeploymentsList{make([]*interface{}, 0)}, nil
 	}
 
 	userdepl, err := s.svc.KubeAPI.GetUserDeployments(ctx, *ns, depl)
@@ -234,12 +238,16 @@ func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionNam
 }
 
 func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName string) (*stypes.ServicesList, error) {
-	depl, ns, err := s.svc.DB.GetUserSolutionsServices(ctx, solutionName)
-	if err != nil {
+	svc, ns, err := s.svc.DB.GetUserSolutionsServices(ctx, solutionName)
+	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
-	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, depl)
+	if ns == nil || len(svc) == 0 {
+		return &stypes.ServicesList{make([]*interface{}, 0)}, nil
+	}
+
+	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, svc)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 
+	"fmt"
+
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"github.com/json-iterator/go"
 )
@@ -13,6 +15,7 @@ func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, u
 	_, err := db.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template, name, namespace, user_id) "+
 		"VALUES ($1, $2, $3, $4, $5)", uuid, solution.Template, solution.Name, solution.Namespace, userID)
 	if err != nil {
+		fmt.Printf("%#v", err)
 		return err
 	}
 
@@ -74,11 +77,11 @@ func (db *pgDB) GetUserSolutionsList(ctx context.Context, userID string) (*stype
 	return &ret, rows.Err()
 }
 
-func (db *pgDB) GetUserSolution(ctx context.Context, userID string, solutionName string) (*stypes.UserSolution, error) {
+func (db *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error) {
 	db.log.Infoln("Get solutions list")
 
 	rows, err := db.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
-		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id WHERE solutions.user_id=$1 AND solution.name=$2", userID, solutionName)
+		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id WHERE solution.name=$1", solutionName)
 	if err != nil {
 		return nil, err
 	}

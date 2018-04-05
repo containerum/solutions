@@ -11,15 +11,15 @@ SID = 11
     Kind = 1
 
 [[error]]
-    Name = "ErrPermissionsError"
-    StatusHTTP = 403
-    Message = "Unable to verify permissions"
-    Kind = 2
-
-[[error]]
     Name = "ErrRequiredHeadersNotProvided"
     StatusHTTP = 400
     Message = "Required headers not provided"
+    Kind = 2
+
+[[error]]
+    Name = "ErrRequestValidationFailed"
+    StatusHTTP = 400
+    Message = "Request validation failed"
     Kind = 3
 
 [[error]]

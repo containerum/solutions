@@ -3,21 +3,20 @@ package middleware
 import (
 	"context"
 
-	umtypes "git.containerum.net/ch/json-types/user-manager"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	UserIDHeader   = "X-User-Id"
+	UserRoleHeader = "X-User-Role"
+)
+
 var hdrToKey = map[string]interface{}{
-	umtypes.UserIDHeader:      server.UserIDContextKey,
-	umtypes.UserAgentHeader:   server.UserAgentContextKey,
-	umtypes.FingerprintHeader: server.FingerPrintContextKey,
-	umtypes.SessionIDHeader:   server.SessionIDContextKey,
-	umtypes.TokenIDHeader:     server.TokenIDContextKey,
-	umtypes.ClientIPHeader:    server.ClientIPContextKey,
-	umtypes.PartTokenIDHeader: server.PartTokenIDContextKey,
+	UserIDHeader:   server.UserIDContextKey,
+	UserRoleHeader: server.UserRoleContextKey,
 }
 
 func RequireHeaders(headers ...string) gin.HandlerFunc {
