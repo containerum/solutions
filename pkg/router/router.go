@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	umtypes "git.containerum.net/ch/json-types/user-manager"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/cherrylog"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	h "git.containerum.net/ch/solutions/pkg/router/handlers"
@@ -40,7 +39,7 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 
 // SetupRoutes sets up http router needed to handle requests from clients.
 func initRoutes(app *gin.Engine) {
-	requireIdentityHeaders := m.RequireHeaders(umtypes.UserIDHeader, umtypes.UserRoleHeader)
+	requireIdentityHeaders := m.RequireHeaders(m.UserIDHeader, m.UserRoleHeader)
 
 	solutions := app.Group("/solutions")
 	{

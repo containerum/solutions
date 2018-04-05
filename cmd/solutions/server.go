@@ -26,11 +26,6 @@ func getService(service interface{}, err error) interface{} {
 
 func initServer(c *cli.Context) error {
 	if c.Bool(debugFlag) {
-		fmt.Println("Flags:")
-		for _, f := range c.GlobalFlagNames() {
-			fmt.Printf("%+v: %v\n", f, c.String(f))
-		}
-
 		gin.SetMode(gin.DebugMode)
 		log.SetLevel(log.DebugLevel)
 	} else {
@@ -42,6 +37,11 @@ func initServer(c *cli.Context) error {
 		log.SetFormatter(&log.TextFormatter{})
 	} else {
 		log.SetFormatter(&log.JSONFormatter{})
+	}
+
+	log.Debugln("Flags:")
+	for _, f := range c.GlobalFlagNames() {
+		log.Debugf("%+v: %v", f, c.String(f))
 	}
 
 	solutionssrv, err := getSolutionsSrv(c, server.Services{

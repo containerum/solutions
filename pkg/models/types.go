@@ -23,7 +23,7 @@ type DB interface {
 	GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error)
 	GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error)
 	GetUserSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error)
-	GetUserSolution(ctx context.Context, userID string, solutionName string) (*stypes.UserSolution, error)
+	GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error)
 	AddSolution(ctx context.Context, solution stypes.UserSolution, userID string, uuid string, env string) error
 	AddDeployment(ctx context.Context, name string, solutionID string) error
 	AddService(ctx context.Context, name string, solutionID string) error
