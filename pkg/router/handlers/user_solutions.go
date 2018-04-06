@@ -54,7 +54,7 @@ func RunSolution(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusAccepted)
+	ctx.Status(http.StatusCreated)
 }
 
 func DeleteSolution(ctx *gin.Context) {
