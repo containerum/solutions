@@ -7,6 +7,8 @@ import (
 
 	stypes "git.containerum.net/ch/json-types/solutions"
 
+	"time"
+
 	"git.containerum.net/ch/kube-client/pkg/cherry"
 	"git.containerum.net/ch/utils"
 	"github.com/go-resty/resty"
@@ -36,6 +38,7 @@ func NewHTTPKubeAPIClient(serverURL string) KubeAPIClient {
 		SetHostURL(serverURL).
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
+		SetTimeout(3 * time.Second).
 		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal

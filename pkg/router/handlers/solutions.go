@@ -25,7 +25,6 @@ func UpdateSolutions(ctx *gin.Context) {
 	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
 	ss := *ssp
 	logrus.Infoln("Last solutions update check:", lastchecktime.Format(time.RFC1123))
-
 	if lastchecktime.Add(checkinterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(m.UserRoleHeader) == "admin") {
 		fmt.Println("Updating solutions")
 		err := ss.UpdateAvailableSolutionsList(ctx.Request.Context())
