@@ -7,8 +7,6 @@ import (
 
 	"time"
 
-	"fmt"
-
 	ch "git.containerum.net/ch/kube-client/pkg/cherry"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
@@ -17,16 +15,16 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var lastchecktime time.Time
+var lastCheckTime time.Time
 
-const checkinterval = 6 * time.Hour
+const checkInterval = 6 * time.Hour
 
 func UpdateSolutions(ctx *gin.Context) {
 	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
 	ss := *ssp
-	logrus.Infoln("Last solutions update check:", lastchecktime.Format(time.RFC1123))
-	if lastchecktime.Add(checkinterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(m.UserRoleHeader) == "admin") {
-		fmt.Println("Updating solutions")
+	logrus.Infoln("Last solutions update check:", lastCheckTime.Format(time.RFC1123))
+	if lastCheckTime.Add(checkInterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(m.UserRoleHeader) == "admin") {
+		logrus.Infoln("Updating solutions")
 		err := ss.UpdateAvailableSolutionsList(ctx.Request.Context())
 		if err != nil {
 			if cherr, ok := err.(*ch.Err); ok {
@@ -37,9 +35,9 @@ func UpdateSolutions(ctx *gin.Context) {
 			}
 			return
 		}
-		lastchecktime = time.Now()
+		lastCheckTime = time.Now()
 	} else {
-		fmt.Println("Solutions list is still actual")
+		logrus.Infoln("No need to update logs")
 	}
 	ctx.Status(http.StatusAccepted)
 }

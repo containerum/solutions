@@ -243,7 +243,7 @@ func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName s
 	}
 
 	if ns == nil || len(svc) == 0 {
-		return &stypes.ServicesList{make([]*interface{}, 0)}, nil
+		return &stypes.ServicesList{Services: make([]*interface{}, 0)}, nil
 	}
 
 	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, svc)

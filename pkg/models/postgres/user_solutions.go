@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	"fmt"
-
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"github.com/json-iterator/go"
 )
@@ -15,7 +13,6 @@ func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, u
 	_, err := db.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template, name, namespace, user_id) "+
 		"VALUES ($1, $2, $3, $4, $5)", uuid, solution.Template, solution.Name, solution.Namespace, userID)
 	if err != nil {
-		fmt.Printf("%#v", err)
 		return err
 	}
 
