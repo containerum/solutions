@@ -7,8 +7,6 @@ import (
 
 	"strings"
 
-	"encoding/json"
-
 	stypes "git.containerum.net/ch/json-types/solutions"
 	jsoniter "github.com/json-iterator/go"
 )
@@ -18,7 +16,7 @@ func (db *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes
 
 	solutionsarr := []string{}
 	for _, s := range solutions.Solutions {
-		images, _ := json.Marshal(s.Images)
+		images, _ := jsoniter.Marshal(s.Images)
 
 		solutionsarr = append(solutionsarr, fmt.Sprintf("('%v', '%v', '%v', '%v', '%v')", s.Name, s.Limits.CPU, s.Limits.RAM, string(images), s.URL))
 	}
