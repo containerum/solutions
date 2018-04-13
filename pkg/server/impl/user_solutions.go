@@ -3,7 +3,6 @@ package impl
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -65,7 +64,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	}
 
 	var solutionJSON server.Solution
-	err = json.Unmarshal(solutionBuf.Bytes(), &solutionJSON)
+	err = jsoniter.Unmarshal(solutionBuf.Bytes(), &solutionJSON)
 
 	if len(solutionJSON.Env) == 0 {
 		solutionReq.Env = make(map[string]string, 0)
@@ -117,7 +116,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		fmt.Println()
 
 		var resMetaJSON server.ResName
-		err = json.Unmarshal(resParsed.Bytes(), &resMetaJSON)
+		err = jsoniter.Unmarshal(resParsed.Bytes(), &resMetaJSON)
 
 		switch f.Type {
 		case "deployment":
@@ -244,7 +243,7 @@ func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName s
 	}
 
 	if ns == nil || len(svc) == 0 {
-		return &stypes.ServicesList{make([]*interface{}, 0)}, nil
+		return &stypes.ServicesList{Services: make([]*interface{}, 0)}, nil
 	}
 
 	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, svc)

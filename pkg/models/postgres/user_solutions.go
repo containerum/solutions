@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	"fmt"
-
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"github.com/json-iterator/go"
 )
@@ -15,7 +13,6 @@ func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, u
 	_, err := db.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template, name, namespace, user_id) "+
 		"VALUES ($1, $2, $3, $4, $5)", uuid, solution.Template, solution.Name, solution.Namespace, userID)
 	if err != nil {
-		fmt.Printf("%#v", err)
 		return err
 	}
 
@@ -24,7 +21,6 @@ func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, u
 	if err != nil {
 		return err
 	}
-
 	return err
 }
 
@@ -98,7 +94,6 @@ func (db *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*styp
 	if err := jsoniter.UnmarshalFromString(env, &solution.Env); err != nil {
 		return nil, err
 	}
-
 	return &solution, rows.Err()
 }
 
@@ -133,7 +128,6 @@ func (db *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName st
 
 		deployments = append(deployments, deploy)
 	}
-
 	return deployments, ns, rows.Err()
 }
 
@@ -157,6 +151,5 @@ func (db *pgDB) GetUserSolutionsServices(ctx context.Context, solutionName strin
 
 		services = append(services, deploy)
 	}
-
 	return services, ns, rows.Err()
 }

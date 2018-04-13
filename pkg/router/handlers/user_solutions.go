@@ -35,7 +35,7 @@ func RunSolution(ctx *gin.Context) {
 	if request.Name == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
 	}
-	if request.Template == "" {
+	if request.Namespace == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Namespace"))
 	}
 	if len(valerrs) > 0 {
