@@ -21,7 +21,6 @@ func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, u
 	if err != nil {
 		return err
 	}
-
 	return err
 }
 
@@ -95,7 +94,6 @@ func (db *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*styp
 	if err := jsoniter.UnmarshalFromString(env, &solution.Env); err != nil {
 		return nil, err
 	}
-
 	return &solution, rows.Err()
 }
 
@@ -130,7 +128,6 @@ func (db *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName st
 
 		deployments = append(deployments, deploy)
 	}
-
 	return deployments, ns, rows.Err()
 }
 
@@ -154,6 +151,5 @@ func (db *pgDB) GetUserSolutionsServices(ctx context.Context, solutionName strin
 
 		services = append(services, deploy)
 	}
-
 	return services, ns, rows.Err()
 }
