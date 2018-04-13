@@ -17,6 +17,6 @@ ENV CH_SOLUTIONS="impl" \
     CH_SOLUTIONS_DB="postgres" \
     CH_SOLUTIONS_DB_URL="postgres://usermanager:ae9Oodai3aid@postgres:5432/solutions?sslmode=disable" \
     CH_SOLUTIONS_CSV_URL="https://raw.githubusercontent.com/containerum/solution-list/master/containerum-solutions.csv" \
-    CH_SOLUTIONS_KUBE_API_URL="http://kube-api:8111"
+    CH_SOLUTIONS_KUBE_API_URL="http://kube-api:1214"
 EXPOSE 6666
 ENTRYPOINT ["/solutions"]

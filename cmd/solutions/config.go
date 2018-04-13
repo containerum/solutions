@@ -64,7 +64,7 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "CH_SOLUTIONS_KUBE_API_URL",
 		Name:   kubeURLFlag,
-		Value:  "http://kube-api:8111",
+		Value:  "http://kube-api:1214",
 		Usage:  "Kube-API service URL",
 	},
 }
