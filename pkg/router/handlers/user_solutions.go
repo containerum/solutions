@@ -20,7 +20,7 @@ import (
 func RunSolution(ctx *gin.Context) {
 	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
 	ss := *ssp
-	logrus.Infoln("Last check time:", lastchecktime)
+	logrus.Infoln("Last check time:", lastCheckTime)
 
 	var request stypes.UserSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
