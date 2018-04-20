@@ -59,7 +59,7 @@ func initServer(c *cli.Context) error {
 
 	// for graceful shutdown
 	srv := &http.Server{
-		Addr:    ":" + portFlag,
+		Addr:    ":" + c.String(portFlag),
 		Handler: app,
 	}
 
