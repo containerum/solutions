@@ -13,6 +13,9 @@ func main() {
 	app.Name = "solutions"
 	app.Usage = "Solutions service"
 	app.Flags = flags
+
+	fmt.Printf("Starting %v %v\n", app.Name, app.Version)
+
 	app.Action = initServer
 
 	if err := app.Run(os.Args); err != nil {
