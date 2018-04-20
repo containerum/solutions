@@ -17,7 +17,7 @@ import (
 
 var csvURL string
 
-// ResourceServiceClient is an interface to resource-service.
+// DownloadClient is an interface to resource-service.
 type DownloadClient interface {
 	DownloadSolutionsCSV(ctx context.Context) ([]stypes.AvailableSolution, error)
 	DownloadFile(ctx context.Context, url string) ([]byte, error)
@@ -28,7 +28,7 @@ type httpDownloadClient struct {
 	log  *logrus.Entry
 }
 
-// NewHTTPResourceServiceClient returns client for resource-service working via restful api
+// NewHTTPDownloadClient returns client for resource-service working via restful api
 func NewHTTPDownloadClient(serverURL string) DownloadClient {
 	log := logrus.WithField("component", "download_client")
 	client := resty.New().
@@ -94,9 +94,8 @@ func (c *httpDownloadClient) DownloadFile(ctx context.Context, url string) ([]by
 		return nil, err
 	}
 
-	if resp.StatusCode() < 399 {
-		return resp.Body(), nil
-	} else {
+	if resp.StatusCode() > 399 {
 		return nil, errors.New("Unable to download file")
 	}
+	return resp.Body(), nil
 }

@@ -49,7 +49,7 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 		return nil, err
 	}
 
-	sBranch := "master"
+	sBranch := branchMaster
 	if branch != "" {
 		sBranch = strings.TrimSpace(branch)
 	}
@@ -96,7 +96,7 @@ func (s *serverImpl) GetAvailableSolutionResourcesList(ctx context.Context, name
 	if branch != "" {
 		branch = strings.TrimSpace(branch)
 	} else {
-		branch = "master"
+		branch = branchMaster
 	}
 	sName := strings.TrimSpace(urlcsv.Path[1:])
 

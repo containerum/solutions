@@ -20,7 +20,7 @@ func MustGetUserID(ctx context.Context) string {
 	return uid
 }
 
-// MustGetUserID attempts to extract user ID using SessionIDContextKey from context.
+// MustGetUserRole attempts to extract user ID using SessionIDContextKey from context.
 // It panics if value was not found in context.
 func MustGetUserRole(ctx context.Context) string {
 	uid, ok := ctx.Value(UserRoleContextKey).(string)

@@ -47,9 +47,11 @@ func initServer(c *cli.Context) error {
 	w.Flush()
 
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
-		DB:             getService(getDB(c)).(models.DB),
-		DownloadClient: clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
-		KubeAPI:        clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag)),
+		DB:              getService(getDB(c)).(models.DB),
+		DownloadClient:  clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
+		ResourceClient:  clients.NewHTTPResourceClient(c.String(resourceURLFlag)),
+		KubeAPIClient:   clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag)),
+		ConverterClient: clients.NewHTTPConverterClient(c.String(converterURLFlag)),
 	})
 	exitOnErr(err)
 

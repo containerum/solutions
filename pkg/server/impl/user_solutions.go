@@ -5,10 +5,11 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"net/url"
 	"strings"
 
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+
+	"net/url"
 
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"git.containerum.net/ch/solutions/pkg/models"
@@ -22,82 +23,101 @@ const (
 	NamespaceKey = "NS"
 	VolumeKey    = "VOLUME"
 	OwnerKey     = "OWNER"
+
+	branchMaster = "master"
 )
 
-func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSolution) error {
+func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error) {
+	s.log.Infoln("Downloading solution config")
 	solutionAvailable, err := s.svc.DB.GetAvailableSolution(ctx, solutionReq.Template)
-	if err := s.handleDBError(err); err != nil {
-		return err
+	if err = s.handleDBError(err); err != nil {
+		return nil, nil, err
 	}
 	if solutionAvailable == nil {
-		return cherry.ErrSolutionNotExist()
+		return nil, nil, cherry.ErrSolutionNotExist()
 	}
 
-	solurl, err := url.Parse(solutionAvailable.URL)
+	solutionURL, err := url.Parse(solutionAvailable.URL)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	if solutionReq.Branch != "" {
 		solutionReq.Branch = strings.TrimSpace(solutionReq.Branch)
 	} else {
-		solutionReq.Branch = "master"
+		solutionReq.Branch = branchMaster
 	}
-	sName := strings.TrimSpace(solurl.Path[1:])
+	sName := strings.TrimSpace(solutionURL.Path[1:])
 
 	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, solutionReq.Branch))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
+	s.log.Infoln("Solution config downloaded")
+	return solutionF, &sName, nil
+}
 
+func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byte, solutionReq stypes.UserSolution) (solutionConfig *server.Solution, solutionUUID *string, err error) {
+	s.log.Infoln("Parsing solution config")
 	solutionTmpl, err := template.New("solution").Funcs(template.FuncMap{
 		"rand_string": utils.RandString,
-	}).Parse(string(solutionF))
+	}).Parse(string(solutionBody))
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
 	var solutionBuf bytes.Buffer
 	err = solutionTmpl.Execute(&solutionBuf, nil)
 	if err != nil {
-		return err
+		return nil, nil, err
 	}
 
-	var solutionJSON server.Solution
-	err = jsoniter.Unmarshal(solutionBuf.Bytes(), &solutionJSON)
+	err = jsoniter.Unmarshal(solutionBuf.Bytes(), &solutionConfig)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	if len(solutionJSON.Env) == 0 {
+	if len(solutionConfig.Env) == 0 {
 		solutionReq.Env = make(map[string]string, 0)
 	}
 
 	s.log.Debugln("Setting env")
-	solutionJSON.Env[NamespaceKey] = solutionReq.Namespace
+	solutionConfig.Env[NamespaceKey] = solutionReq.Namespace
 
 	for k, v := range solutionReq.Env {
-		solutionJSON.Env[k] = v
+		solutionConfig.Env[k] = v
 	}
 
-	if _, set := solutionJSON.Env[VolumeKey]; !set { // use default volume name format if volume name not specified
-		solutionJSON.Env[VolumeKey] = fmt.Sprintf("%s-volume", solutionReq.Namespace)
+	if _, set := solutionConfig.Env[VolumeKey]; !set { // use default volume name format if volume name not specified
+		solutionConfig.Env[VolumeKey] = fmt.Sprintf("%s-volume", solutionReq.Namespace)
 	}
 
-	solutionJSON.Env[OwnerKey] = server.MustGetUserID(ctx)
+	solutionConfig.Env[OwnerKey] = server.MustGetUserID(ctx)
 
-	solutionUUID := uuid.New().String()
-	enviroments, err := jsoniter.Marshal(solutionJSON.Env)
+	sUUID := uuid.New().String()
+	environments, err := jsoniter.Marshal(solutionConfig.Env)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
-		err := s.svc.DB.AddSolution(ctx, solutionReq, server.MustGetUserID(ctx), solutionUUID, string(enviroments))
+		err = s.svc.DB.AddSolution(ctx, solutionReq, server.MustGetUserID(ctx), sUUID, string(environments))
 		return err
 	})
-	if err := s.handleDBError(err); err != nil {
-		return err
+	if err = s.handleDBError(err); err != nil {
+		return nil, nil, err
 	}
+	s.log.Infoln("Solution config parsed")
+	return solutionConfig, &sUUID, nil
+}
 
+func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig server.Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) error {
 	//Creating all resources from solution
-	for _, f := range solutionJSON.Run {
+	s.log.Infoln("Creating solution resources")
+	for _, f := range solutionConfig.Run {
 		s.log.Debugf("Creating %s %s", f.Type, f.Name)
-		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", sName, solutionReq.Branch, f.Name))
+
+		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionName, solutionReq.Branch, f.Name))
 		if err != nil {
 			return err
 		}
@@ -108,39 +128,47 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		}
 
 		var resParsed bytes.Buffer
-		err = resTmpl.Execute(&resParsed, solutionJSON.Env)
+		err = resTmpl.Execute(&resParsed, solutionConfig.Env)
 		if err != nil {
 			return err
 		}
 
-		fmt.Println()
-
 		var resMetaJSON server.ResName
 		err = jsoniter.Unmarshal(resParsed.Bytes(), &resMetaJSON)
+		if err != nil {
+			return err
+		}
 
 		switch f.Type {
 		case "deployment":
-			s.log.Debugln("Deployment sent to kube-api")
-			err := s.svc.KubeAPI.CreateDeployment(ctx, solutionReq.Namespace, resParsed.String())
+			convertedDeploy, err := s.svc.ConverterClient.ConvertDeployment(ctx, resParsed.String())
+			if err != nil {
+				return err
+			}
+
+			err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, *convertedDeploy)
 			if err != nil {
 				return err
 			}
 
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
-				err := s.svc.DB.AddDeployment(ctx, resMetaJSON.Metadata.Name, solutionUUID)
+				err = s.svc.DB.AddDeployment(ctx, resMetaJSON.Metadata.Name, solutionUUID)
 				return err
 			})
 			if err := s.handleDBError(err); err != nil {
 				return err
 			}
 		case "service":
-			s.log.Debugln("Service sent to kube-api")
-			err := s.svc.KubeAPI.CreateService(ctx, solutionReq.Namespace, resParsed.String())
+			convertedService, err := s.svc.ConverterClient.ConvertService(ctx, resParsed.String())
+			if err != nil {
+				return err
+			}
+			err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, *convertedService)
 			if err != nil {
 				return err
 			}
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
-				err := s.svc.DB.AddService(ctx, resMetaJSON.Metadata.Name, solutionUUID)
+				err = s.svc.DB.AddService(ctx, resMetaJSON.Metadata.Name, solutionUUID)
 				return err
 			})
 			if err := s.handleDBError(err); err != nil {
@@ -153,10 +181,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 			return err
 		}
 	}
-	if err != nil {
-		return err
-	}
-
+	s.log.Infoln("All solution resources has been created")
 	return nil
 }
 
@@ -184,14 +209,14 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	}
 
 	for _, r := range depl {
-		err := s.svc.KubeAPI.DeleteDeployment(ctx, *ns, r)
+		err = s.svc.ResourceClient.DeleteDeployment(ctx, *ns, r)
 		if err != nil {
 			s.log.Infoln(err)
 		}
 	}
 
 	for _, r := range svc {
-		err := s.svc.KubeAPI.DeleteService(ctx, *ns, r)
+		err = s.svc.ResourceClient.DeleteService(ctx, *ns, r)
 		if err != nil {
 			s.log.Infoln(err)
 		}
@@ -228,7 +253,7 @@ func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionNam
 		return &stypes.DeploymentsList{make([]*interface{}, 0)}, nil
 	}
 
-	userdepl, err := s.svc.KubeAPI.GetUserDeployments(ctx, *ns, depl)
+	userdepl, err := s.svc.KubeAPIClient.GetUserDeployments(ctx, *ns, depl)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +271,7 @@ func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName s
 		return &stypes.ServicesList{Services: make([]*interface{}, 0)}, nil
 	}
 
-	usersvc, err := s.svc.KubeAPI.GetUserServices(ctx, *ns, svc)
+	usersvc, err := s.svc.KubeAPIClient.GetUserServices(ctx, *ns, svc)
 	if err != nil {
 		return nil, err
 	}

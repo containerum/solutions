@@ -18,7 +18,9 @@ type SolutionsService interface {
 	GetAvailableSolutionEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error)
 	GetAvailableSolutionResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error)
 	GetUserSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error)
-	RunSolution(ctx context.Context, solution stypes.UserSolution) error
+	DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error)
+	ParseSolutionConfig(ctx context.Context, solutionBody []byte, solutionReq stypes.UserSolution) (solutionConfig *Solution, solutionUUID *string, err error)
+	CreateSolutionResources(ctx context.Context, solutionConfig Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) error
 	DeleteSolution(ctx context.Context, solution string) error
 	GetUserSolutionDeployments(ctx context.Context, solutionName string) (*stypes.DeploymentsList, error)
 	GetUserSolutionServices(ctx context.Context, solutionName string) (*stypes.ServicesList, error)
@@ -27,9 +29,11 @@ type SolutionsService interface {
 
 // Services is a collection of resources needed for server functionality.
 type Services struct {
-	DB             models.DB
-	DownloadClient clients.DownloadClient
-	KubeAPI        clients.KubeAPIClient
+	DB              models.DB
+	DownloadClient  clients.DownloadClient
+	ResourceClient  clients.ResourceClient
+	KubeAPIClient   clients.KubeAPIClient
+	ConverterClient clients.ConverterClient
 }
 
 type Solution struct {
