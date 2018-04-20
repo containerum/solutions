@@ -19,6 +19,8 @@ const (
 	dbMigrationsFlag = "db_migrations"
 	csvURLFlag       = "csv_url"
 	kubeURLFlag      = "kube_url"
+	resourceURLFlag  = "resource_url"
+	converterURLFlag = "converter_url"
 )
 
 var flags = []cli.Flag{
@@ -64,8 +66,20 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "CH_SOLUTIONS_KUBE_API_URL",
 		Name:   kubeURLFlag,
-		Value:  "http://kube-api:8111",
+		Value:  "http://kube-api:1214",
 		Usage:  "Kube-API service URL",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_RESOURCE_URL",
+		Name:   resourceURLFlag,
+		Value:  "http://resource-service:1213",
+		Usage:  "Resource service URL",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_CONVERTER_URL",
+		Name:   converterURLFlag,
+		Value:  "http://model-converter:6543",
+		Usage:  "Model converter service URL",
 	},
 }
 

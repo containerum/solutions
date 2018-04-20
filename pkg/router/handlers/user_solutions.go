@@ -43,7 +43,29 @@ func RunSolution(ctx *gin.Context) {
 		return
 	}
 
-	err := ss.RunSolution(ctx.Request.Context(), request)
+	solutionFile, solutionName, err := ss.DownloadSolutionConfig(ctx.Request.Context(), request)
+	if err != nil {
+		if cherr, ok := err.(*ch.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(cherry.ErrUnableCreateSolution(), ctx)
+		}
+		return
+	}
+
+	solutionConfig, solutionUUID, err := ss.ParseSolutionConfig(ctx.Request.Context(), solutionFile, request)
+	if err != nil {
+		if cherr, ok := err.(*ch.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(cherry.ErrUnableCreateSolution(), ctx)
+		}
+		return
+	}
+
+	err = ss.CreateSolutionResources(ctx.Request.Context(), *solutionConfig, request, *solutionName, *solutionUUID)
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
 			gonic.Gonic(cherr, ctx)
