@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 
-	"git.containerum.net/ch/solutions/pkg/models"
-	"git.containerum.net/ch/solutions/pkg/models/postgres"
+	"git.containerum.net/ch/solutions/pkg/db"
+	"git.containerum.net/ch/solutions/pkg/db/postgres"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/server/impl"
 	"github.com/urfave/cli"
@@ -99,7 +99,7 @@ func getSolutionsSrv(c *cli.Context, services server.Services) (server.Solutions
 	}
 }
 
-func getDB(c *cli.Context) (models.DB, error) {
+func getDB(c *cli.Context) (db.DB, error) {
 	switch c.String(dbFlag) {
 	case "postgres":
 		return postgres.DBConnect(c.String(dbURLFlag), c.String(dbMigrationsFlag))

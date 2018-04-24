@@ -8,8 +8,8 @@ import (
 
 	"fmt"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/json-iterator/go"
 )

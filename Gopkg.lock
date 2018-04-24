@@ -4,12 +4,8 @@
 [[projects]]
   branch = "master"
   name = "git.containerum.net/ch/json-types"
-  packages = [
-    "misc",
-    "solutions",
-    "user-manager"
-  ]
-  revision = "36190bd3a045c3e3e7464862a8cb63061f48870e"
+  packages = ["user-manager"]
+  revision = "041a989c67953d829255c2fb10985b9bc1b25e51"
 
 [[projects]]
   name = "git.containerum.net/ch/kube-client"
@@ -19,14 +15,17 @@
     "pkg/cherry/adaptors/gonic",
     "pkg/cherry/solutions"
   ]
-  revision = "a2b6d7d30ca6779d15572fb18abd873691840f61"
-  version = "v0.8.5"
+  revision = "7ccb027698fdd902e09da3586337afaf4cc3bad9"
+  version = "v0.9.4"
 
 [[projects]]
   branch = "master"
   name = "git.containerum.net/ch/utils"
-  packages = ["."]
-  revision = "9e2da5343a462956ff0baf54aaa56f62f9321250"
+  packages = [
+    "httputil",
+    "sqlxutil"
+  ]
+  revision = "0c31c414efa017dc1932f5e663dba8f00b3dcfe9"
 
 [[projects]]
   branch = "master"
@@ -90,7 +89,7 @@
     ".",
     "reflectx"
   ]
-  revision = "cf35089a197953c69420c8d0cecda90809764b1d"
+  revision = "2aeb6a910c2b94f2d5eb53d9895d80e27264ec41"
 
 [[projects]]
   name = "github.com/json-iterator/go"
@@ -146,8 +145,8 @@
 [[projects]]
   name = "github.com/ugorji/go"
   packages = ["codec"]
-  revision = "9831f2c3ac1068a78f50999a30db84270f647af6"
-  version = "v1.1"
+  revision = "b4c50a2b199d93b13dc15e78929cfb23bfdf21ab"
+  version = "v1.1.1"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -159,7 +158,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "b2aa35443fbc700ab74c586ae79b81c171851023"
+  revision = "2b6c08872f4b66da917bb4ce98df4f0307330f78"
 
 [[projects]]
   branch = "master"
@@ -168,7 +167,7 @@
     "idna",
     "publicsuffix"
   ]
-  revision = "b3c676e531a6dc479fa1b35ac961c13f5e2b4d2e"
+  revision = "5f9ae10d9af5b1c89ae6904293b14b064d4ada23"
 
 [[projects]]
   branch = "master"
@@ -177,7 +176,7 @@
     "unix",
     "windows"
   ]
-  revision = "1d206c9fa8975fb4cf00df1dc8bf3283dc24ba0e"
+  revision = "79b0c6888797020a994db17c8510466c72fe75d9"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -209,8 +208,8 @@
 [[projects]]
   name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
-  revision = "8ce234ff024d85b3848e485decba806385d6e276"
-  version = "v9.13.0"
+  revision = "14984d91328f9612b58443cbdf4a077d4fd71091"
+  version = "v9.15.0"
 
 [[projects]]
   name = "gopkg.in/yaml.v2"
@@ -221,6 +220,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ebfd90231088ba2063d926a72d0442410c237b5e0cec4d7dfddd68fa60b96d0b"
+  inputs-digest = "910698e6a8045aa06438fab551b511dfa4eb31f67f897ef5fea9afebe0665e98"
   solver-name = "gps-cdcl"
   solver-version = 1

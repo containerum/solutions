@@ -8,7 +8,7 @@ import (
 
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
 
-	"git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/server"
 
 	"github.com/lib/pq"
@@ -51,7 +51,7 @@ func (s *serverImpl) handleDBError(err error) error {
 	switch err {
 	case nil:
 		return nil
-	case models.ErrTransactionRollback, models.ErrTransactionCommit, models.ErrTransactionBegin:
+	case db.ErrTransactionRollback, db.ErrTransactionCommit, db.ErrTransactionBegin:
 		s.log.WithError(err).Error("db transaction error")
 		return err
 	default:

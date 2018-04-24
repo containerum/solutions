@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"

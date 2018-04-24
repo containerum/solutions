@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"git.containerum.net/ch/kube-client/pkg/cherry"
-	"git.containerum.net/ch/utils"
+	utils "git.containerum.net/ch/utils/httputil"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"

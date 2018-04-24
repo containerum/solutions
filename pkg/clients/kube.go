@@ -5,12 +5,12 @@ import (
 
 	"fmt"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
+	utils "git.containerum.net/ch/utils/httputil"
 
 	"time"
 
 	"git.containerum.net/ch/kube-client/pkg/cherry"
-	"git.containerum.net/ch/utils"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
