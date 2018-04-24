@@ -3,20 +3,22 @@ package postgres
 import (
 	"context"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"github.com/json-iterator/go"
 )
 
-func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, userID string, uuid string, env string) error {
-	db.log.Infoln("Saving solutions list")
+func (pgdb *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, userID string, uuid string, env string) error {
+	pgdb.log.Infoln("Saving solutions list")
 
-	_, err := db.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template, name, namespace, user_id) "+
+	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template, name, namespace, user_id) "+
 		"VALUES ($1, $2, $3, $4, $5)", uuid, solution.Template, solution.Name, solution.Namespace, userID)
 	if err != nil {
 		return err
 	}
 
-	_, err = db.qLog.QueryxContext(ctx, "INSERT INTO parameters (solution_id, branch, env) "+
+	_, err = pgdb.qLog.QueryxContext(ctx, "INSERT INTO parameters (solution_id, branch, env) "+
 		"VALUES ($1, $2, $3)", uuid, solution.Branch, env)
 	if err != nil {
 		return err
@@ -24,10 +26,10 @@ func (db *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, u
 	return err
 }
 
-func (db *pgDB) AddDeployment(ctx context.Context, name string, solutionID string) error {
-	db.log.Infoln("Adding deployment")
+func (pgdb *pgDB) AddDeployment(ctx context.Context, name string, solutionID string) error {
+	pgdb.log.Infoln("Adding deployment")
 
-	_, err := db.qLog.QueryxContext(ctx, "INSERT INTO deployments (deploy_name, solution_id) "+
+	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO deployments (deploy_name, solution_id) "+
 		"VALUES ($1, $2)", name, solutionID)
 	if err != nil {
 		return err
@@ -35,10 +37,10 @@ func (db *pgDB) AddDeployment(ctx context.Context, name string, solutionID strin
 	return err
 }
 
-func (db *pgDB) AddService(ctx context.Context, name string, solutionID string) error {
-	db.log.Infoln("Adding service")
+func (pgdb *pgDB) AddService(ctx context.Context, name string, solutionID string) error {
+	pgdb.log.Infoln("Adding service")
 
-	_, err := db.qLog.QueryxContext(ctx, "INSERT INTO services (service_name, solution_id) "+
+	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO services (service_name, solution_id) "+
 		"VALUES ($1, $2)", name, solutionID)
 	if err != nil {
 		return err
@@ -46,11 +48,11 @@ func (db *pgDB) AddService(ctx context.Context, name string, solutionID string) 
 	return err
 }
 
-func (db *pgDB) GetUserSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error) {
-	db.log.Infoln("Get solutions list")
+func (pgdb *pgDB) GetUserSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error) {
+	pgdb.log.Infoln("Get solutions list")
 	var ret stypes.UserSolutionsList
 
-	rows, err := db.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
 		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id WHERE solutions.user_id=$1", userID)
 	if err != nil {
 		return nil, err
@@ -73,10 +75,10 @@ func (db *pgDB) GetUserSolutionsList(ctx context.Context, userID string) (*stype
 	return &ret, rows.Err()
 }
 
-func (db *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error) {
-	db.log.Infoln("Get solutions list")
+func (pgdb *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error) {
+	pgdb.log.Infoln("Get solutions list")
 
-	rows, err := db.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
 		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id WHERE solution.name=$1", solutionName)
 	if err != nil {
 		return nil, err
@@ -97,21 +99,25 @@ func (db *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*styp
 	return &solution, rows.Err()
 }
 
-func (db *pgDB) DeleteSolution(ctx context.Context, name string) error {
-	db.log.Infoln("Deleting solution")
+func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string) error {
+	pgdb.log.Infoln("Deleting solution")
 
-	_, err := db.qLog.QueryxContext(ctx, "DELETE FROM solutions WHERE name=$1", name)
+	res, err := pgdb.eLog.ExecContext(ctx, "DELETE FROM solutions WHERE name=$1", name)
 	if err != nil {
 		return err
 	}
 
+	rows, err := res.RowsAffected()
+	if rows == 0 {
+		return cherry.ErrSolutionNotExist()
+	}
 	return nil
 }
 
-func (db *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName string) (deployments []string, ns *string, err error) {
-	db.log.Infoln("Get solution deployments")
+func (pgdb *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName string) (deployments []string, ns *string, err error) {
+	pgdb.log.Infoln("Get solution deployments")
 
-	rows, err := db.qLog.QueryxContext(ctx, "SELECT solutions.namespace, deployments.deploy_name "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, deployments.deploy_name "+
 		"FROM solutions JOIN deployments ON solutions.id = deployments.solution_id WHERE solutions.name=$1", solutionName)
 	if err != nil {
 		return nil, nil, err
@@ -131,10 +137,10 @@ func (db *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName st
 	return deployments, ns, rows.Err()
 }
 
-func (db *pgDB) GetUserSolutionsServices(ctx context.Context, solutionName string) (services []string, ns *string, err error) {
-	db.log.Infoln("Get solution services")
+func (pgdb *pgDB) GetUserSolutionsServices(ctx context.Context, solutionName string) (services []string, ns *string, err error) {
+	pgdb.log.Infoln("Get solution services")
 
-	rows, err := db.qLog.QueryxContext(ctx, "SELECT solutions.namespace, services.service_name "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, services.service_name "+
 		"FROM solutions JOIN services ON solutions.id = services.solution_id WHERE solutions.name=$1", solutionName)
 	if err != nil {
 		return nil, nil, err

@@ -11,8 +11,9 @@ import (
 
 	"net/url"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/models"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/utils"
 	"github.com/google/uuid"
@@ -23,6 +24,8 @@ const (
 	NamespaceKey = "NS"
 	VolumeKey    = "VOLUME"
 	OwnerKey     = "OWNER"
+
+	unableToCreate = "unable to create %s %s: %s"
 )
 
 func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error) {
@@ -93,7 +96,7 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 		return nil, nil, err
 	}
 
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
+	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		err = s.svc.DB.AddSolution(ctx, solutionReq, server.MustGetUserID(ctx), sUUID, string(environments))
 		return err
 	})
@@ -104,77 +107,117 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 	return solutionConfig, &sUUID, nil
 }
 
-func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig server.Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) error {
+func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig server.Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*models.RunSolutionResponce, error) {
 	s.log.Infoln("Creating solution resources")
+
+	ret := models.RunSolutionResponce{
+		Errors:  []string{},
+		Created: 0,
+	}
+
 	for _, f := range solutionConfig.Run {
-		s.log.Debugf("Creating %s %s", f.Type, f.Name)
+		s.log.Infof("Creating %s %s", f.Type, f.Name)
 
 		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionName, solutionReq.Branch, f.Name))
 		if err != nil {
-			return err
+			s.log.Debugln(err)
+			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+			continue
 		}
 
 		resTmpl, err := template.New("res").Parse(string(resF))
 		if err != nil {
-			return err
+			s.log.Debugln(err)
+			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+			continue
 		}
 
 		var resParsed bytes.Buffer
 		err = resTmpl.Execute(&resParsed, solutionConfig.Env)
 		if err != nil {
-			return err
+			s.log.Debugln(err)
+			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+			continue
 		}
 
 		var resMetaJSON server.ResName
 		err = jsoniter.Unmarshal(resParsed.Bytes(), &resMetaJSON)
 		if err != nil {
-			return err
+			s.log.Debugln(err)
+			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+			continue
 		}
 
 		switch f.Type {
 		case "deployment":
 			convertedDeploy, err := s.svc.ConverterClient.ConvertDeployment(ctx, resParsed.String())
 			if err != nil {
-				return err
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
 			}
 
 			err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, *convertedDeploy)
 			if err != nil {
-				return err
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
 			}
 
-			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
+			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 				err = s.svc.DB.AddDeployment(ctx, resMetaJSON.Metadata.Name, solutionUUID)
 				return err
 			})
 			if err := s.handleDBError(err); err != nil {
-				return err
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
 			}
+			ret.Created++
 		case "service":
 			convertedService, err := s.svc.ConverterClient.ConvertService(ctx, resParsed.String())
 			if err != nil {
-				return err
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
 			}
 			err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, *convertedService)
 			if err != nil {
-				return err
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
 			}
-			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
+			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 				err = s.svc.DB.AddService(ctx, resMetaJSON.Metadata.Name, solutionUUID)
 				return err
 			})
 			if err := s.handleDBError(err); err != nil {
-				return err
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
 			}
+			ret.Created++
 		default:
-			s.log.Debugln("Unknown resource type: ", f.Type)
-		}
-		if err != nil {
-			return err
+			ret.Errors = append(ret.Errors, fmt.Sprintf("unknown resource type: %v", f.Type))
+			continue
 		}
 	}
-	s.log.Infoln("All solution resources has been created")
-	return nil
+	if ret.Created == 0 {
+		s.log.Infoln("No resources was created. Deleting solution...")
+		err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+			err := s.svc.DB.DeleteSolution(ctx, solutionReq.Name)
+			return err
+		})
+		if err != nil {
+			s.log.Errorln(err)
+		}
+		return nil, cherry.ErrUnableCreateSolution()
+	}
+
+	ret.NotCreated = len(ret.Errors)
+
+	s.log.Infoln("Solution resources has been created")
+	return &ret, nil
 }
 
 func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error {
@@ -182,7 +225,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	svc := make([]string, 0)
 	var ns *string
 
-	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
+	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		depl, ns, err = s.svc.DB.GetUserSolutionsDeployments(ctx, solution)
 		return err
@@ -191,7 +234,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		return err
 	}
 
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
+	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		svc, _, err = s.svc.DB.GetUserSolutionsServices(ctx, solution)
 		return err
@@ -214,7 +257,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		}
 	}
 
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx models.DB) error {
+	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		err = s.svc.DB.DeleteSolution(ctx, solution)
 		return err

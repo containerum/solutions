@@ -7,12 +7,12 @@ import (
 
 	"strings"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 	jsoniter "github.com/json-iterator/go"
 )
 
-func (db *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes.AvailableSolutionsList) error {
-	db.log.Infoln("Saving solutions list")
+func (pgdb *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes.AvailableSolutionsList) error {
+	pgdb.log.Infoln("Saving solutions list")
 
 	solutionsarr := []string{}
 	for _, s := range solutions.Solutions {
@@ -21,7 +21,7 @@ func (db *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes
 		solutionsarr = append(solutionsarr, fmt.Sprintf("('%v', '%v', '%v', '%v', '%v')", s.Name, s.Limits.CPU, s.Limits.RAM, string(images), s.URL))
 	}
 
-	rows, err := db.qLog.QueryxContext(ctx, "DELETE FROM available_solutions; INSERT INTO available_solutions (name, cpu, ram, images, url) "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "DELETE FROM available_solutions; INSERT INTO available_solutions (name, cpu, ram, images, url) "+
 		"VALUES "+strings.Join(solutionsarr, ","))
 	if err != nil {
 		return err
@@ -33,11 +33,11 @@ func (db *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes
 	return err
 }
 
-func (db *pgDB) GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error) {
-	db.log.Infoln("Get solutions list")
+func (pgdb *pgDB) GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error) {
+	pgdb.log.Infoln("Get solutions list")
 	var ret stypes.AvailableSolutionsList
 
-	rows, err := db.qLog.QueryxContext(ctx, "SELECT name, cpu, ram, images, url FROM available_solutions")
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT name, cpu, ram, images, url FROM available_solutions")
 	if err != nil {
 		return nil, err
 	}
@@ -59,9 +59,9 @@ func (db *pgDB) GetAvailableSolutionsList(ctx context.Context) (*stypes.Availabl
 	return &ret, rows.Err()
 }
 
-func (db *pgDB) GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error) {
-	db.log.Infoln("Get solution ", name)
-	rows, err := db.qLog.QueryxContext(ctx, "SELECT name, cpu, ram, images, url FROM available_solutions WHERE name = $1", name)
+func (pgdb *pgDB) GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error) {
+	pgdb.log.Infoln("Get solution ", name)
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT name, cpu, ram, images, url FROM available_solutions WHERE name = $1", name)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (db *pgDB) GetAvailableSolution(ctx context.Context, name string) (*stypes.
 	if err != nil {
 		return nil, err
 	}
-	if err := jsoniter.UnmarshalFromString(images, &solution.Images); err != nil {
+	if err = jsoniter.UnmarshalFromString(images, &solution.Images); err != nil {
 		return nil, err
 	}
 

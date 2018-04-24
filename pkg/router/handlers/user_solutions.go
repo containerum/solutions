@@ -9,9 +9,9 @@ import (
 
 	"strings"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -75,7 +75,7 @@ func RunSolution(ctx *gin.Context) {
 		return
 	}
 
-	err = ss.CreateSolutionResources(ctx.Request.Context(), *solutionConfig, request, *solutionName, *solutionUUID)
+	ret, err := ss.CreateSolutionResources(ctx.Request.Context(), *solutionConfig, request, *solutionName, *solutionUUID)
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -86,13 +86,11 @@ func RunSolution(ctx *gin.Context) {
 		return
 	}
 
-	ctx.Status(http.StatusCreated)
+	ctx.JSON(http.StatusAccepted, ret)
 }
 
 func DeleteSolution(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
-
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {

@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 
 	"time"
 

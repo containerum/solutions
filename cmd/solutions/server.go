@@ -9,7 +9,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/router"
 	"git.containerum.net/ch/solutions/pkg/server"
 
@@ -47,7 +47,7 @@ func initServer(c *cli.Context) error {
 	w.Flush()
 
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
-		DB:              getService(getDB(c)).(models.DB),
+		DB:              getService(getDB(c)).(db.DB),
 		DownloadClient:  clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
 		ResourceClient:  clients.NewHTTPResourceClient(c.String(resourceURLFlag)),
 		KubeAPIClient:   clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag)),

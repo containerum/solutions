@@ -5,10 +5,11 @@ import (
 
 	"io"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	"git.containerum.net/ch/solutions/pkg/db"
+	"git.containerum.net/ch/solutions/pkg/models"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 
 	"git.containerum.net/ch/solutions/pkg/clients"
-	"git.containerum.net/ch/solutions/pkg/models"
 )
 
 // SolutionsService is an interface for server "business logic"
@@ -20,7 +21,7 @@ type SolutionsService interface {
 	GetUserSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error)
 	DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error)
 	ParseSolutionConfig(ctx context.Context, solutionBody []byte, solutionReq stypes.UserSolution) (solutionConfig *Solution, solutionUUID *string, err error)
-	CreateSolutionResources(ctx context.Context, solutionConfig Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) error
+	CreateSolutionResources(ctx context.Context, solutionConfig Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*models.RunSolutionResponce, error)
 	DeleteSolution(ctx context.Context, solution string) error
 	GetUserSolutionDeployments(ctx context.Context, solutionName string) (*stypes.DeploymentsList, error)
 	GetUserSolutionServices(ctx context.Context, solutionName string) (*stypes.ServicesList, error)
@@ -29,7 +30,7 @@ type SolutionsService interface {
 
 // Services is a collection of resources needed for server functionality.
 type Services struct {
-	DB              models.DB
+	DB              db.DB
 	DownloadClient  clients.DownloadClient
 	ResourceClient  clients.ResourceClient
 	KubeAPIClient   clients.KubeAPIClient

@@ -1,4 +1,4 @@
-package models
+package db
 
 import (
 	"io"
@@ -7,7 +7,7 @@ import (
 
 	"errors"
 
-	stypes "git.containerum.net/ch/json-types/solutions"
+	stypes "git.containerum.net/ch/solutions/pkg/models"
 )
 
 // Errors which may occur in transactional operations
