@@ -24,8 +24,7 @@ const (
 )
 
 func RunSolution(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	logrus.Infoln("Last check time:", lastCheckTime)
 
 	var request stypes.UserSolution
@@ -109,8 +108,7 @@ func DeleteSolution(ctx *gin.Context) {
 }
 
 func GetUserSolutionsList(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionsList(ctx.Request.Context())
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
@@ -126,8 +124,7 @@ func GetUserSolutionsList(ctx *gin.Context) {
 }
 
 func GetUserSolutionsDeployments(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
@@ -143,8 +140,7 @@ func GetUserSolutionsDeployments(ctx *gin.Context) {
 }
 
 func GetUserSolutionsServices(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {

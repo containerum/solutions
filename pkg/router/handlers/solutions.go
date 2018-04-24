@@ -7,6 +7,8 @@ import (
 
 	"time"
 
+	"strings"
+
 	ch "git.containerum.net/ch/kube-client/pkg/cherry"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
@@ -20,8 +22,7 @@ var lastCheckTime time.Time
 const checkInterval = 6 * time.Hour
 
 func UpdateSolutions(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	logrus.Infoln("Last solutions update check:", lastCheckTime.Format(time.RFC1123))
 	if lastCheckTime.Add(checkInterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(m.UserRoleHeader) == "admin") {
 		logrus.Infoln("Updating solutions")
@@ -43,8 +44,7 @@ func UpdateSolutions(ctx *gin.Context) {
 }
 
 func GetSolutionsList(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetAvailableSolutionsList(ctx.Request.Context())
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
@@ -60,9 +60,13 @@ func GetSolutionsList(ctx *gin.Context) {
 }
 
 func GetSolutionEnv(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
-	resp, err := ss.GetAvailableSolutionEnvList(ctx.Request.Context(), ctx.Param("solution"), ctx.Query("branch"))
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	branch := branchMaster
+	if ctx.Query("branch") != "" {
+		branch = strings.TrimSpace(ctx.Query("branch"))
+	}
+
+	resp, err := ss.GetAvailableSolutionEnvList(ctx.Request.Context(), ctx.Param("solution"), branch)
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -76,9 +80,13 @@ func GetSolutionEnv(ctx *gin.Context) {
 }
 
 func GetSolutionResources(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
-	resp, err := ss.GetAvailableSolutionResourcesList(ctx.Request.Context(), ctx.Param("solution"), ctx.Query("branch"))
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	branch := branchMaster
+	if ctx.Query("branch") != "" {
+		branch = strings.TrimSpace(ctx.Query("branch"))
+	}
+
+	resp, err := ss.GetAvailableSolutionResourcesList(ctx.Request.Context(), ctx.Param("solution"), branch)
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
 			gonic.Gonic(cherr, ctx)

@@ -13,6 +13,6 @@ const (
 // RegisterServices adds services to context
 func RegisterServices(svc *server.SolutionsService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set(SolutionsServices, svc)
+		c.Set(SolutionsServices, *svc)
 	}
 }
