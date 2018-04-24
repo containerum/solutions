@@ -26,6 +26,7 @@ const (
 	OwnerKey     = "OWNER"
 
 	unableToCreate = "unable to create %s %s: %s"
+	unableToDelete = "unable to delete %s %s: %s"
 )
 
 func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error) {
@@ -243,18 +244,23 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		return err
 	}
 
+	errs := []error{}
 	for _, r := range depl {
 		err = s.svc.ResourceClient.DeleteDeployment(ctx, *ns, r)
 		if err != nil {
-			s.log.Infoln(err)
+			errs = append(errs, fmt.Errorf(unableToDelete, "deployment", r, err))
 		}
 	}
 
 	for _, r := range svc {
 		err = s.svc.ResourceClient.DeleteService(ctx, *ns, r)
 		if err != nil {
-			s.log.Infoln(err)
+			errs = append(errs, fmt.Errorf(unableToDelete, "service", r, err))
 		}
+	}
+
+	if len(errs) != 0 {
+		return cherry.ErrUnableDeleteSolution().AddDetailsErr(errs...)
 	}
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
