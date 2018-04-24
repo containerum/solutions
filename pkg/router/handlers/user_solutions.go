@@ -7,6 +7,8 @@ import (
 
 	"fmt"
 
+	"strings"
+
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
@@ -17,9 +19,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	branchMaster = "master"
+)
+
 func RunSolution(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	logrus.Infoln("Last check time:", lastCheckTime)
 
 	var request stypes.UserSolution
@@ -41,6 +46,11 @@ func RunSolution(ctx *gin.Context) {
 	if len(valerrs) > 0 {
 		gonic.Gonic(cherry.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
 		return
+	}
+	if request.Branch != "" {
+		request.Branch = strings.TrimSpace(request.Branch)
+	} else {
+		request.Branch = branchMaster
 	}
 
 	solutionFile, solutionName, err := ss.DownloadSolutionConfig(ctx.Request.Context(), request)
@@ -98,8 +108,7 @@ func DeleteSolution(ctx *gin.Context) {
 }
 
 func GetUserSolutionsList(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionsList(ctx.Request.Context())
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
@@ -115,8 +124,7 @@ func GetUserSolutionsList(ctx *gin.Context) {
 }
 
 func GetUserSolutionsDeployments(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
@@ -132,8 +140,7 @@ func GetUserSolutionsDeployments(ctx *gin.Context) {
 }
 
 func GetUserSolutionsServices(ctx *gin.Context) {
-	ssp := ctx.MustGet(m.SolutionsServices).(*server.SolutionsService)
-	ss := *ssp
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*ch.Err); ok {
@@ -142,6 +149,7 @@ func GetUserSolutionsServices(ctx *gin.Context) {
 			ctx.Error(err)
 			gonic.Gonic(cherry.ErrUnableGetSolution(), ctx)
 		}
+		return
 	}
 
 	ctx.JSON(http.StatusOK, resp)

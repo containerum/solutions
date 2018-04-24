@@ -49,14 +49,10 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 		return nil, err
 	}
 
-	sBranch := branchMaster
-	if branch != "" {
-		sBranch = strings.TrimSpace(branch)
-	}
 	sName := strings.TrimSpace(solurl.Path[1:])
 	sFile := ".containerum.json"
 
-	containerumJSONURL := "https://raw.githubusercontent.com/" + sName + "/" + sBranch + "/" + sFile
+	containerumJSONURL := "https://raw.githubusercontent.com/" + sName + "/" + branch + "/" + sFile
 
 	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, containerumJSONURL)
 	if err != nil {
@@ -93,11 +89,6 @@ func (s *serverImpl) GetAvailableSolutionResourcesList(ctx context.Context, name
 		return nil, err
 	}
 
-	if branch != "" {
-		branch = strings.TrimSpace(branch)
-	} else {
-		branch = branchMaster
-	}
 	sName := strings.TrimSpace(urlcsv.Path[1:])
 
 	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, branch))
