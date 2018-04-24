@@ -11,7 +11,7 @@ import (
 
 	"git.containerum.net/ch/solutions/pkg/server"
 
-	"git.containerum.net/ch/utils"
+	utils "git.containerum.net/ch/utils/httputil"
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
