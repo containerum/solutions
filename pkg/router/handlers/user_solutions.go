@@ -7,6 +7,8 @@ import (
 
 	"fmt"
 
+	"strings"
+
 	stypes "git.containerum.net/ch/json-types/solutions"
 	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
 	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
@@ -15,6 +17,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"
+)
+
+const (
+	branchMaster = "master"
 )
 
 func RunSolution(ctx *gin.Context) {
@@ -41,6 +47,11 @@ func RunSolution(ctx *gin.Context) {
 	if len(valerrs) > 0 {
 		gonic.Gonic(cherry.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
 		return
+	}
+	if request.Branch != "" {
+		request.Branch = strings.TrimSpace(request.Branch)
+	} else {
+		request.Branch = branchMaster
 	}
 
 	solutionFile, solutionName, err := ss.DownloadSolutionConfig(ctx.Request.Context(), request)
@@ -142,6 +153,7 @@ func GetUserSolutionsServices(ctx *gin.Context) {
 			ctx.Error(err)
 			gonic.Gonic(cherry.ErrUnableGetSolution(), ctx)
 		}
+		return
 	}
 
 	ctx.JSON(http.StatusOK, resp)

@@ -23,8 +23,6 @@ const (
 	NamespaceKey = "NS"
 	VolumeKey    = "VOLUME"
 	OwnerKey     = "OWNER"
-
-	branchMaster = "master"
 )
 
 func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error) {
@@ -42,11 +40,6 @@ func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq sty
 		return nil, nil, err
 	}
 
-	if solutionReq.Branch != "" {
-		solutionReq.Branch = strings.TrimSpace(solutionReq.Branch)
-	} else {
-		solutionReq.Branch = branchMaster
-	}
 	sName := strings.TrimSpace(solutionURL.Path[1:])
 
 	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, solutionReq.Branch))
@@ -112,7 +105,6 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 }
 
 func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig server.Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) error {
-	//Creating all resources from solution
 	s.log.Infoln("Creating solution resources")
 	for _, f := range solutionConfig.Run {
 		s.log.Debugf("Creating %s %s", f.Type, f.Name)
