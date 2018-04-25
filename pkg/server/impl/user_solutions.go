@@ -22,7 +22,6 @@ import (
 
 const (
 	NamespaceKey = "NS"
-	VolumeKey    = "VOLUME"
 	OwnerKey     = "OWNER"
 
 	unableToCreate = "unable to create %s %s: %s"
@@ -84,11 +83,6 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 	for k, v := range solutionReq.Env {
 		solutionConfig.Env[k] = v
 	}
-
-	if _, set := solutionConfig.Env[VolumeKey]; !set { // use default volume name format if volume name not specified
-		solutionConfig.Env[VolumeKey] = fmt.Sprintf("%s-volume", solutionReq.Namespace)
-	}
-
 	solutionConfig.Env[OwnerKey] = server.MustGetUserID(ctx)
 
 	sUUID := uuid.New().String()
