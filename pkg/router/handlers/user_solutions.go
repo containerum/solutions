@@ -3,14 +3,12 @@ package handlers
 import (
 	"net/http"
 
-	ch "git.containerum.net/ch/kube-client/pkg/cherry"
-
 	"fmt"
 
 	"strings"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
-	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+	"git.containerum.net/ch/cherry"
+	"git.containerum.net/ch/cherry/adaptors/gonic"
 	stypes "git.containerum.net/ch/solutions/pkg/models"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/server"
@@ -29,7 +27,7 @@ func RunSolution(ctx *gin.Context) {
 
 	var request stypes.UserSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
-		gonic.Gonic(cherry.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
+		gonic.Gonic(solutionsErrorsErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
@@ -44,7 +42,7 @@ func RunSolution(ctx *gin.Context) {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Namespace"))
 	}
 	if len(valerrs) > 0 {
-		gonic.Gonic(cherry.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
+		gonic.Gonic(solutionsErrorsErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
 		return
 	}
 	if request.Branch != "" {
@@ -55,33 +53,33 @@ func RunSolution(ctx *gin.Context) {
 
 	solutionFile, solutionName, err := ss.DownloadSolutionConfig(ctx.Request.Context(), request)
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableCreateSolution(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
 
 	solutionConfig, solutionUUID, err := ss.ParseSolutionConfig(ctx.Request.Context(), solutionFile, request)
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableCreateSolution(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
 
 	ret, err := ss.CreateSolutionResources(ctx.Request.Context(), *solutionConfig, request, *solutionName, *solutionUUID)
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableCreateSolution(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
@@ -93,11 +91,11 @@ func DeleteSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableDeleteSolution(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableDeleteSolution(), ctx)
 		}
 		return
 	}
@@ -109,11 +107,11 @@ func GetUserSolutionsList(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionsList(ctx.Request.Context())
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableGetSolutionsList(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableGetSolutionsList(), ctx)
 		}
 		return
 	}
@@ -125,11 +123,11 @@ func GetUserSolutionsDeployments(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableGetSolution(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableGetSolution(), ctx)
 		}
 		return
 	}
@@ -141,11 +139,11 @@ func GetUserSolutionsServices(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableGetSolution(), ctx)
+			gonic.Gonic(solutionsErrorsErrUnableGetSolution(), ctx)
 		}
 		return
 	}

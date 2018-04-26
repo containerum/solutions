@@ -7,8 +7,6 @@ import (
 	"html/template"
 	"strings"
 
-	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
-
 	"net/url"
 
 	"git.containerum.net/ch/solutions/pkg/db"
@@ -35,7 +33,7 @@ func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq sty
 		return nil, nil, err
 	}
 	if solutionAvailable == nil {
-		return nil, nil, cherry.ErrSolutionNotExist()
+		return nil, nil, solutionsErrorsErrSolutionNotExist()
 	}
 
 	solutionURL, err := url.Parse(solutionAvailable.URL)
@@ -206,7 +204,7 @@ func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig
 		if err != nil {
 			s.log.Errorln(err)
 		}
-		return nil, cherry.ErrUnableCreateSolution()
+		return nil, solutionsErrorsErrUnableCreateSolution()
 	}
 
 	ret.NotCreated = len(ret.Errors)
@@ -254,7 +252,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	}
 
 	if len(errs) != 0 {
-		return cherry.ErrUnableDeleteSolution().AddDetailsErr(errs...)
+		return solutionsErrorsErrUnableDeleteSolution().AddDetailsErr(errs...)
 	}
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {

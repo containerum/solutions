@@ -6,9 +6,8 @@ import (
 
 	"errors"
 
-	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
-
 	"git.containerum.net/ch/solutions/pkg/db"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 
 	"github.com/lib/pq"
@@ -58,7 +57,7 @@ func (s *serverImpl) handleDBError(err error) error {
 		if pqerr, ok := err.(*pq.Error); ok {
 			switch pqerr.Code {
 			case "23505": //unique_violation
-				return cherry.ErrSolutionAlreadyExists()
+				return sErrors.ErrSolutionAlreadyExists()
 			default:
 				s.log.WithError(pqerr)
 			}

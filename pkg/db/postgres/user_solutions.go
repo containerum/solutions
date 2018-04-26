@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
-
 	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"github.com/json-iterator/go"
 )
@@ -109,7 +107,7 @@ func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string) error {
 
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return cherry.ErrSolutionNotExist()
+		return solutionsErrorsErrSolutionNotExist()
 	}
 	return nil
 }

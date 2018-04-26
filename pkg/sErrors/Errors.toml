@@ -1,7 +1,7 @@
 # File for noice errors generation
 
 Name = "sErrors"
-SID = 11
+SID = "Solutions"
 
 # errors
 [[error]]

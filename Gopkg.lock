@@ -2,21 +2,20 @@
 
 
 [[projects]]
-  branch = "master"
-  name = "git.containerum.net/ch/json-types"
-  packages = ["user-manager"]
-  revision = "041a989c67953d829255c2fb10985b9bc1b25e51"
+  branch = "65-make-code-refactor-before-publishing-2"
+  name = "git.containerum.net/ch/api-gateway"
+  packages = ["pkg/utils/headers"]
+  revision = "01c243ee7d19634d2d9cbd37c1d06609919ae7df"
 
 [[projects]]
-  name = "git.containerum.net/ch/kube-client"
+  name = "git.containerum.net/ch/cherry"
   packages = [
-    "pkg/cherry",
-    "pkg/cherry/adaptors/cherrylog",
-    "pkg/cherry/adaptors/gonic",
-    "pkg/cherry/solutions"
+    ".",
+    "adaptors/cherrylog",
+    "adaptors/gonic"
   ]
-  revision = "7ccb027698fdd902e09da3586337afaf4cc3bad9"
-  version = "v0.9.4"
+  revision = "82e4d22be24efe6d9e6925376119a24f789bddc7"
+  version = "v1.0.1-rc2"
 
 [[projects]]
   branch = "master"
@@ -25,7 +24,7 @@
     "httputil",
     "sqlxutil"
   ]
-  revision = "0c31c414efa017dc1932f5e663dba8f00b3dcfe9"
+  revision = "47fc480749a3e137a621f1b95263f61cc5febcf8"
 
 [[projects]]
   branch = "master"
@@ -158,7 +157,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "2b6c08872f4b66da917bb4ce98df4f0307330f78"
+  revision = "b0697eccbea9adec5b7ba8008f4c33d98d733388"
 
 [[projects]]
   branch = "master"
@@ -176,7 +175,7 @@
     "unix",
     "windows"
   ]
-  revision = "79b0c6888797020a994db17c8510466c72fe75d9"
+  revision = "bb9c189858d91f42db229b04d45a4c3d23a7662a"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -220,6 +219,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "910698e6a8045aa06438fab551b511dfa4eb31f67f897ef5fea9afebe0665e98"
+  inputs-digest = "141777eec9ccc7b36b9d12a6ba9fc6300cfdb22dd4ae14ea4cd6a810ad915a42"
   solver-name = "gps-cdcl"
   solver-version = 1

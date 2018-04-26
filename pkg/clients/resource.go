@@ -7,7 +7,6 @@ import (
 
 	"time"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry"
 	utils "git.containerum.net/ch/utils/httputil"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
@@ -35,7 +34,7 @@ func NewHTTPResourceClient(serverURL string) ResourceClient {
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
 		SetTimeout(3 * time.Second).
-		SetError(cherry.Err{})
+		SetError(solutionsErrorsErr{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &httpResourceClient{
@@ -56,7 +55,7 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*cherry.Err)
+		return resp.Error().(*solutionsErrorsErr)
 	}
 	return nil
 }
@@ -72,7 +71,7 @@ func (c *httpResourceClient) CreateService(ctx context.Context, namespace string
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*cherry.Err)
+		return resp.Error().(*solutionsErrorsErr)
 	}
 	return nil
 }
@@ -87,7 +86,7 @@ func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace str
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*cherry.Err)
+		return resp.Error().(*solutionsErrorsErr)
 	}
 	return nil
 }
@@ -102,7 +101,7 @@ func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*cherry.Err)
+		return resp.Error().(*solutionsErrorsErr)
 	}
 	return nil
 }

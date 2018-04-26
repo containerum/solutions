@@ -6,7 +6,6 @@ import (
 
 	"fmt"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ func NewHTTPConverterClient(serverURL string) ConverterClient {
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
 		SetTimeout(3 * time.Second).
-		SetError(cherry.Err{})
+		SetError(solutionsErrorsErr{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &httpConverterClient{
@@ -50,7 +49,7 @@ func (c *httpConverterClient) ConvertDeployment(ctx context.Context, deployment 
 		return nil, err
 	}
 	if resp.Error() != nil {
-		return nil, resp.Error().(*cherry.Err)
+		return nil, resp.Error().(*solutionsErrorsErr)
 	}
 	result := fmt.Sprintf("%v", string(resp.Body()))
 	return &result, nil
@@ -66,7 +65,7 @@ func (c *httpConverterClient) ConvertService(ctx context.Context, service string
 		return nil, err
 	}
 	if resp.Error() != nil {
-		return nil, resp.Error().(*cherry.Err)
+		return nil, resp.Error().(*solutionsErrorsErr)
 	}
 	result := fmt.Sprintf("%v", string(resp.Body()))
 	return &result, nil
