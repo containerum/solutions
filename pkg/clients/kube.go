@@ -10,7 +10,6 @@ import (
 
 	"time"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -35,7 +34,7 @@ func NewHTTPKubeAPIClient(serverURL string) KubeAPIClient {
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
 		SetTimeout(3 * time.Second).
-		SetError(cherry.Err{})
+		SetError(solutionsErrorsErr{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &httpKubeAPIClient{
@@ -63,7 +62,7 @@ func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace st
 			return nil, err
 		}
 		if resp.Error() != nil {
-			return nil, resp.Error().(*cherry.Err)
+			return nil, resp.Error().(*solutionsErrorsErr)
 		}
 
 		dlist.Deployments = append(dlist.Deployments, &depl)
@@ -91,7 +90,7 @@ func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace strin
 			return nil, err
 		}
 		if resp.Error() != nil {
-			return nil, resp.Error().(*cherry.Err)
+			return nil, resp.Error().(*solutionsErrorsErr)
 		}
 
 		dlist.Services = append(dlist.Services, &service)

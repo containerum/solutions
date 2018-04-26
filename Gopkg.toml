@@ -48,3 +48,7 @@
 [[constraint]]
   branch = "master"
   name = "k8s.io/api"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/api-gateway"

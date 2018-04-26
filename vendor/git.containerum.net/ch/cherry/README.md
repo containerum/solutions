@@ -1,9 +1,10 @@
 ```go
 type Err struct {
-    Message    string   `json:"message"`
-    StatusHTTP int      `json:"-"`
-    ID         string   `json:"id"`
-    Details    []string `json:"details,omitempty"`
+    Message    string            `json:"message"`
+    StatusHTTP int               `json:"-"`
+    ID         string            `json:"id"`
+    Details    []string          `json:"details,omitempty"`
+    Fields     map[string]string `json:"fields,omitempty"
 }
 ```
     Err -- standart serializable API error Message -- constant error
@@ -52,6 +53,16 @@ AddDetails -- adds detail messages to Err, chainable
 func (err *Err) AddDetailsErr(details ...error) *Err
 ```
 AddDetailsErr -- adds errors as detail messages to Err,chainable
+
+```go
+func (err *Err) WithField(name, value string) *Err
+```
+WithField -- adds field to Err, chainable
+
+```go
+func (err *Err) WithFields(fields Fields) *Err
+```
+WithFields -- adds fields to Err, chainable
 
 ```go
 func (err *Err) Error() string

@@ -3,8 +3,8 @@ package middleware
 import (
 	"context"
 
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
-	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+	"git.containerum.net/ch/cherry/adaptors/gonic"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +28,7 @@ func RequireHeaders(headers ...string) gin.HandlerFunc {
 			}
 		}
 		if len(notFoundHeaders) > 0 {
-			gonic.Gonic(cherry.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
+			gonic.Gonic(sErrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
 		}
 	}
 }

@@ -9,10 +9,10 @@ import (
 
 	"strings"
 
-	ch "git.containerum.net/ch/kube-client/pkg/cherry"
-	"git.containerum.net/ch/kube-client/pkg/cherry/adaptors/gonic"
-	cherry "git.containerum.net/ch/kube-client/pkg/cherry/solutions"
+	"git.containerum.net/ch/cherry"
+	"git.containerum.net/ch/cherry/adaptors/gonic"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/sirupsen/logrus"
 )
@@ -28,11 +28,11 @@ func UpdateSolutions(ctx *gin.Context) {
 		logrus.Infoln("Updating solutions")
 		err := ss.UpdateAvailableSolutionsList(ctx.Request.Context())
 		if err != nil {
-			if cherr, ok := err.(*ch.Err); ok {
+			if cherr, ok := err.(*cherry.Err); ok {
 				gonic.Gonic(cherr, ctx)
 			} else {
 				ctx.Error(err)
-				gonic.Gonic(cherry.ErrUnableUpdateSolutionsList(), ctx)
+				gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
 			}
 			return
 		}
@@ -47,11 +47,11 @@ func GetSolutionsList(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetAvailableSolutionsList(ctx.Request.Context())
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableGetSolutionsTemplatesList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolutionsTemplatesList(), ctx)
 		}
 		return
 	}
@@ -68,11 +68,11 @@ func GetSolutionEnv(ctx *gin.Context) {
 
 	resp, err := ss.GetAvailableSolutionEnvList(ctx.Request.Context(), ctx.Param("solution"), branch)
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableGetSolutionTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolutionTemplate(), ctx)
 		}
 		return
 	}
@@ -88,11 +88,11 @@ func GetSolutionResources(ctx *gin.Context) {
 
 	resp, err := ss.GetAvailableSolutionResourcesList(ctx.Request.Context(), ctx.Param("solution"), branch)
 	if err != nil {
-		if cherr, ok := err.(*ch.Err); ok {
+		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(cherry.ErrUnableGetSolutionTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolutionTemplate(), ctx)
 		}
 		return
 	}
