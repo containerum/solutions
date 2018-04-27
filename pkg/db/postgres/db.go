@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"git.containerum.net/ch/solutions/pkg/db"
-	chutils "git.containerum.net/ch/utils/sqlxutil"
+	chutils "github.com/containerum/utils/sqlxutil"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // postgresql database driver
 	"github.com/mattes/migrate"

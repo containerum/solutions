@@ -7,11 +7,12 @@ import (
 
 	"strings"
 
-	"git.containerum.net/ch/cherry"
-	"git.containerum.net/ch/cherry/adaptors/gonic"
 	stypes "git.containerum.net/ch/solutions/pkg/models"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"github.com/containerum/cherry"
+	"github.com/containerum/cherry/adaptors/gonic"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"
@@ -27,7 +28,7 @@ func RunSolution(ctx *gin.Context) {
 
 	var request stypes.UserSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
-		gonic.Gonic(solutionsErrorsErrRequestValidationFailed().AddDetailsErr(err), ctx)
+		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
@@ -42,7 +43,7 @@ func RunSolution(ctx *gin.Context) {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Namespace"))
 	}
 	if len(valerrs) > 0 {
-		gonic.Gonic(solutionsErrorsErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
+		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
 		return
 	}
 	if request.Branch != "" {
@@ -57,7 +58,7 @@ func RunSolution(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableCreateSolution(), ctx)
+			gonic.Gonic(sErrors.ErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
@@ -68,7 +69,7 @@ func RunSolution(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableCreateSolution(), ctx)
+			gonic.Gonic(sErrors.ErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
@@ -79,7 +80,7 @@ func RunSolution(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableCreateSolution(), ctx)
+			gonic.Gonic(sErrors.ErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
@@ -95,7 +96,7 @@ func DeleteSolution(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableDeleteSolution(), ctx)
+			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
 		}
 		return
 	}
@@ -111,7 +112,7 @@ func GetUserSolutionsList(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableGetSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolutionsList(), ctx)
 		}
 		return
 	}
@@ -127,7 +128,7 @@ func GetUserSolutionsDeployments(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableGetSolution(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
@@ -143,7 +144,7 @@ func GetUserSolutionsServices(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(solutionsErrorsErrUnableGetSolution(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}

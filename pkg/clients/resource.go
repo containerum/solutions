@@ -7,7 +7,8 @@ import (
 
 	"time"
 
-	utils "git.containerum.net/ch/utils/httputil"
+	"github.com/containerum/cherry"
+	utils "github.com/containerum/utils/httputil"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -34,7 +35,7 @@ func NewHTTPResourceClient(serverURL string) ResourceClient {
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
 		SetTimeout(3 * time.Second).
-		SetError(solutionsErrorsErr{})
+		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &httpResourceClient{
@@ -55,7 +56,7 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*solutionsErrorsErr)
+		return resp.Error().(*cherry.Err)
 	}
 	return nil
 }
@@ -71,7 +72,7 @@ func (c *httpResourceClient) CreateService(ctx context.Context, namespace string
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*solutionsErrorsErr)
+		return resp.Error().(*cherry.Err)
 	}
 	return nil
 }
@@ -86,7 +87,7 @@ func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace str
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*solutionsErrorsErr)
+		return resp.Error().(*cherry.Err)
 	}
 	return nil
 }
@@ -101,7 +102,7 @@ func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*solutionsErrorsErr)
+		return resp.Error().(*cherry.Err)
 	}
 	return nil
 }

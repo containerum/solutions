@@ -9,11 +9,12 @@ import (
 
 	"strings"
 
-	"git.containerum.net/ch/cherry"
-	"git.containerum.net/ch/cherry/adaptors/gonic"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"github.com/containerum/cherry"
+	"github.com/containerum/cherry/adaptors/gonic"
+	"github.com/containerum/utils/httputil"
 	"github.com/sirupsen/logrus"
 )
 
@@ -24,7 +25,7 @@ const checkInterval = 6 * time.Hour
 func UpdateSolutions(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	logrus.Infoln("Last solutions update check:", lastCheckTime.Format(time.RFC1123))
-	if lastCheckTime.Add(checkInterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(m.UserRoleHeader) == "admin") {
+	if lastCheckTime.Add(checkInterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(httputil.UserRoleXHeader) == "admin") {
 		logrus.Infoln("Updating solutions")
 		err := ss.UpdateAvailableSolutionsList(ctx.Request.Context())
 		if err != nil {
