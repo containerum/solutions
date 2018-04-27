@@ -1,7 +1,7 @@
 [prune]
   go-tests = true
   unused-packages = true
-  no-go = true
+  non-go = true
 
 [[constraint]]
   name = "github.com/gin-gonic/gin"
