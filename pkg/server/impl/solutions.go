@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	stypes "git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/json-iterator/go"
 )
@@ -40,7 +41,7 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 		return nil, err
 	}
 	if solution == nil {
-		return nil, solutionsErrorsErrSolutionNotExist()
+		return nil, sErrors.ErrSolutionNotExist()
 	}
 
 	solurl, err := url.Parse(solution.URL)
@@ -80,7 +81,7 @@ func (s *serverImpl) GetAvailableSolutionResourcesList(ctx context.Context, name
 		return nil, err
 	}
 	if solution == nil {
-		return nil, solutionsErrorsErrSolutionNotExist()
+		return nil, sErrors.ErrSolutionNotExist()
 	}
 
 	urlcsv, err := url.Parse(solution.URL)

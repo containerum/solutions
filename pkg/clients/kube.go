@@ -6,7 +6,8 @@ import (
 	"fmt"
 
 	stypes "git.containerum.net/ch/solutions/pkg/models"
-	utils "git.containerum.net/ch/utils/httputil"
+	"github.com/containerum/cherry"
+	utils "github.com/containerum/utils/httputil"
 
 	"time"
 
@@ -34,7 +35,7 @@ func NewHTTPKubeAPIClient(serverURL string) KubeAPIClient {
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(true).
 		SetTimeout(3 * time.Second).
-		SetError(solutionsErrorsErr{})
+		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
 	return &httpKubeAPIClient{
@@ -62,7 +63,7 @@ func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace st
 			return nil, err
 		}
 		if resp.Error() != nil {
-			return nil, resp.Error().(*solutionsErrorsErr)
+			return nil, resp.Error().(*cherry.Err)
 		}
 
 		dlist.Deployments = append(dlist.Deployments, &depl)
@@ -90,7 +91,7 @@ func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace strin
 			return nil, err
 		}
 		if resp.Error() != nil {
-			return nil, resp.Error().(*solutionsErrorsErr)
+			return nil, resp.Error().(*cherry.Err)
 		}
 
 		dlist.Services = append(dlist.Services, &service)

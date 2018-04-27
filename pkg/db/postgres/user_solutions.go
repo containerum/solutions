@@ -4,6 +4,7 @@ import (
 	"context"
 
 	stypes "git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"github.com/json-iterator/go"
 )
 
@@ -107,7 +108,7 @@ func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string) error {
 
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return solutionsErrorsErrSolutionNotExist()
+		return sErrors.ErrSolutionNotExist()
 	}
 	return nil
 }

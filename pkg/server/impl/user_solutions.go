@@ -12,6 +12,7 @@ import (
 	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/models"
 	stypes "git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/utils"
 	"github.com/google/uuid"
@@ -33,7 +34,7 @@ func (s *serverImpl) DownloadSolutionConfig(ctx context.Context, solutionReq sty
 		return nil, nil, err
 	}
 	if solutionAvailable == nil {
-		return nil, nil, solutionsErrorsErrSolutionNotExist()
+		return nil, nil, sErrors.ErrSolutionNotExist()
 	}
 
 	solutionURL, err := url.Parse(solutionAvailable.URL)
@@ -204,7 +205,7 @@ func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig
 		if err != nil {
 			s.log.Errorln(err)
 		}
-		return nil, solutionsErrorsErrUnableCreateSolution()
+		return nil, sErrors.ErrUnableCreateSolution()
 	}
 
 	ret.NotCreated = len(ret.Errors)
@@ -252,7 +253,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	}
 
 	if len(errs) != 0 {
-		return solutionsErrorsErrUnableDeleteSolution().AddDetailsErr(errs...)
+		return sErrors.ErrUnableDeleteSolution().AddDetailsErr(errs...)
 	}
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
