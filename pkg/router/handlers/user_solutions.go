@@ -15,16 +15,33 @@ import (
 	"github.com/containerum/cherry/adaptors/gonic"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/sirupsen/logrus"
 )
 
 const (
 	branchMaster = "master"
 )
 
+// swagger:operation POST /user_solutions UserSolutions RunSolution
+// Run solution.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: body
+//    in: body
+//    schema:
+//      $ref: '#/definitions/UserSolution'
+// responses:
+//  '202':
+//    description: solution created
+//    schema:
+//      $ref: '#/definitions/RunSolutionResponce'
+//  default:
+//    $ref: '#/responses/error'
 func RunSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	logrus.Infoln("Last check time:", lastCheckTime)
 
 	var request stypes.UserSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
@@ -88,6 +105,23 @@ func RunSolution(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, ret)
 }
 
+// swagger:operation DELETE /user_solutions/{solution} UserSolutions DeleteSolution
+// Delete solution.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '202':
+//    description: solution deleted
+//  default:
+//    $ref: '#/responses/error'
 func DeleteSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution"))
@@ -104,6 +138,21 @@ func DeleteSolution(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+// swagger:operation GET /user_solutions UserSolutions GetUserSolutionsList
+// Get running solutions list.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+// responses:
+//  '200':
+//    description: running solutions list
+//    schema:
+//      $ref: '#/definitions/UserSolutionsList'
+//  default:
+//    $ref: '#/responses/error'
 func GetUserSolutionsList(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionsList(ctx.Request.Context())
@@ -120,6 +169,25 @@ func GetUserSolutionsList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// swagger:operation GET /user_solutions/{solution}/deployments UserSolutions GetUserSolutionsDeployments
+// Get solution deployments.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '200':
+//    description: solution deployments
+//    schema:
+//      $ref: '#/definitions/DeploymentsList'
+//  default:
+//    $ref: '#/responses/error'
 func GetUserSolutionsDeployments(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
@@ -136,6 +204,25 @@ func GetUserSolutionsDeployments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// swagger:operation GET /user_solutions/{solution}/services UserSolutions GetUserSolutionsServices
+// Get solution services.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '200':
+//    description: solutions services
+//    schema:
+//      $ref: '#/definitions/ServicesList'
+//  default:
+//    $ref: '#/responses/error'
 func GetUserSolutionsServices(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetUserSolutionServices(ctx.Request.Context(), ctx.Param("solution"))

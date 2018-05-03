@@ -15,10 +15,16 @@ import (
 // SolutionsService is an interface for server "business logic"
 type SolutionsService interface {
 	UpdateAvailableSolutionsList(ctx context.Context) error
-	GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error)
+	AddAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
+	UpdateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
+	DeleteAvailableSolution(ctx context.Context, solution string) error
+	GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
 	GetAvailableSolutionEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error)
 	GetAvailableSolutionResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error)
 	GetUserSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error)
+	ActivateAvailableSolution(ctx context.Context, solution string) error
+	DeactivateAvailableSolution(ctx context.Context, solution string) error
+
 	DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error)
 	ParseSolutionConfig(ctx context.Context, solutionBody []byte, solutionReq stypes.UserSolution) (solutionConfig *Solution, solutionUUID *string, err error)
 	CreateSolutionResources(ctx context.Context, solutionConfig Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*models.RunSolutionResponce, error)

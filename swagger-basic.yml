@@ -1,0 +1,11 @@
+swagger: "2.0"
+parameters:
+  UserIDHeader:
+    $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserIDHeader"
+  UserRoleHeader:
+    $ref: "vendor/github.com/containerum/utils/httputil/swagger.json#/parameters/UserRoleHeader"
+responses:
+  error:
+    description: cherry error
+    schema:
+      $ref: "vendor/github.com/containerum/cherry/swagger.json#/definitions/Err"

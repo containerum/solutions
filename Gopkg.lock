@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  branch = "develop"
+  name = "git.containerum.net/ch/auth"
+  packages = ["static"]
+  revision = "7430ec8f101b19886808585f9cef3ff6e6c33016"
+
+[[projects]]
   name = "github.com/containerum/cherry"
   packages = [
     ".",
@@ -30,7 +36,7 @@
   branch = "master"
   name = "github.com/gin-gonic/contrib"
   packages = ["ginrus"]
-  revision = "9b830a15f6abcf9e160f47ee01fc00691cc1981a"
+  revision = "33543d11593dd66df698cae8b4c776faa0827359"
 
 [[projects]]
   name = "github.com/gin-gonic/gin"
@@ -66,8 +72,8 @@
 [[projects]]
   name = "github.com/golang/protobuf"
   packages = ["proto"]
-  revision = "925541529c1fa6821df4e44ce2723319eb2be768"
-  version = "v1.0.0"
+  revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/google/uuid"
@@ -151,16 +157,19 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "b49d69b5da943f7ef3c9cf91c8777c1f78a0cc3c"
+  revision = "8b1d31080a7692e075c4681cb2458454a1fe0706"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = [
+    "context",
     "idna",
-    "publicsuffix"
+    "publicsuffix",
+    "webdav",
+    "webdav/internal/xml"
   ]
-  revision = "5f9ae10d9af5b1c89ae6904293b14b064d4ada23"
+  revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
 
 [[projects]]
   branch = "master"
@@ -169,7 +178,7 @@
     "unix",
     "windows"
   ]
-  revision = "bb9c189858d91f42db229b04d45a4c3d23a7662a"
+  revision = "78d5f264b493f125018180c204871ecf58a2dce1"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -193,6 +202,12 @@
   version = "v0.3.0"
 
 [[projects]]
+  name = "gopkg.in/gin-contrib/cors.v1"
+  packages = ["."]
+  revision = "cf4846e6a636a76237a28d9286f163c132e841bc"
+  version = "v1.2"
+
+[[projects]]
   name = "gopkg.in/go-playground/validator.v8"
   packages = ["."]
   revision = "5f1438d3fca68893a817e4a66806cea46a9e4ebf"
@@ -213,6 +228,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d85de1f62978153f2b4f04ae3ad00256afc9254aebdb8758a578c77470fc8b7f"
+  inputs-digest = "5d128cf787f4f3ffeaae270831ca8837e8172a125c81d7e00989c65e381bd563"
   solver-name = "gps-cdcl"
   solver-version = 1

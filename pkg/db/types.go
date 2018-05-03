@@ -20,8 +20,14 @@ var (
 // DB is an interface for persistent data storage (also sometimes called DAO).
 type DB interface {
 	SaveAvailableSolutionsList(ctx context.Context, solution stypes.AvailableSolutionsList) error
-	GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error)
+	CreateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
+	UpdateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
+	DeleteAvailableSolution(ctx context.Context, solution string) error
+	GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
 	GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error)
+	ActivateAvailableSolution(ctx context.Context, solution string) error
+	DeactivateAvailableSolution(ctx context.Context, solution string) error
+
 	GetUserSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error)
 	GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error)
 	AddSolution(ctx context.Context, solution stypes.UserSolution, userID string, uuid string, env string) error

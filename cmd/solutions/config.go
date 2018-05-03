@@ -28,7 +28,7 @@ var flags = []cli.Flag{
 	cli.StringFlag{
 		EnvVar: "CH_SOLUTIONS_PORT",
 		Name:   portFlag,
-		Value:  "6666",
+		Value:  "6767",
 		Usage:  "port for solutions server",
 	},
 	cli.StringFlag{
