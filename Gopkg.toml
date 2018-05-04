@@ -32,6 +32,9 @@
   version = "1.0.0"
 
 [[constraint]]
-  version = "~v1.0.1-rc2"
   name = "github.com/containerum/cherry"
+  version = "~v1.0.1-rc2"
 
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/kube-api"

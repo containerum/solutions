@@ -5,6 +5,7 @@ import (
 
 	"io"
 
+	kube_types "git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/models"
 	stypes "git.containerum.net/ch/solutions/pkg/models"
@@ -29,8 +30,8 @@ type SolutionsService interface {
 	ParseSolutionConfig(ctx context.Context, solutionBody []byte, solutionReq stypes.UserSolution) (solutionConfig *Solution, solutionUUID *string, err error)
 	CreateSolutionResources(ctx context.Context, solutionConfig Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*models.RunSolutionResponce, error)
 	DeleteSolution(ctx context.Context, solution string) error
-	GetUserSolutionDeployments(ctx context.Context, solutionName string) (*stypes.DeploymentsList, error)
-	GetUserSolutionServices(ctx context.Context, solutionName string) (*stypes.ServicesList, error)
+	GetUserSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error)
+	GetUserSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error)
 	io.Closer
 }
 

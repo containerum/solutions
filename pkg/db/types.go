@@ -29,13 +29,12 @@ type DB interface {
 	DeactivateAvailableSolution(ctx context.Context, solution string) error
 
 	GetUserSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error)
-	GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error)
 	AddSolution(ctx context.Context, solution stypes.UserSolution, userID string, uuid string, env string) error
 	AddDeployment(ctx context.Context, name string, solutionID string) error
 	AddService(ctx context.Context, name string, solutionID string) error
-	DeleteSolution(ctx context.Context, name string) error
-	GetUserSolutionsDeployments(ctx context.Context, solutionName string) (deployments []string, ns *string, err error)
-	GetUserSolutionsServices(ctx context.Context, solutionName string) (services []string, ns *string, err error)
+	DeleteSolution(ctx context.Context, name string, userID string) error
+	GetUserSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error)
+	GetUserSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error)
 
 	// Perform operations inside transaction
 	// Transaction commits if `f` returns nil error, rollbacks and forwards error otherwise

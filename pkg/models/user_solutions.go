@@ -21,20 +21,6 @@ type UserSolution struct {
 	Namespace string `json:"namespace"`
 }
 
-// DeploymentsList -- list of deployments
-//
-// swagger:model
-type DeploymentsList struct {
-	Deployments []*interface{} `json:"deployments"`
-}
-
-// ServicesList -- list of services
-//
-// swagger:model
-type ServicesList struct {
-	Services []*interface{} `json:"services"`
-}
-
 // RunSolutionResponce -- responce to run solution request
 //
 // swagger:model

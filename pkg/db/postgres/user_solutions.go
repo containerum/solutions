@@ -51,6 +51,8 @@ func (pgdb *pgDB) GetUserSolutionsList(ctx context.Context, userID string) (*sty
 	pgdb.log.Infoln("Get solutions list")
 	var ret stypes.UserSolutionsList
 
+	ret.Solutions = make([]stypes.UserSolution, 0)
+
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
 		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id WHERE solutions.user_id=$1", userID)
 	if err != nil {
@@ -74,34 +76,10 @@ func (pgdb *pgDB) GetUserSolutionsList(ctx context.Context, userID string) (*sty
 	return &ret, rows.Err()
 }
 
-func (pgdb *pgDB) GetUserSolution(ctx context.Context, solutionName string) (*stypes.UserSolution, error) {
-	pgdb.log.Infoln("Get solutions list")
-
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.template, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
-		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id WHERE solution.name=$1", solutionName)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return nil, rows.Err()
-	}
-	solution := stypes.UserSolution{}
-	var env string
-	err = rows.Scan(&solution.Template, &solution.Name, &solution.Namespace, &env, &solution.Branch)
-	if err != nil {
-		return nil, err
-	}
-	if err := jsoniter.UnmarshalFromString(env, &solution.Env); err != nil {
-		return nil, err
-	}
-	return &solution, rows.Err()
-}
-
-func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string) error {
+func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string, userID string) error {
 	pgdb.log.Infoln("Deleting solution")
 
-	res, err := pgdb.eLog.ExecContext(ctx, "DELETE FROM solutions WHERE name=$1", name)
+	res, err := pgdb.eLog.ExecContext(ctx, "DELETE FROM solutions WHERE name=$1 AND solutions.user_id=$2", name, userID)
 	if err != nil {
 		return err
 	}
@@ -113,11 +91,11 @@ func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string) error {
 	return nil
 }
 
-func (pgdb *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName string) (deployments []string, ns *string, err error) {
+func (pgdb *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error) {
 	pgdb.log.Infoln("Get solution deployments")
 
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, deployments.deploy_name "+
-		"FROM solutions JOIN deployments ON solutions.id = deployments.solution_id WHERE solutions.name=$1", solutionName)
+		"FROM solutions JOIN deployments ON solutions.id = deployments.solution_id WHERE solutions.name=$1 AND solutions.user_id=$2", solutionName, userID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -136,11 +114,11 @@ func (pgdb *pgDB) GetUserSolutionsDeployments(ctx context.Context, solutionName 
 	return deployments, ns, rows.Err()
 }
 
-func (pgdb *pgDB) GetUserSolutionsServices(ctx context.Context, solutionName string) (services []string, ns *string, err error) {
+func (pgdb *pgDB) GetUserSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error) {
 	pgdb.log.Infoln("Get solution services")
 
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, services.service_name "+
-		"FROM solutions JOIN services ON solutions.id = services.solution_id WHERE solutions.name=$1", solutionName)
+		"FROM solutions JOIN services ON solutions.id = services.solution_id WHERE solutions.name=$1 AND solutions.user_id=$2", solutionName, userID)
 	if err != nil {
 		return nil, nil, err
 	}

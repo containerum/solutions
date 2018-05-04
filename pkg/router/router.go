@@ -48,20 +48,23 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 
 // SetupRoutes sets up http router needed to handle requests from clients.
 func initRoutes(app *gin.Engine) {
-	requireIdentityHeaders := httputil.RequireHeaders(sErrors.ErrInternalError, httputil.UserIDXHeader, httputil.UserRoleXHeader)
+	requireIdentityHeaders := httputil.RequireHeaders(sErrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
 
-	solutions := app.Group("/solutions", requireIdentityHeaders)
+	app.Use(requireIdentityHeaders)
+
+	solutions := app.Group("/solutions")
 	{
-		solutions.GET("", h.UpdateSolutions, h.GetSolutionsList)
-		solutions.GET("/:solution/env", h.UpdateSolutions, h.GetSolutionEnv)
-		solutions.GET("/:solution/resources", h.UpdateSolutions, h.GetSolutionResources)
-		solutions.POST("", m.RequireAdminRole, h.UpdateSolutions, h.AddAvailableSolution)
-		solutions.PUT("/:solution", m.RequireAdminRole, h.UpdateSolutions, h.UpdateAvailableSolution)
-		solutions.PUT("/:solution/activate", m.RequireAdminRole, h.UpdateSolutions, h.ActivateAvailableSolution)
-		solutions.PUT("/:solution/deactivate", m.RequireAdminRole, h.UpdateSolutions, h.DeactivateAvailableSolution)
-		solutions.DELETE("/:solution", m.RequireAdminRole, h.UpdateSolutions, h.DeleteAvailableSolution)
+		solutions.Use(h.UpdateSolutions)
+		solutions.GET("", h.GetSolutionsList)
+		solutions.GET("/:solution/env", h.GetSolutionEnv)
+		solutions.GET("/:solution/resources", h.GetSolutionResources)
+		solutions.POST("", m.RequireAdminRole, h.AddAvailableSolution)
+		solutions.POST("/:solution/activate", m.RequireAdminRole, h.ActivateAvailableSolution)
+		solutions.POST("/:solution/deactivate", m.RequireAdminRole, h.DeactivateAvailableSolution)
+		solutions.PUT("/:solution", m.RequireAdminRole, h.UpdateAvailableSolution)
+		solutions.DELETE("/:solution", m.RequireAdminRole, h.DeleteAvailableSolution)
 	}
-	userSolutions := app.Group("/user_solutions", requireIdentityHeaders)
+	userSolutions := app.Group("/user_solutions")
 	{
 		userSolutions.GET("", h.GetUserSolutionsList)
 		userSolutions.GET("/:solution/deployments", h.GetUserSolutionsDeployments)
