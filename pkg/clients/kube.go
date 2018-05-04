@@ -5,7 +5,8 @@ import (
 
 	"fmt"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
+	kube_types "git.containerum.net/ch/kube-api/pkg/model"
+
 	"github.com/containerum/cherry"
 	utils "github.com/containerum/utils/httputil"
 
@@ -18,8 +19,8 @@ import (
 
 // KubeAPIClient is an interface to Kube-API.
 type KubeAPIClient interface {
-	GetUserDeployments(ctx context.Context, namespace string, depl []string) (*stypes.DeploymentsList, error)
-	GetUserServices(ctx context.Context, namespace string, svc []string) (*stypes.ServicesList, error)
+	GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_types.DeploymentsList, error)
+	GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_types.ServicesList, error)
 }
 
 type httpKubeAPIClient struct {
@@ -44,16 +45,16 @@ func NewHTTPKubeAPIClient(serverURL string) KubeAPIClient {
 	}
 }
 
-func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace string, depl []string) (*stypes.DeploymentsList, error) {
+func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_types.DeploymentsList, error) {
 	c.log.Info("Getting user deployments")
 	headersMap := utils.RequestHeadersMap(ctx)
 
-	var dlist stypes.DeploymentsList
+	var dlist kube_types.DeploymentsList
 
-	dlist.Deployments = make([]*interface{}, 0)
+	dlist.Deployments = make([]kube_types.DeploymentWithOwner, 0)
 
 	for _, d := range depl {
-		var depl interface{}
+		var depl kube_types.DeploymentWithOwner
 
 		resp, err := c.rest.R().SetContext(ctx).
 			SetResult(&depl).
@@ -66,22 +67,22 @@ func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace st
 			return nil, resp.Error().(*cherry.Err)
 		}
 
-		dlist.Deployments = append(dlist.Deployments, &depl)
+		dlist.Deployments = append(dlist.Deployments, depl)
 	}
 
 	return &dlist, nil
 }
 
-func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace string, svc []string) (*stypes.ServicesList, error) {
+func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_types.ServicesList, error) {
 	c.log.Info("Getting user services")
 	headersMap := utils.RequestHeadersMap(ctx)
 
-	var dlist stypes.ServicesList
+	var dlist kube_types.ServicesList
 
-	dlist.Services = make([]*interface{}, 0)
+	dlist.Services = make([]kube_types.ServiceWithOwner, 0)
 
 	for _, r := range svc {
-		var service interface{}
+		var service kube_types.ServiceWithOwner
 
 		resp, err := c.rest.R().SetContext(ctx).
 			SetResult(&service).
@@ -94,7 +95,7 @@ func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace strin
 			return nil, resp.Error().(*cherry.Err)
 		}
 
-		dlist.Services = append(dlist.Services, &service)
+		dlist.Services = append(dlist.Services, service)
 	}
 
 	return &dlist, nil

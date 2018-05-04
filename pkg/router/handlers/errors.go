@@ -1,5 +1,5 @@
 package handlers
 
 const (
-	fieldShouldExist = "Field %v should be provided"
+	fieldShouldExist = "field %v should be provided"
 )

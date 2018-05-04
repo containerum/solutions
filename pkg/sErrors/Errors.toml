@@ -83,3 +83,15 @@ SID = "Solutions"
     StatusHTTP = 500
     Message = "Internal error"
     Kind = 13
+
+[[error]]
+    Name = "ErrUnableAddSolution"
+    StatusHTTP = 500
+    Message = "Unable to add solution template"
+    Kind = 14
+
+[[error]]
+    Name = "ErrUnableUpdateSolution"
+    StatusHTTP = 500
+    Message = "Unable to update solution template"
+    Kind = 15

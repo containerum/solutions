@@ -7,8 +7,10 @@ import (
 	h "git.containerum.net/ch/solutions/pkg/router/handlers"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/static"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/cherry/adaptors/gonic"
+	cors "gopkg.in/gin-contrib/cors.v1"
 
 	"git.containerum.net/ch/solutions/pkg/server"
 
@@ -27,6 +29,14 @@ func CreateRouter(ss *server.SolutionsService) http.Handler {
 }
 
 func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
+	/* CORS */
+	cfg := cors.DefaultConfig()
+	cfg.AllowAllOrigins = true
+	cfg.AddAllowMethods(http.MethodDelete)
+	cfg.AddAllowHeaders(httputil.UserIDXHeader, httputil.UserRoleXHeader)
+	e.Use(cors.New(cfg))
+	e.Group("/static").
+		StaticFS("/", static.HTTP)
 	/* System */
 	e.Use(ginrus.Ginrus(logrus.WithField("component", "gin"), time.RFC3339, true))
 	e.Use(gonic.Recovery(sErrors.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
@@ -38,20 +48,28 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 
 // SetupRoutes sets up http router needed to handle requests from clients.
 func initRoutes(app *gin.Engine) {
-	requireIdentityHeaders := httputil.RequireHeaders(sErrors.ErrInternalError, httputil.UserIDXHeader, httputil.UserRoleXHeader)
+	requireIdentityHeaders := httputil.RequireHeaders(sErrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
+
+	app.Use(requireIdentityHeaders)
 
 	solutions := app.Group("/solutions")
 	{
-		solutions.GET("", h.UpdateSolutions, h.GetSolutionsList)
-		solutions.GET("/:solution/env", h.UpdateSolutions, h.GetSolutionEnv)
-		solutions.GET("/:solution/resources", h.UpdateSolutions, h.GetSolutionResources)
+		solutions.Use(h.UpdateSolutions)
+		solutions.GET("", h.GetSolutionsList)
+		solutions.GET("/:solution/env", h.GetSolutionEnv)
+		solutions.GET("/:solution/resources", h.GetSolutionResources)
+		solutions.POST("", m.RequireAdminRole, h.AddAvailableSolution)
+		solutions.POST("/:solution/activate", m.RequireAdminRole, h.ActivateAvailableSolution)
+		solutions.POST("/:solution/deactivate", m.RequireAdminRole, h.DeactivateAvailableSolution)
+		solutions.PUT("/:solution", m.RequireAdminRole, h.UpdateAvailableSolution)
+		solutions.DELETE("/:solution", m.RequireAdminRole, h.DeleteAvailableSolution)
 	}
 	userSolutions := app.Group("/user_solutions")
 	{
-		userSolutions.GET("", requireIdentityHeaders, h.GetUserSolutionsList)
-		userSolutions.GET("/:solution/deployments", requireIdentityHeaders, h.GetUserSolutionsDeployments)
-		userSolutions.GET("/:solution/services", requireIdentityHeaders, h.GetUserSolutionsServices)
-		userSolutions.POST("", requireIdentityHeaders, h.UpdateSolutions, h.RunSolution)
+		userSolutions.GET("", h.GetUserSolutionsList)
+		userSolutions.GET("/:solution/deployments", h.GetUserSolutionsDeployments)
+		userSolutions.GET("/:solution/services", h.GetUserSolutionsServices)
+		userSolutions.POST("", h.UpdateSolutions, h.RunSolution)
 		userSolutions.DELETE("/:solution", h.DeleteSolution)
 	}
 }

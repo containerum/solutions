@@ -27,8 +27,48 @@ func (s *serverImpl) UpdateAvailableSolutionsList(ctx context.Context) error {
 	return nil
 }
 
-func (s *serverImpl) GetAvailableSolutionsList(ctx context.Context) (*stypes.AvailableSolutionsList, error) {
-	resp, err := s.svc.DB.GetAvailableSolutionsList(ctx)
+func (s *serverImpl) AddAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error {
+	err := s.svc.DB.CreateAvailableSolution(ctx, solution)
+	if err := s.handleDBError(err); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *serverImpl) UpdateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error {
+	err := s.svc.DB.UpdateAvailableSolution(ctx, solution)
+	if err := s.handleDBError(err); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *serverImpl) DeleteAvailableSolution(ctx context.Context, solution string) error {
+	err := s.svc.DB.DeleteAvailableSolution(ctx, solution)
+	if err := s.handleDBError(err); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *serverImpl) ActivateAvailableSolution(ctx context.Context, solution string) error {
+	err := s.svc.DB.ActivateAvailableSolution(ctx, solution)
+	if err := s.handleDBError(err); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *serverImpl) DeactivateAvailableSolution(ctx context.Context, solution string) error {
+	err := s.svc.DB.DeactivateAvailableSolution(ctx, solution)
+	if err := s.handleDBError(err); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *serverImpl) GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error) {
+	resp, err := s.svc.DB.GetAvailableSolutionsList(ctx, isAdmin)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
@@ -66,11 +106,7 @@ func (s *serverImpl) GetAvailableSolutionEnvList(ctx context.Context, name strin
 		return nil, err
 	}
 
-	resp := stypes.SolutionEnv{}
-
-	for e := range solutionStr.Env {
-		resp.Env = append(resp.Env, e)
-	}
+	resp := stypes.SolutionEnv{Env: solutionStr.Env}
 
 	return &resp, nil
 }

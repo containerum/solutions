@@ -9,12 +9,14 @@ import (
 
 	"net/url"
 
+	kube_types "git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/models"
 	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/utils"
+	"github.com/containerum/utils/httputil"
 	"github.com/google/uuid"
 	"github.com/json-iterator/go"
 )
@@ -82,7 +84,7 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 	for k, v := range solutionReq.Env {
 		solutionConfig.Env[k] = v
 	}
-	solutionConfig.Env[OwnerKey] = server.MustGetUserID(ctx)
+	solutionConfig.Env[OwnerKey] = httputil.MustGetUserID(ctx)
 
 	sUUID := uuid.New().String()
 	environments, err := jsoniter.Marshal(solutionConfig.Env)
@@ -91,7 +93,7 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 	}
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		err = s.svc.DB.AddSolution(ctx, solutionReq, server.MustGetUserID(ctx), sUUID, string(environments))
+		err = s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), sUUID, string(environments))
 		return err
 	})
 	if err = s.handleDBError(err); err != nil {
@@ -199,7 +201,7 @@ func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig
 	if ret.Created == 0 {
 		s.log.Infoln("No resources was created. Deleting solution...")
 		err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-			err := s.svc.DB.DeleteSolution(ctx, solutionReq.Name)
+			err := s.svc.DB.DeleteSolution(ctx, solutionReq.Name, httputil.MustGetUserID(ctx))
 			return err
 		})
 		if err != nil {
@@ -221,7 +223,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
-		depl, ns, err = s.svc.DB.GetUserSolutionsDeployments(ctx, solution)
+		depl, ns, err = s.svc.DB.GetUserSolutionsDeployments(ctx, solution, httputil.MustGetUserID(ctx))
 		return err
 	})
 	if err := s.handleDBError(err); err != nil {
@@ -230,7 +232,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
-		svc, _, err = s.svc.DB.GetUserSolutionsServices(ctx, solution)
+		svc, _, err = s.svc.DB.GetUserSolutionsServices(ctx, solution, httputil.MustGetUserID(ctx))
 		return err
 	})
 	if err := s.handleDBError(err); err != nil {
@@ -258,7 +260,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
-		err = s.svc.DB.DeleteSolution(ctx, solution)
+		err = s.svc.DB.DeleteSolution(ctx, solution, httputil.MustGetUserID(ctx))
 		return err
 	})
 	if err := s.handleDBError(err); err != nil {
@@ -269,7 +271,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 }
 
 func (s *serverImpl) GetUserSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error) {
-	resp, err := s.svc.DB.GetUserSolutionsList(ctx, server.MustGetUserID(ctx))
+	resp, err := s.svc.DB.GetUserSolutionsList(ctx, httputil.MustGetUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -277,14 +279,14 @@ func (s *serverImpl) GetUserSolutionsList(ctx context.Context) (*stypes.UserSolu
 	return resp, nil
 }
 
-func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionName string) (*stypes.DeploymentsList, error) {
-	depl, ns, err := s.svc.DB.GetUserSolutionsDeployments(ctx, solutionName)
+func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error) {
+	depl, ns, err := s.svc.DB.GetUserSolutionsDeployments(ctx, solutionName, httputil.MustGetUserID(ctx))
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
 	if ns == nil || len(depl) == 0 {
-		return &stypes.DeploymentsList{make([]*interface{}, 0)}, nil
+		return &kube_types.DeploymentsList{Deployments: make([]kube_types.DeploymentWithOwner, 0)}, nil
 	}
 
 	userdepl, err := s.svc.KubeAPIClient.GetUserDeployments(ctx, *ns, depl)
@@ -295,14 +297,14 @@ func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionNam
 	return userdepl, nil
 }
 
-func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName string) (*stypes.ServicesList, error) {
-	svc, ns, err := s.svc.DB.GetUserSolutionsServices(ctx, solutionName)
+func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error) {
+	svc, ns, err := s.svc.DB.GetUserSolutionsServices(ctx, solutionName, httputil.MustGetUserID(ctx))
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
 	if ns == nil || len(svc) == 0 {
-		return &stypes.ServicesList{Services: make([]*interface{}, 0)}, nil
+		return &kube_types.ServicesList{Services: make([]kube_types.ServiceWithOwner, 0)}, nil
 	}
 
 	usersvc, err := s.svc.KubeAPIClient.GetUserServices(ctx, *ns, svc)
