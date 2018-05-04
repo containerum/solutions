@@ -19,9 +19,9 @@ environment: develop
 
 service:
   name: solutions
-  externalPort: 6666
+  externalPort: 6767
   externalIP: 192.168.88.210
-  internalPort: 6666
+  internalPort: 6767
   
 
 resources: {}
