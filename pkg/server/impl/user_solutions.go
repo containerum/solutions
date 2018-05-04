@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	NamespaceKey = "NS"
-	OwnerKey     = "OWNER"
+	namespaceKey = "NS"
+	ownerKey     = "OWNER"
 
 	unableToCreate = "unable to create %s %s: %s"
 	unableToDelete = "unable to delete %s %s: %s"
@@ -78,12 +78,12 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 	}
 
 	s.log.Debugln("Setting env")
-	solutionConfig.Env[NamespaceKey] = solutionReq.Namespace
+	solutionConfig.Env[namespaceKey] = solutionReq.Namespace
 
 	for k, v := range solutionReq.Env {
 		solutionConfig.Env[k] = v
 	}
-	solutionConfig.Env[OwnerKey] = httputil.MustGetUserID(ctx)
+	solutionConfig.Env[ownerKey] = httputil.MustGetUserID(ctx)
 
 	sUUID := uuid.New().String()
 	environments, err := jsoniter.Marshal(solutionConfig.Env)
