@@ -291,7 +291,7 @@ func UpdateAvailableSolution(ctx *gin.Context) {
 }
 
 // swagger:operation POST /solutions/{solution}/activate AvailableSolutions ActivateAvailableSolution
-// Update available solution.
+// Activate available solution.
 //
 // ---
 // x-method-visibility: public
@@ -325,7 +325,7 @@ func ActivateAvailableSolution(ctx *gin.Context) {
 }
 
 // swagger:operation POST /solutions/{solution}/deactivate AvailableSolutions DeactivateAvailableSolution
-// Update available solution.
+// Deactivate available solution.
 //
 // ---
 // x-method-visibility: public
