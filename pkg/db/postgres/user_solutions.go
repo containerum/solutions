@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
+	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 

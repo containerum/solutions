@@ -11,12 +11,12 @@ import (
 
 	"fmt"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
+	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/sirupsen/logrus"

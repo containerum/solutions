@@ -7,7 +7,7 @@ import (
 
 	"errors"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
+	stypes "github.com/containerum/kube-client/pkg/model"
 )
 
 // Errors which may occur in transactional operations

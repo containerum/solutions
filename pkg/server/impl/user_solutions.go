@@ -11,11 +11,10 @@ import (
 
 	kube_types "git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/solutions/pkg/db"
-	"git.containerum.net/ch/solutions/pkg/models"
-	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/utils"
+	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/google/uuid"
 	"github.com/json-iterator/go"
@@ -103,10 +102,10 @@ func (s *serverImpl) ParseSolutionConfig(ctx context.Context, solutionBody []byt
 	return solutionConfig, &sUUID, nil
 }
 
-func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig server.Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*models.RunSolutionResponce, error) {
+func (s *serverImpl) CreateSolutionResources(ctx context.Context, solutionConfig server.Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*stypes.RunSolutionResponce, error) {
 	s.log.Infoln("Creating solution resources")
 
-	ret := models.RunSolutionResponce{
+	ret := stypes.RunSolutionResponce{
 		Errors:  []string{},
 		Created: 0,
 	}
