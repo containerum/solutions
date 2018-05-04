@@ -8,9 +8,9 @@ import (
 
 	"fmt"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 

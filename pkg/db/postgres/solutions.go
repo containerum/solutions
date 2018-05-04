@@ -7,25 +7,25 @@ import (
 
 	"strings"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
+	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 
 func (pgdb *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes.AvailableSolutionsList) error {
 	pgdb.log.Infoln("Saving solutions list")
 
-	solutionsarr := []string{}
+	solutionsstr := make([]string, 0)
 	for _, s := range solutions.Solutions {
 		images, _ := jsoniter.Marshal(s.Images)
 
-		solutionsarr = append(solutionsarr, fmt.Sprintf("('%v', '%v', '%v', '%v', '%v', 'false', 'true')", s.Name, s.Limits.CPU, s.Limits.RAM, string(images), s.URL))
+		solutionsstr = append(solutionsstr, fmt.Sprintf("('%v', '%v', '%v', '%v', '%v', 'false', 'true')", s.Name, s.Limits.CPU, s.Limits.RAM, string(images), s.URL))
 	}
 
 	rows, err := pgdb.qLog.QueryxContext(ctx, fmt.Sprintf(
 		`DELETE FROM available_solutions WHERE local!='true'; 
 				INSERT INTO available_solutions (name, cpu, ram, images, url, local, active) VALUES %s 
-				ON CONFLICT DO NOTHING;`, strings.Join(solutionsarr, ",")))
+				ON CONFLICT DO NOTHING;`, strings.Join(solutionsstr, ",")))
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func (pgdb *pgDB) DeleteAvailableSolution(ctx context.Context, solution string) 
 	pgdb.log.Infoln("Updating solution")
 
 	res, err := pgdb.eLog.ExecContext(ctx,
-		`DELETE FROM available_solutions WHERE name = $1 AND local = true`, solution)
+		`DELETE FROM available_solutions WHERE name = $1 AND local = 'true'`, solution)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (pgdb *pgDB) GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (
 	}
 	defer rows.Close()
 	for rows.Next() {
-		solution := stypes.AvailableSolution{Limits: &stypes.Limits{}}
+		solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
 		var images string
 		err := rows.Scan(&solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL, &solution.Active)
 		if err != nil {
@@ -162,7 +162,7 @@ func (pgdb *pgDB) GetAvailableSolution(ctx context.Context, name string) (*stype
 		return nil, rows.Err()
 	}
 
-	solution := stypes.AvailableSolution{Limits: &stypes.Limits{}}
+	solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
 	var images string
 	err = rows.Scan(&solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL)
 	if err != nil {

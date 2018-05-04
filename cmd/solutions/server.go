@@ -55,7 +55,7 @@ func initServer(c *cli.Context) error {
 	})
 	exitOnErr(err)
 
-	app := router.CreateRouter(&solutionssrv)
+	app := router.CreateRouter(&solutionssrv, c.Bool(corsFlag))
 
 	// for graceful shutdown
 	srv := &http.Server{

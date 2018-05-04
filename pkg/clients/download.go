@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	stypes "git.containerum.net/ch/solutions/pkg/models"
+	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
@@ -71,7 +71,7 @@ func (c *httpDownloadClient) DownloadSolutionsCSV(ctx context.Context) ([]stypes
 		if !header {
 			solutions = append(solutions, stypes.AvailableSolution{
 				Name: line[0],
-				Limits: &stypes.Limits{
+				Limits: &stypes.SolutionLimits{
 					CPU: line[1],
 					RAM: line[2],
 				},

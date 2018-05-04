@@ -22,6 +22,7 @@ const (
 	kubeURLFlag      = "kube_url"
 	resourceURLFlag  = "resource_url"
 	converterURLFlag = "converter_url"
+	corsFlag         = "cors"
 )
 
 var flags = []cli.Flag{
@@ -87,6 +88,11 @@ var flags = []cli.Flag{
 		Name:   converterURLFlag,
 		Value:  "http://model-converter:6543",
 		Usage:  "Model converter service URL",
+	},
+	cli.BoolFlag{
+		EnvVar: "CH_SOLUTIONS_CORS",
+		Name:   "cors",
+		Usage:  "enable CORS",
 	},
 }
 
