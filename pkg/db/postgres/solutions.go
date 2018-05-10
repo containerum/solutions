@@ -3,145 +3,72 @@ package postgres
 import (
 	"context"
 
-	"fmt"
-
-	"strings"
+	"time"
 
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 
-func (pgdb *pgDB) SaveAvailableSolutionsList(ctx context.Context, solutions stypes.AvailableSolutionsList) error {
-	pgdb.log.Infoln("Saving solutions list")
-
-	solutionsstr := make([]string, 0)
-	for _, s := range solutions.Solutions {
-		images, _ := jsoniter.Marshal(s.Images)
-
-		solutionsstr = append(solutionsstr, fmt.Sprintf("('%v', '%v', '%v', '%v', '%v', 'false', 'true')", s.Name, s.Limits.CPU, s.Limits.RAM, string(images), s.URL))
-	}
-
-	rows, err := pgdb.qLog.QueryxContext(ctx, fmt.Sprintf(
-		`DELETE FROM available_solutions WHERE local!='true'; 
-				INSERT INTO available_solutions (name, cpu, ram, images, url, local, active) VALUES %s 
-				ON CONFLICT DO NOTHING;`, strings.Join(solutionsstr, ",")))
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-	if !rows.Next() {
-		return rows.Err()
-	}
-	return err
-}
-
-func (pgdb *pgDB) CreateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error {
+func (pgdb *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, userID, templateID, uuid, env string) error {
 	pgdb.log.Infoln("Saving solution")
 
-	images, _ := jsoniter.Marshal(solution.Images)
-
-	rows, err := pgdb.qLog.QueryxContext(ctx,
-		`INSERT INTO available_solutions (name, cpu, ram, images, url, local, active) VALUES ($1, $2, $3, $4, $5, $6, $7) 
-				ON CONFLICT DO NOTHING;`, solution.Name, solution.Limits.CPU, solution.Limits.RAM, string(images), solution.URL, "true", "true")
+	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template_id, name, namespace, user_id) "+
+		"VALUES ($1, $2, $3, $4, $5)", uuid, templateID, solution.Name, solution.Namespace, userID)
 	if err != nil {
 		return err
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return rows.Err()
+
+	_, err = pgdb.qLog.QueryxContext(ctx, "INSERT INTO parameters (solution_id, branch, env) "+
+		"VALUES ($1, $2, $3)", uuid, solution.Branch, env)
+	if err != nil {
+		return err
 	}
 	return err
 }
 
-func (pgdb *pgDB) UpdateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error {
-	pgdb.log.Infoln("Updating solution")
+func (pgdb *pgDB) AddDeployment(ctx context.Context, name string, solutionID string) error {
+	pgdb.log.Infoln("Adding deployment")
 
-	images, _ := jsoniter.Marshal(solution.Images)
-
-	res, err := pgdb.eLog.ExecContext(ctx,
-		`UPDATE available_solutions SET (cpu, ram, images, url, local) = ($2, $3, $4, $5, $6) 
-				WHERE name = $1`, solution.Name, solution.Limits.CPU, solution.Limits.RAM, string(images), solution.URL, "true")
+	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO deployments (deploy_name, solution_id) "+
+		"VALUES ($1, $2)", name, solutionID)
 	if err != nil {
 		return err
-	}
-	rows, err := res.RowsAffected()
-	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
 	}
 	return err
 }
 
-func (pgdb *pgDB) ActivateAvailableSolution(ctx context.Context, solution string) error {
-	pgdb.log.Infoln("Activating solution")
+func (pgdb *pgDB) AddService(ctx context.Context, name string, solutionID string) error {
+	pgdb.log.Infoln("Adding service")
 
-	res, err := pgdb.eLog.ExecContext(ctx,
-		`UPDATE available_solutions SET active = 'true' 
-				WHERE name = $1 AND active = 'false' AND local = 'true'`, solution)
+	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO services (service_name, solution_id) "+
+		"VALUES ($1, $2)", name, solutionID)
 	if err != nil {
 		return err
-	}
-	rows, err := res.RowsAffected()
-	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
 	}
 	return err
 }
 
-func (pgdb *pgDB) DeactivateAvailableSolution(ctx context.Context, solution string) error {
-	pgdb.log.Infoln("Activating solution")
-
-	res, err := pgdb.eLog.ExecContext(ctx,
-		`UPDATE available_solutions SET active = 'false' 
-				WHERE name = $1 AND active = 'true' AND local = 'true'`, solution)
-	if err != nil {
-		return err
-	}
-	rows, err := res.RowsAffected()
-	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
-	}
-	return err
-}
-
-func (pgdb *pgDB) DeleteAvailableSolution(ctx context.Context, solution string) error {
-	pgdb.log.Infoln("Updating solution")
-
-	res, err := pgdb.eLog.ExecContext(ctx,
-		`DELETE FROM available_solutions WHERE name = $1 AND local = 'true'`, solution)
-	if err != nil {
-		return err
-	}
-	rows, err := res.RowsAffected()
-	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
-	}
-	return err
-}
-
-func (pgdb *pgDB) GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error) {
+func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error) {
 	pgdb.log.Infoln("Get solutions list")
-	var ret stypes.AvailableSolutionsList
+	var ret stypes.UserSolutionsList
 
-	query := "SELECT name, cpu, ram, images, url, active FROM available_solutions"
+	ret.Solutions = make([]stypes.UserSolution, 0)
 
-	if !isAdmin {
-		query = query + " WHERE active = 'true'"
-	}
-
-	rows, err := pgdb.qLog.QueryxContext(ctx, query)
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.Name, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.is_deleted !='true'", userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 	for rows.Next() {
-		solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
-		var images string
-		err := rows.Scan(&solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL, &solution.Active)
+		solution := stypes.UserSolution{}
+		var env string
+		err := rows.Scan(&solution.Template, &solution.Name, &solution.Namespace, &env, &solution.Branch)
 		if err != nil {
 			return nil, err
 		}
-		if err := jsoniter.UnmarshalFromString(images, &solution.Images); err != nil {
+		if err := jsoniter.UnmarshalFromString(env, &solution.Env); err != nil {
 			return nil, err
 		}
 
@@ -151,26 +78,63 @@ func (pgdb *pgDB) GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (
 	return &ret, rows.Err()
 }
 
-func (pgdb *pgDB) GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error) {
-	pgdb.log.Infoln("Get solution ", name)
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT name, cpu, ram, images, url FROM available_solutions WHERE name = $1", name)
+func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string, userID string) error {
+	pgdb.log.Infoln("Deleting solution")
+
+	res, err := pgdb.eLog.ExecContext(ctx, `UPDATE solutions SET is_deleted = 'true', deleted_at=$1 WHERE name=$2 AND user_id=$3 AND is_deleted != 'true'`, time.Now(), name, userID)
 	if err != nil {
-		return nil, err
+		return err
 	}
+
+	rows, err := res.RowsAffected()
+	if rows == 0 {
+		return sErrors.ErrSolutionNotExist()
+	}
+	return nil
+}
+
+func (pgdb *pgDB) GetSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error) {
+	pgdb.log.Infoln("Get solution deployments")
+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, deployments.deploy_name "+
+		"FROM solutions JOIN deployments ON solutions.id = deployments.solution_id WHERE solutions.name=$1 AND solutions.user_id=$2 AND solutions.is_deleted !='true'", solutionName, userID)
+	if err != nil {
+		return nil, nil, err
+	}
+	deployments = make([]string, 0)
+
 	defer rows.Close()
-	if !rows.Next() {
-		return nil, rows.Err()
-	}
+	for rows.Next() {
+		var deploy string
+		err := rows.Scan(&ns, &deploy)
+		if err != nil {
+			return nil, nil, err
+		}
 
-	solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
-	var images string
-	err = rows.Scan(&solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL)
+		deployments = append(deployments, deploy)
+	}
+	return deployments, ns, rows.Err()
+}
+
+func (pgdb *pgDB) GetSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error) {
+	pgdb.log.Infoln("Get solution services")
+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, services.service_name "+
+		"FROM solutions JOIN services ON solutions.id = services.solution_id WHERE solutions.name=$1 AND solutions.user_id=$2 AND solutions.is_deleted !='true'", solutionName, userID)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	if err = jsoniter.UnmarshalFromString(images, &solution.Images); err != nil {
-		return nil, err
-	}
+	services = make([]string, 0)
 
-	return &solution, err
+	defer rows.Close()
+	for rows.Next() {
+		var deploy string
+		err := rows.Scan(&ns, &deploy)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		services = append(services, deploy)
+	}
+	return services, ns, rows.Err()
 }

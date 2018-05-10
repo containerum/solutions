@@ -34,7 +34,7 @@
           "AvailableSolutions"
         ],
         "summary": "Add available solution.",
-        "operationId": "AddAvailableSolution",
+        "operationId": "AddTemplate",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -67,7 +67,7 @@
           "AvailableSolutions"
         ],
         "summary": "Update available solution.",
-        "operationId": "UpdateAvailableSolution",
+        "operationId": "UpdateTemplate",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -104,7 +104,7 @@
           "AvailableSolutions"
         ],
         "summary": "Delete available solution.",
-        "operationId": "DeleteAvailableSolution",
+        "operationId": "DeleteTemplate",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -136,7 +136,7 @@
           "AvailableSolutions"
         ],
         "summary": "Update available solution.",
-        "operationId": "ActivateAvailableSolution",
+        "operationId": "ActivateTemplate",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -168,7 +168,7 @@
           "AvailableSolutions"
         ],
         "summary": "Update available solution.",
-        "operationId": "DeactivateAvailableSolution",
+        "operationId": "DeactivateTemplate",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -200,7 +200,7 @@
           "AvailableSolutions"
         ],
         "summary": "Get available solution environment variables.",
-        "operationId": "GetSolutionEnv",
+        "operationId": "GetTemplatesEnv",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -235,7 +235,7 @@
           "AvailableSolutions"
         ],
         "summary": "Get available solution resources.",
-        "operationId": "GetSolutionResources",
+        "operationId": "GetTemplatesResources",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -270,7 +270,7 @@
           "UserSolutions"
         ],
         "summary": "Get running solutions list.",
-        "operationId": "GetUserSolutionsList",
+        "operationId": "GetSolutionsList",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -365,7 +365,7 @@
           "UserSolutions"
         ],
         "summary": "Get solution deployments.",
-        "operationId": "GetUserSolutionsDeployments",
+        "operationId": "GetSolutionsDeployments",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -400,7 +400,7 @@
           "UserSolutions"
         ],
         "summary": "Get solution services.",
-        "operationId": "GetUserSolutionsServices",
+        "operationId": "GetSolutionsServices",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"

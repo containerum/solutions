@@ -14,20 +14,17 @@ import (
 
 // SolutionsService is an interface for server "business logic"
 type SolutionsService interface {
-	UpdateAvailableSolutionsList(ctx context.Context) error
-	AddAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
-	UpdateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
-	DeleteAvailableSolution(ctx context.Context, solution string) error
-	GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
-	GetAvailableSolutionEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error)
-	GetAvailableSolutionResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error)
-	GetUserSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error)
-	ActivateAvailableSolution(ctx context.Context, solution string) error
-	DeactivateAvailableSolution(ctx context.Context, solution string) error
+	AddTemplate(ctx context.Context, solution stypes.AvailableSolution) error
+	UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error
+	DeleteTemplate(ctx context.Context, solution string) error
+	GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
+	GetTemplatesEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error)
+	GetTemplatesResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error)
+	GetSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error)
+	ActivateTemplate(ctx context.Context, solution string) error
+	DeactivateTemplate(ctx context.Context, solution string) error
 
-	DownloadSolutionConfig(ctx context.Context, solutionReq stypes.UserSolution) (solutionFile []byte, solutionName *string, err error)
-	ParseSolutionConfig(ctx context.Context, solutionBody []byte, solutionReq stypes.UserSolution) (solutionConfig *Solution, solutionUUID *string, err error)
-	CreateSolutionResources(ctx context.Context, solutionConfig Solution, solutionReq stypes.UserSolution, solutionName string, solutionUUID string) (*stypes.RunSolutionResponce, error)
+	RunSolution(ctx context.Context, solutionReq stypes.UserSolution) (*stypes.RunSolutionResponce, error)
 	DeleteSolution(ctx context.Context, solution string) error
 	GetUserSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error)
 	GetUserSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error)

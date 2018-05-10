@@ -95,3 +95,15 @@ SID = "Solutions"
     StatusHTTP = 500
     Message = "Unable to update solution template"
     Kind = 15
+
+[[error]]
+    Name = "ErrTemplateAlreadyExists"
+    StatusHTTP = 409
+    Message = "Template with this name already exists"
+    Kind = 16
+
+[[error]]
+    Name = "ErrTemplateNotExist"
+    StatusHTTP = 404
+    Message = "Template with this name doesn't exist"
+    Kind = 17
