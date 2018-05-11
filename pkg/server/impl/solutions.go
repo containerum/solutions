@@ -185,15 +185,17 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 
 	ret.NotCreated = len(ret.Errors)
 
-	s.log.Infoln("Solution resources has been created")
+	s.log.Infoln("Solution has been created")
 	return &ret, nil
 }
 
 func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error {
+	s.log.Infoln("Deleting solution ", solution)
 	depl := make([]string, 0)
 	svc := make([]string, 0)
 	var ns *string
 
+	s.log.Debugln("Getting solution resources")
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		depl, ns, err = s.svc.DB.GetSolutionsDeployments(ctx, solution, httputil.MustGetUserID(ctx))
@@ -212,6 +214,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		return err
 	}
 
+	s.log.Debugln("Deleting solution resources")
 	errs := []error{}
 	for _, r := range depl {
 		err = s.svc.ResourceClient.DeleteDeployment(ctx, *ns, r)
@@ -231,6 +234,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		return sErrors.ErrUnableDeleteSolution().AddDetailsErr(errs...)
 	}
 
+	s.log.Debugln("Deleting solution")
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		err = s.svc.DB.DeleteSolution(ctx, solution, httputil.MustGetUserID(ctx))
@@ -240,6 +244,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 		return err
 	}
 
+	s.log.Debugln("Solution deleted")
 	return nil
 }
 
