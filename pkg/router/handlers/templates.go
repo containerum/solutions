@@ -18,8 +18,8 @@ import (
 	"github.com/gin-gonic/gin/binding"
 )
 
-// swagger:operation GET /solutions AvailableSolutions GetSolutionsList
-// Get available solutions list.
+// swagger:operation GET /templates Templates GetTemplatesList
+// Get solutions templates list.
 //
 // ---
 // x-method-visibility: public
@@ -49,8 +49,8 @@ func GetTemplatesList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution}/env AvailableSolutions GetTemplatesEnv
-// Get available solution environment variables.
+// swagger:operation GET /templates/{solution}/env Templates GetTemplatesEnv
+// Get solution templates environment variables.
 //
 // ---
 // x-method-visibility: public
@@ -88,8 +88,8 @@ func GetTemplatesEnv(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution}/resources AvailableSolutions GetTemplatesResources
-// Get available solution resources.
+// swagger:operation GET /templates/{solution}/resources Templates GetTemplatesResources
+// Get solution templates resources.
 //
 // ---
 // x-method-visibility: public
@@ -127,8 +127,8 @@ func GetTemplatesResources(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation POST /solutions AvailableSolutions AddTemplate
-// Add available solution.
+// swagger:operation POST /templates Templates AddTemplate
+// Add template.
 //
 // ---
 // x-method-visibility: public
@@ -172,8 +172,8 @@ func AddTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
-// swagger:operation PUT /solutions/{solution} AvailableSolutions UpdateTemplate
-// Update available solution.
+// swagger:operation PUT /templates/{solution} Templates UpdateTemplate
+// Update template.
 //
 // ---
 // x-method-visibility: public
@@ -223,8 +223,8 @@ func UpdateTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// swagger:operation POST /solutions/{solution}/activate AvailableSolutions ActivateTemplate
-// Activate available solution.
+// swagger:operation POST /templates/{solution}/activate Templates ActivateTemplate
+// Activate template.
 //
 // ---
 // x-method-visibility: public
@@ -257,8 +257,8 @@ func ActivateTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// swagger:operation POST /solutions/{solution}/deactivate AvailableSolutions DeactivateTemplate
-// Deactivate available solution.
+// swagger:operation POST /templates/{solution}/deactivate Templates DeactivateTemplate
+// Deactivate template.
 //
 // ---
 // x-method-visibility: public
@@ -291,8 +291,8 @@ func DeactivateTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// swagger:operation DELETE /solutions/{solution} AvailableSolutions DeleteTemplate
-// Delete available solution.
+// swagger:operation DELETE /templates/{solution} Templates DeleteTemplate
+// Delete template.
 //
 // ---
 // x-method-visibility: public

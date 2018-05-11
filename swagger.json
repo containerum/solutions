@@ -4,10 +4,175 @@
     "/solutions": {
       "get": {
         "tags": [
-          "AvailableSolutions"
+          "Solutions"
         ],
-        "summary": "Get available solutions list.",
+        "summary": "Get running solutions list.",
         "operationId": "GetSolutionsList",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "running solutions list",
+            "schema": {
+              "$ref": "#/definitions/UserSolutionsList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      },
+      "post": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Run solution.",
+        "operationId": "RunSolution",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserSolution"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "solution created",
+            "schema": {
+              "$ref": "#/definitions/RunSolutionResponce"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/solutions/{solution}": {
+      "delete": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Delete solution.",
+        "operationId": "DeleteSolution",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "solution deleted"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/solutions/{solution}/deployments": {
+      "get": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Get solution deployments.",
+        "operationId": "GetSolutionsDeployments",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "solution deployments",
+            "schema": {
+              "$ref": "#/definitions/DeploymentsList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/solutions/{solution}/services": {
+      "get": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Get solution services.",
+        "operationId": "GetSolutionsServices",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "solutions services",
+            "schema": {
+              "$ref": "#/definitions/ServicesList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/templates": {
+      "get": {
+        "tags": [
+          "Templates"
+        ],
+        "summary": "Get solutions templates list.",
+        "operationId": "GetTemplatesList",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
@@ -31,9 +196,9 @@
       },
       "post": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Add available solution.",
+        "summary": "Add template.",
         "operationId": "AddTemplate",
         "parameters": [
           {
@@ -61,12 +226,12 @@
         "x-method-visibility": "public"
       }
     },
-    "/solutions/{solution}": {
+    "/templates/{solution}": {
       "put": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Update available solution.",
+        "summary": "Update template.",
         "operationId": "UpdateTemplate",
         "parameters": [
           {
@@ -101,9 +266,9 @@
       },
       "delete": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Delete available solution.",
+        "summary": "Delete template.",
         "operationId": "DeleteTemplate",
         "parameters": [
           {
@@ -130,12 +295,12 @@
         "x-method-visibility": "public"
       }
     },
-    "/solutions/{solution}/activate": {
+    "/templates/{solution}/activate": {
       "post": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Update available solution.",
+        "summary": "Activate template.",
         "operationId": "ActivateTemplate",
         "parameters": [
           {
@@ -162,12 +327,12 @@
         "x-method-visibility": "public"
       }
     },
-    "/solutions/{solution}/deactivate": {
+    "/templates/{solution}/deactivate": {
       "post": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Update available solution.",
+        "summary": "Deactivate template.",
         "operationId": "DeactivateTemplate",
         "parameters": [
           {
@@ -194,12 +359,12 @@
         "x-method-visibility": "public"
       }
     },
-    "/solutions/{solution}/env": {
+    "/templates/{solution}/env": {
       "get": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Get available solution environment variables.",
+        "summary": "Get solution templates environment variables.",
         "operationId": "GetTemplatesEnv",
         "parameters": [
           {
@@ -229,12 +394,12 @@
         "x-method-visibility": "public"
       }
     },
-    "/solutions/{solution}/resources": {
+    "/templates/{solution}/resources": {
       "get": {
         "tags": [
-          "AvailableSolutions"
+          "Templates"
         ],
-        "summary": "Get available solution resources.",
+        "summary": "Get solution templates resources.",
         "operationId": "GetTemplatesResources",
         "parameters": [
           {
@@ -263,171 +428,6 @@
         },
         "x-method-visibility": "public"
       }
-    },
-    "/user_solutions": {
-      "get": {
-        "tags": [
-          "UserSolutions"
-        ],
-        "summary": "Get running solutions list.",
-        "operationId": "GetSolutionsList",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "running solutions list",
-            "schema": {
-              "$ref": "#/definitions/UserSolutionsList"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      },
-      "post": {
-        "tags": [
-          "UserSolutions"
-        ],
-        "summary": "Run solution.",
-        "operationId": "RunSolution",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/UserSolution"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "solution created",
-            "schema": {
-              "$ref": "#/definitions/RunSolutionResponce"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
-    },
-    "/user_solutions/{solution}": {
-      "delete": {
-        "tags": [
-          "UserSolutions"
-        ],
-        "summary": "Delete solution.",
-        "operationId": "DeleteSolution",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "solution deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
-    },
-    "/user_solutions/{solution}/deployments": {
-      "get": {
-        "tags": [
-          "UserSolutions"
-        ],
-        "summary": "Get solution deployments.",
-        "operationId": "GetSolutionsDeployments",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "solution deployments",
-            "schema": {
-              "$ref": "#/definitions/DeploymentsList"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
-    },
-    "/user_solutions/{solution}/services": {
-      "get": {
-        "tags": [
-          "UserSolutions"
-        ],
-        "summary": "Get solution services.",
-        "operationId": "GetSolutionsServices",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "solutions services",
-            "schema": {
-              "$ref": "#/definitions/ServicesList"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
     }
   },
   "definitions": {
@@ -435,8 +435,13 @@
       "description": "AvailableSolution -- solution which user can run",
       "type": "object",
       "properties": {
-        "Active": {
-          "type": "boolean"
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
         },
         "images": {
           "type": "array",
@@ -446,7 +451,7 @@
           "x-go-name": "Images"
         },
         "limits": {
-          "$ref": "#/definitions/Limits"
+          "$ref": "#/definitions/SolutionLimits"
         },
         "name": {
           "type": "string",
@@ -457,7 +462,7 @@
           "x-go-name": "URL"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "AvailableSolutionsList": {
       "description": "AvailableSolutionsList -- list of available solutions",
@@ -471,7 +476,21 @@
           "x-go-name": "Solutions"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "ConfigFile": {
+      "type": "object",
+      "properties": {
+        "config_file": {
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "type": {
+          "type": "string",
+          "x-go-name": "Type"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ConfigMap": {
       "description": "ConfigMap -- model for config map",
@@ -487,19 +506,22 @@
           "x-go-name": "CreatedAt"
         },
         "data": {
-          "description": "key-value data",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-name": "Data"
+          "$ref": "#/definitions/ConfigMapData"
         },
         "name": {
           "type": "string",
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "ConfigMapData": {
+      "description": "ConfigMapData -- model for config map data",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ConfigMapWithOwner": {
       "description": "ConfigMapWithOwner -- model for config map with owner",
@@ -516,12 +538,7 @@
           "x-go-name": "CreatedAt"
         },
         "data": {
-          "description": "key-value data",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "x-go-name": "Data"
+          "$ref": "#/definitions/ConfigMapData"
         },
         "name": {
           "type": "string",
@@ -532,7 +549,7 @@
           "x-go-name": "Owner"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "ConfigMapsList": {
       "description": "ConfigMapsList -- model for config maps list",
@@ -546,7 +563,7 @@
           "x-go-name": "ConfigMaps"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Container": {
       "description": "Container -- model for container in deployment",
@@ -604,7 +621,7 @@
           "x-go-name": "VolumeMounts"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ContainerPort": {
       "description": "ContainerPort -- model for port in container",
@@ -628,7 +645,7 @@
           "$ref": "#/definitions/Protocol"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ContainerVolume": {
       "description": "ContainerVolume -- volume (or config map) mounted in container",
@@ -655,7 +672,7 @@
           "x-go-name": "SubPath"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Deployment": {
       "description": "Deployment -- model for deployments",
@@ -698,7 +715,7 @@
           "x-go-name": "TotalMemory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "DeploymentStatus": {
       "description": "DeploymentStatus -- kubernetes status of deployment",
@@ -740,7 +757,7 @@
           "x-go-name": "UpdatedReplicas"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "DeploymentWithOwner": {
       "description": "DeploymentWithOwner -- model for deployment with owner",
@@ -788,7 +805,7 @@
           "x-go-name": "TotalMemory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "DeploymentsList": {
       "description": "DeploymentsList -- model for deployments list",
@@ -802,7 +819,7 @@
           "x-go-name": "Deployments"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Endpoint": {
       "description": "Endpoint -- model for endpoint",
@@ -841,7 +858,7 @@
           "x-go-name": "Ports"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "EndpointsList": {
       "description": "EndpointsList -- model for endpoints list",
@@ -855,7 +872,7 @@
           "x-go-name": "Endpoints"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Env": {
       "description": "Env -- key-value pair of enviroment variables",
@@ -874,7 +891,7 @@
           "x-go-name": "Value"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Err": {
       "description": "Err -- standard serializable API error\nMessage -- constant error message:\n+ \"invalid username\"\n+ \"quota exceeded\"\n+ \"validation error\"\n...etc...\nID -- unique error identification code\nDetails -- optional context error messages kinda\n+ \"field 'Replicas' must be non-zero value\"\n+ \"not enough tights to feed gopher\"\n+ \"resource 'God' does't exist\"\nFields -- optional set of key-value pairs",
@@ -903,7 +920,7 @@
           "x-go-name": "StatusHTTP"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/cherry"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/cherry"
     },
     "ErrID": {
       "description": "ErrID -- represents unique error ID",
@@ -916,18 +933,18 @@
           "$ref": "#/definitions/ErrSID"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/cherry"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/cherry"
     },
     "ErrKind": {
       "description": "ErrKind -- represents kind of error",
       "type": "integer",
       "format": "uint64",
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/cherry"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/cherry"
     },
     "ErrSID": {
       "description": "ErrSID -- represents service ID of error",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/cherry"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/cherry"
     },
     "Fields": {
       "description": "Fields -- represents additional key-value fields of error",
@@ -935,7 +952,7 @@
       "additionalProperties": {
         "type": "string"
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/cherry"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/cherry"
     },
     "Ingress": {
       "description": "Ingress -- model for ingress",
@@ -962,7 +979,7 @@
           "x-go-name": "Rules"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "IngressWithOwner": {
       "description": "IngressWithOwner -- model for ingress with owner",
@@ -994,7 +1011,7 @@
           "x-go-name": "Rules"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "IngressesList": {
       "description": "IngressesList -- model for ingresses list",
@@ -1008,22 +1025,7 @@
           "x-go-name": "Ingress"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
-    },
-    "Limits": {
-      "description": "Limits -- solution resources limits",
-      "type": "object",
-      "properties": {
-        "cpu": {
-          "type": "string",
-          "x-go-name": "CPU"
-        },
-        "ram": {
-          "type": "string",
-          "x-go-name": "RAM"
-        }
-      },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Namespace": {
       "description": "Namespace -- namespace representation provided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
@@ -1072,7 +1074,7 @@
           "x-go-name": "Volumes"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "NamespaceWithOwner": {
       "description": "NamespaceWithOwner -- model for namespace with owner",
@@ -1131,7 +1133,7 @@
           "x-go-name": "Volumes"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "NamespacesList": {
       "description": "NamespacesList -- model for namespaces list",
@@ -1145,7 +1147,7 @@
           "x-go-name": "Namespaces"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Path": {
       "description": "Path -- ingress path",
@@ -1170,7 +1172,7 @@
           "x-go-name": "ServicePort"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Pod": {
       "description": "Pod -- model for pod",
@@ -1223,7 +1225,7 @@
           "x-go-name": "TotalMemory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "PodStatus": {
       "description": "PodStatus -- kubernetes status of pod",
@@ -1244,7 +1246,7 @@
           "x-go-name": "StartAt"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "PodWithOwner": {
       "description": "PodWithOwner -- model for pod with owner",
@@ -1301,7 +1303,7 @@
           "x-go-name": "TotalMemory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "PodsList": {
       "description": "PodsList -- model for pods list",
@@ -1315,7 +1317,7 @@
           "x-go-name": "Pods"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Port": {
       "description": "Port -- model for endpoint port",
@@ -1339,12 +1341,12 @@
           "$ref": "#/definitions/Protocol"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Protocol": {
       "description": "represents port protocol type (TCP or UDP)",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Resource": {
       "description": "Resource -- represents namespace CPU and RAM",
@@ -1367,7 +1369,7 @@
           "x-go-name": "Memory"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Resources": {
       "type": "object",
@@ -1383,7 +1385,7 @@
           "$ref": "#/definitions/Resource"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Rule": {
       "description": "Rule -- ingress rule",
@@ -1409,7 +1411,7 @@
           "x-go-name": "TLSSecret"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "RunSolutionResponce": {
       "description": "RunSolutionResponce -- responce to run solution request",
@@ -1433,7 +1435,7 @@
           "x-go-name": "NotCreated"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Secret": {
       "description": "model for secret",
@@ -1460,7 +1462,7 @@
           "x-go-name": "Name"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "SecretWithOwner": {
       "description": "SecretWithOwner -- model for secret with owner",
@@ -1483,6 +1485,10 @@
           },
           "x-go-name": "Data"
         },
+        "hidden": {
+          "type": "boolean",
+          "x-go-name": "Hidden"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
@@ -1492,7 +1498,7 @@
           "x-go-name": "Owner"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "SecretsList": {
       "description": "SecretsList -- model for secrets list",
@@ -1506,7 +1512,7 @@
           "x-go-name": "Secrets"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "SelectedConfigMapsList": {
       "description": "SelectedConfigMapsList -- model for config maps list from all namespaces",
@@ -1514,7 +1520,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/ConfigMapsList"
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "SelectedIngressesList": {
       "description": "SelectedIngressesList -- model for ingresses list from all namespaces",
@@ -1522,7 +1528,7 @@
       "additionalProperties": {
         "$ref": "#/definitions/IngressesList"
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "Service": {
       "description": "represents service",
@@ -1564,7 +1570,7 @@
           "x-go-name": "Ports"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ServicePort": {
       "description": "represent service port",
@@ -1593,12 +1599,12 @@
           "x-go-name": "TargetPort"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ServiceType": {
       "description": "represents service type",
       "type": "string",
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "ServiceWithOwner": {
       "description": "ServiceWithOwner -- model for service with owner",
@@ -1655,7 +1661,7 @@
           "x-go-name": "Ports"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "ServicesList": {
       "description": "ServicesList -- model for services list",
@@ -1669,7 +1675,7 @@
           "x-go-name": "Services"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/git.containerum.net/ch/kube-api/pkg/model"
     },
     "SolutionEnv": {
       "description": "SolutionEnv -- solution environment variables",
@@ -1683,7 +1689,22 @@
           "x-go-name": "Env"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "SolutionLimits": {
+      "description": "SolutionLimits -- solution resources limits",
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "type": "string",
+          "x-go-name": "CPU"
+        },
+        "ram": {
+          "type": "string",
+          "x-go-name": "RAM"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "SolutionResources": {
       "description": "SolutionResources -- list of solution resources",
@@ -1698,7 +1719,7 @@
           "x-go-name": "Resources"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UpdateImage": {
       "description": "UpdateImage -- model for update container image request",
@@ -1717,7 +1738,7 @@
           "x-go-name": "Image"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UpdateNamespaceName": {
       "description": "UpdateNamespaceName -- contains new namespace label",
@@ -1731,7 +1752,7 @@
           "x-go-name": "Label"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UpdateReplicas": {
       "description": "UpdateReplicas -- contains new number of replicas",
@@ -1746,7 +1767,7 @@
           "x-go-name": "Replicas"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UserHeaderData": {
       "description": "represents header data for X-User-Namespace and X-User-Volume headers (encoded in base64)",
@@ -1773,7 +1794,7 @@
           "x-go-name": "Label"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UserSolution": {
       "description": "UserSolution -- running solution",
@@ -1795,6 +1816,10 @@
           },
           "x-go-name": "Env"
         },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
@@ -1808,7 +1833,7 @@
           "x-go-name": "Template"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "UserSolutionsList": {
       "description": "UserSolutionsList -- list of running solution",
@@ -1822,7 +1847,7 @@
           "x-go-name": "Solutions"
         }
       },
-      "x-go-package": "git.containerum.net/ch/solutions/pkg/models"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
     "Volume": {
       "description": "Volume -- volume representation\nprovided by resource-service\nhttps://ch.pages.containerum.net/api-docs/modules/resource-service/index.html#get-namespace",
@@ -1857,7 +1882,7 @@
           "x-go-name": "Storage"
         }
       },
-      "x-go-package": "git.containerum.net/ch/kube-api/vendor/github.com/containerum/kube-client/pkg/model"
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     }
   },
   "parameters": {

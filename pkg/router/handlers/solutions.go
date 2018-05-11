@@ -21,7 +21,7 @@ const (
 	branchMaster = "master"
 )
 
-// swagger:operation GET /user_solutions UserSolutions GetSolutionsList
+// swagger:operation GET /solutions Solutions GetSolutionsList
 // Get running solutions list.
 //
 // ---
@@ -52,7 +52,7 @@ func GetSolutionsList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /user_solutions/{solution}/deployments UserSolutions GetSolutionsDeployments
+// swagger:operation GET /solutions/{solution}/deployments Solutions GetSolutionsDeployments
 // Get solution deployments.
 //
 // ---
@@ -87,7 +87,7 @@ func GetSolutionsDeployments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /user_solutions/{solution}/services UserSolutions GetSolutionsServices
+// swagger:operation GET /solutions/{solution}/services Solutions GetSolutionsServices
 // Get solution services.
 //
 // ---
@@ -122,7 +122,7 @@ func GetSolutionsServices(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation POST /user_solutions UserSolutions RunSolution
+// swagger:operation POST /solutions Solutions RunSolution
 // Run solution.
 //
 // ---
@@ -175,7 +175,7 @@ func RunSolution(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, ret)
 }
 
-// swagger:operation DELETE /user_solutions/{solution} UserSolutions DeleteSolution
+// swagger:operation DELETE /solutions/{solution} Solutions DeleteSolution
 // Delete solution.
 //
 // ---
