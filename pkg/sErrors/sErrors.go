@@ -188,6 +188,30 @@ func ErrUnableUpdateSolution(params ...func(*cherry.Err)) *cherry.Err {
 	}
 	return err
 }
+
+func ErrTemplateAlreadyExists(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Template with this name already exists", StatusHTTP: 409, ID: cherry.ErrID{SID: "Solutions", Kind: 0x10}, Details: []string(nil), Fields: cherry.Fields(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
+
+func ErrTemplateNotExist(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Template with this name doesn't exist", StatusHTTP: 404, ID: cherry.ErrID{SID: "Solutions", Kind: 0x11}, Details: []string(nil), Fields: cherry.Fields(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
 func renderTemplate(templText string) string {
 	buf := &bytes.Buffer{}
 	templ, err := template.New("").Parse(templText)

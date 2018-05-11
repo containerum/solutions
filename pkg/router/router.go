@@ -54,24 +54,23 @@ func initRoutes(app *gin.Engine) {
 
 	app.Use(requireIdentityHeaders)
 
+	templates := app.Group("/templates")
+	{
+		templates.GET("", h.GetTemplatesList)
+		templates.GET("/:solution/env", h.GetTemplatesEnv)
+		templates.GET("/:solution/resources", h.GetTemplatesResources)
+		templates.POST("", m.RequireAdminRole, h.AddTemplate)
+		templates.POST("/:solution/activate", m.RequireAdminRole, h.ActivateTemplate)
+		templates.POST("/:solution/deactivate", m.RequireAdminRole, h.DeactivateTemplate)
+		templates.PUT("/:solution", m.RequireAdminRole, h.UpdateTemplate)
+		templates.DELETE("/:solution", m.RequireAdminRole, h.DeleteTemplate)
+	}
 	solutions := app.Group("/solutions")
 	{
-		solutions.Use(h.UpdateSolutions)
 		solutions.GET("", h.GetSolutionsList)
-		solutions.GET("/:solution/env", h.GetSolutionEnv)
-		solutions.GET("/:solution/resources", h.GetSolutionResources)
-		solutions.POST("", m.RequireAdminRole, h.AddAvailableSolution)
-		solutions.POST("/:solution/activate", m.RequireAdminRole, h.ActivateAvailableSolution)
-		solutions.POST("/:solution/deactivate", m.RequireAdminRole, h.DeactivateAvailableSolution)
-		solutions.PUT("/:solution", m.RequireAdminRole, h.UpdateAvailableSolution)
-		solutions.DELETE("/:solution", m.RequireAdminRole, h.DeleteAvailableSolution)
-	}
-	userSolutions := app.Group("/user_solutions")
-	{
-		userSolutions.GET("", h.GetUserSolutionsList)
-		userSolutions.GET("/:solution/deployments", h.GetUserSolutionsDeployments)
-		userSolutions.GET("/:solution/services", h.GetUserSolutionsServices)
-		userSolutions.POST("", h.UpdateSolutions, h.RunSolution)
-		userSolutions.DELETE("/:solution", h.DeleteSolution)
+		solutions.GET("/:solution/deployments", h.GetSolutionsDeployments)
+		solutions.GET("/:solution/services", h.GetSolutionsServices)
+		solutions.POST("", h.RunSolution)
+		solutions.DELETE("/:solution", h.DeleteSolution)
 	}
 }

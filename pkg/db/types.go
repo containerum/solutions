@@ -19,22 +19,22 @@ var (
 
 // DB is an interface for persistent data storage (also sometimes called DAO).
 type DB interface {
-	SaveAvailableSolutionsList(ctx context.Context, solution stypes.AvailableSolutionsList) error
-	CreateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
-	UpdateAvailableSolution(ctx context.Context, solution stypes.AvailableSolution) error
-	DeleteAvailableSolution(ctx context.Context, solution string) error
-	GetAvailableSolutionsList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
-	GetAvailableSolution(ctx context.Context, name string) (*stypes.AvailableSolution, error)
-	ActivateAvailableSolution(ctx context.Context, solution string) error
-	DeactivateAvailableSolution(ctx context.Context, solution string) error
+	CreateTemplate(ctx context.Context, solution stypes.AvailableSolution) error
+	UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error
+	DeleteTemplate(ctx context.Context, solution string) error
+	GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
+	GetTemplate(ctx context.Context, name string) (*stypes.AvailableSolution, error)
+	ActivateTemplate(ctx context.Context, solution string) error
+	DeactivateTemplate(ctx context.Context, solution string) error
 
-	GetUserSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error)
-	AddSolution(ctx context.Context, solution stypes.UserSolution, userID string, uuid string, env string) error
+	GetSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error)
+	AddSolution(ctx context.Context, solution stypes.UserSolution, userID, templateID, uuid, env string) error
 	AddDeployment(ctx context.Context, name string, solutionID string) error
 	AddService(ctx context.Context, name string, solutionID string) error
 	DeleteSolution(ctx context.Context, name string, userID string) error
-	GetUserSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error)
-	GetUserSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error)
+	CompletelyDeleteSolution(ctx context.Context, name string, userID string) error
+	GetSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error)
+	GetSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error)
 
 	// Perform operations inside transaction
 	// Transaction commits if `f` returns nil error, rollbacks and forwards error otherwise

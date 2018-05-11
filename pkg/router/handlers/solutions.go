@@ -3,53 +3,26 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
-
-	"time"
-
 	"strings"
-
-	"fmt"
 
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/validation"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
 	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
+	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"github.com/sirupsen/logrus"
 )
 
-var lastCheckTime time.Time
+const (
+	branchMaster = "master"
+)
 
-const checkInterval = 6 * time.Hour
-
-func UpdateSolutions(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	logrus.Infoln("Last solutions update check:", lastCheckTime.Format(time.RFC1123))
-	if lastCheckTime.Add(checkInterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(httputil.UserRoleXHeader) == "admin") {
-		logrus.Infoln("Updating solutions")
-		err := ss.UpdateAvailableSolutionsList(ctx.Request.Context())
-		if err != nil {
-			if cherr, ok := err.(*cherry.Err); ok {
-				gonic.Gonic(cherr, ctx)
-			} else {
-				ctx.Error(err)
-				gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
-			}
-			return
-		}
-		lastCheckTime = time.Now()
-	} else {
-		logrus.Infoln("No need to update logs")
-	}
-	ctx.Status(http.StatusAccepted)
-}
-
-// swagger:operation GET /solutions AvailableSolutions GetSolutionsList
-// Get available solutions list.
+// swagger:operation GET /solutions Solutions GetSolutionsList
+// Get running solutions list.
 //
 // ---
 // x-method-visibility: public
@@ -58,20 +31,20 @@ func UpdateSolutions(ctx *gin.Context) {
 //  - $ref: '#/parameters/UserIDHeader'
 // responses:
 //  '200':
-//    description: available solutions
+//    description: running solutions list
 //    schema:
-//      $ref: '#/definitions/AvailableSolutionsList'
+//      $ref: '#/definitions/UserSolutionsList'
 //  default:
 //    $ref: '#/responses/error'
 func GetSolutionsList(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetAvailableSolutionsList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	resp, err := ss.GetSolutionsList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionsTemplatesList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolutionsList(), ctx)
 		}
 		return
 	}
@@ -79,8 +52,8 @@ func GetSolutionsList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution}/env AvailableSolutions GetSolutionEnv
-// Get available solution environment variables.
+// swagger:operation GET /solutions/{solution}/deployments Solutions GetSolutionsDeployments
+// Get solution deployments.
 //
 // ---
 // x-method-visibility: public
@@ -93,33 +66,29 @@ func GetSolutionsList(ctx *gin.Context) {
 //    required: true
 // responses:
 //  '200':
-//    description: available solution envs
+//    description: solution deployments
 //    schema:
-//      $ref: '#/definitions/SolutionEnv'
+//      $ref: '#/definitions/DeploymentsList'
 //  default:
 //    $ref: '#/responses/error'
-func GetSolutionEnv(ctx *gin.Context) {
+func GetSolutionsDeployments(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	branch := branchMaster
-	if ctx.Query("branch") != "" {
-		branch = strings.TrimSpace(ctx.Query("branch"))
-	}
-
-	resp, err := ss.GetAvailableSolutionEnvList(ctx.Request.Context(), ctx.Param("solution"), branch)
+	resp, err := ss.GetSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
+
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution}/resources AvailableSolutions GetSolutionResources
-// Get available solution resources.
+// swagger:operation GET /solutions/{solution}/services Solutions GetSolutionsServices
+// Get solution services.
 //
 // ---
 // x-method-visibility: public
@@ -132,33 +101,29 @@ func GetSolutionEnv(ctx *gin.Context) {
 //    required: true
 // responses:
 //  '200':
-//    description: available solution resources
+//    description: solutions services
 //    schema:
-//      $ref: '#/definitions/SolutionResources'
+//      $ref: '#/definitions/ServicesList'
 //  default:
 //    $ref: '#/responses/error'
-func GetSolutionResources(ctx *gin.Context) {
+func GetSolutionsServices(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	branch := branchMaster
-	if ctx.Query("branch") != "" {
-		branch = strings.TrimSpace(ctx.Query("branch"))
-	}
-
-	resp, err := ss.GetAvailableSolutionResourcesList(ctx.Request.Context(), ctx.Param("solution"), branch)
+	resp, err := ss.GetSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
+
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation POST /solutions AvailableSolutions AddAvailableSolution
-// Add available solution.
+// swagger:operation POST /solutions Solutions RunSolution
+// Run solution.
 //
 // ---
 // x-method-visibility: public
@@ -168,198 +133,50 @@ func GetSolutionResources(ctx *gin.Context) {
 //  - name: body
 //    in: body
 //    schema:
-//      $ref: '#/definitions/AvailableSolution'
+//      $ref: '#/definitions/UserSolution'
 // responses:
-//  '201':
-//    description: solution added
-//  default:
-//    $ref: '#/responses/error'
-func AddAvailableSolution(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-
-	var request stypes.AvailableSolution
-	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
-		return
-	}
-
-	valerrs := []error{}
-	if request.Name == "" {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
-	}
-	if request.Limits == nil {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Limits"))
-	} else {
-		if request.Limits.RAM == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "RAM"))
-		}
-		if request.Limits.CPU == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "CPU"))
-		}
-	}
-	if len(request.Images) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Images"))
-	}
-	if len(request.URL) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
-	}
-	if len(valerrs) > 0 {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
-		return
-	}
-
-	err := ss.AddAvailableSolution(ctx.Request.Context(), request)
-	if err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionsTemplatesList(), ctx)
-		}
-		return
-	}
-
-	ctx.Status(http.StatusCreated)
-}
-
-// swagger:operation PUT /solutions/{solution} AvailableSolutions UpdateAvailableSolution
-// Update available solution.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
-//  - name: body
-//    in: body
+//  '202':
+//    description: solution created
 //    schema:
-//      $ref: '#/definitions/AvailableSolution'
-// responses:
-//  '202':
-//    description: solution updated
+//      $ref: '#/definitions/RunSolutionResponce'
 //  default:
 //    $ref: '#/responses/error'
-func UpdateAvailableSolution(ctx *gin.Context) {
+func RunSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	var request stypes.AvailableSolution
+	var request stypes.UserSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
-	request.Name = ctx.Param("solution")
+	cherr := validation.ValidateSolution(request)
+	if cherr != nil {
+		gonic.Gonic(cherr, ctx)
+	}
 
-	valerrs := []error{}
-	if request.Limits == nil {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Limits"))
+	if request.Branch != "" {
+		request.Branch = strings.TrimSpace(request.Branch)
 	} else {
-		if request.Limits.RAM == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "RAM"))
-		}
-		if request.Limits.CPU == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "CPU"))
-		}
-	}
-	if len(request.Images) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Images"))
-	}
-	if len(request.URL) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
-	}
-	if len(valerrs) > 0 {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
-		return
+		request.Branch = branchMaster
 	}
 
-	err := ss.UpdateAvailableSolution(ctx.Request.Context(), request)
+	ret, err := ss.RunSolution(ctx.Request.Context(), request)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
 
-	ctx.Status(http.StatusAccepted)
+	ctx.JSON(http.StatusAccepted, ret)
 }
 
-// swagger:operation POST /solutions/{solution}/activate AvailableSolutions ActivateAvailableSolution
-// Activate available solution.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
-// responses:
-//  '202':
-//    description: solution activated
-//  default:
-//    $ref: '#/responses/error'
-func ActivateAvailableSolution(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-
-	err := ss.ActivateAvailableSolution(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
-		}
-		return
-	}
-
-	ctx.Status(http.StatusAccepted)
-}
-
-// swagger:operation POST /solutions/{solution}/deactivate AvailableSolutions DeactivateAvailableSolution
-// Deactivate available solution.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
-// responses:
-//  '202':
-//    description: solution deactivated
-//  default:
-//    $ref: '#/responses/error'
-func DeactivateAvailableSolution(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-
-	err := ss.DeactivateAvailableSolution(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
-		}
-		return
-	}
-
-	ctx.Status(http.StatusAccepted)
-}
-
-// swagger:operation DELETE /solutions/{solution} AvailableSolutions DeleteAvailableSolution
-// Delete available solution.
+// swagger:operation DELETE /solutions/{solution} Solutions DeleteSolution
+// Delete solution.
 //
 // ---
 // x-method-visibility: public
@@ -375,15 +192,15 @@ func DeactivateAvailableSolution(ctx *gin.Context) {
 //    description: solution deleted
 //  default:
 //    $ref: '#/responses/error'
-func DeleteAvailableSolution(ctx *gin.Context) {
+func DeleteSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	err := ss.DeleteAvailableSolution(ctx.Request.Context(), ctx.Param("solution"))
+	err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
 		}
 		return
 	}
