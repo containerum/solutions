@@ -94,12 +94,12 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		return nil, err
 	}
 
+	s.log.Debugln("Creating solution resources")
 	ret := stypes.RunSolutionResponce{
 		Errors:  []string{},
 		Created: 0,
 	}
 
-	s.log.Debugln("Creating solution resources")
 	for _, f := range solutionConfig.Run {
 		s.log.Infof("Creating %s %s", f.Type, f.Name)
 		s.log.Debugln("Downloading resource")
