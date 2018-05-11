@@ -8,7 +8,7 @@
     "pkg/kubeErrors",
     "pkg/model"
   ]
-  revision = "b19107f2b8d00a53e8d7ceecc47498aecddb92da"
+  revision = "be74ddb6b1b60f7f15359b199ca8db731b212082"
 
 [[projects]]
   name = "github.com/PuerkitoBio/purell"
@@ -35,8 +35,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "584feaf51fc5cf24ccf2f4872c7da1c5a81d75d8"
-  version = "v0.11.3"
+  revision = "2da1273465508146137a2a0312889ebbfb1b3346"
+  version = "v0.13.1"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -120,8 +120,8 @@
 [[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
-  revision = "f8815663de1e64d57cdd4ee9e2b2fa96977a030e"
-  version = "v1.4"
+  revision = "f0976a825c7520308909ce5a9e8b4f8675fdd6de"
+  version = "v1.5"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -221,12 +221,6 @@
   version = "1.0.0"
 
 [[projects]]
-  name = "github.com/pkg/errors"
-  packages = ["."]
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
-
-[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
@@ -254,7 +248,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "1f94bef427e370e425e55b172f3b5e300ef38304"
+  revision = "2d027ae1dddd4694d54f7a8b6cbe78dca8720226"
 
 [[projects]]
   branch = "master"
@@ -265,12 +259,11 @@
     "http2",
     "http2/hpack",
     "idna",
-    "lex/httplex",
     "publicsuffix",
     "webdav",
     "webdav/internal/xml"
   ]
-  revision = "640f4622ab692b87c2f3a94265e6f579fe38263d"
+  revision = "f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd"
 
 [[projects]]
   branch = "master"
@@ -279,7 +272,7 @@
     "unix",
     "windows"
   ]
-  revision = "6f686a352de66814cdd080d970febae7767857a3"
+  revision = "7dfd1290c7917b7ba22824b9d24954ab3002fe24"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -318,8 +311,8 @@
 [[projects]]
   name = "gopkg.in/go-playground/validator.v9"
   packages = ["."]
-  revision = "14984d91328f9612b58443cbdf4a077d4fd71091"
-  version = "v9.15.0"
+  revision = "ffe836d7363bc7ab3f56d2fc90ce09bfb5a0c2c5"
+  version = "v9.17.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -377,11 +370,11 @@
   branch = "master"
   name = "k8s.io/kube-openapi"
   packages = ["pkg/common"]
-  revision = "f08db293d3ef80052d6513ece19792642a289fea"
+  revision = "b3f03f55328800731ce03a164b80973014ecd455"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5f64a3b4b9d3c045f339cfb9af99248d52e7768ef2404798d4d5b129dd1575c1"
+  inputs-digest = "6675ad47c172e31d34aaa048c90d71ca874bb19d90114e411818754e5138f3b3"
   solver-name = "gps-cdcl"
   solver-version = 1
