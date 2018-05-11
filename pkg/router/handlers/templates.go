@@ -7,44 +7,16 @@ import (
 
 	"strings"
 
-	"fmt"
-
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/validation"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
 	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin/binding"
 )
-
-/*
-var lastCheckTime time.Time
-
-const checkInterval = 6 * time.Hour
-
-func UpdateSolutions(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	logrus.Infoln("Last solutions update check:", lastCheckTime.Format(time.RFC1123))
-	if lastCheckTime.Add(checkInterval).Before(time.Now()) || (ctx.Query("forceupdate") == "true" && ctx.GetHeader(httputil.UserRoleXHeader) == "admin") {
-		logrus.Infoln("Updating solutions")
-		err := ss.UpdateTemplatesList(ctx.Request.Context())
-		if err != nil {
-			if cherr, ok := err.(*cherry.Err); ok {
-				gonic.Gonic(cherr, ctx)
-			} else {
-				ctx.Error(err)
-				gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
-			}
-			return
-		}
-		lastCheckTime = time.Now()
-	} else {
-		logrus.Infoln("No need to update logs")
-	}
-	ctx.Status(http.StatusAccepted)
-}*/
 
 // swagger:operation GET /solutions AvailableSolutions GetSolutionsList
 // Get available solutions list.
@@ -181,29 +153,9 @@ func AddTemplate(ctx *gin.Context) {
 		return
 	}
 
-	valerrs := []error{}
-	if request.Name == "" {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
-	}
-	if request.Limits == nil {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Limits"))
-	} else {
-		if request.Limits.RAM == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "RAM"))
-		}
-		if request.Limits.CPU == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "CPU"))
-		}
-	}
-	if len(request.Images) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Images"))
-	}
-	if len(request.URL) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
-	}
-	if len(valerrs) > 0 {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
-		return
+	cherr := validation.ValidateTemplate(request)
+	if cherr != nil {
+		gonic.Gonic(cherr, ctx)
 	}
 
 	err := ss.AddTemplate(ctx.Request.Context(), request)
@@ -252,26 +204,9 @@ func UpdateTemplate(ctx *gin.Context) {
 
 	request.Name = ctx.Param("solution")
 
-	valerrs := []error{}
-	if request.Limits == nil {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Limits"))
-	} else {
-		if request.Limits.RAM == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "RAM"))
-		}
-		if request.Limits.CPU == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "CPU"))
-		}
-	}
-	if len(request.Images) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Images"))
-	}
-	if len(request.URL) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
-	}
-	if len(valerrs) > 0 {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
-		return
+	cherr := validation.ValidateTemplate(request)
+	if cherr != nil {
+		gonic.Gonic(cherr, ctx)
 	}
 
 	err := ss.UpdateTemplate(ctx.Request.Context(), request)

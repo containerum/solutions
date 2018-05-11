@@ -22,7 +22,6 @@ import (
 
 const (
 	namespaceKey = "NS"
-	ownerKey     = "OWNER"
 
 	unableToCreate = "unable to create %s %s: %s"
 	unableToDelete = "unable to delete %s %s: %s"
@@ -79,7 +78,6 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	for k, v := range solutionReq.Env {
 		solutionConfig.Env[k] = v
 	}
-	solutionConfig.Env[ownerKey] = httputil.MustGetUserID(ctx)
 
 	solutionUUID := uuid.New().String()
 	environments, err := jsoniter.Marshal(solutionConfig.Env)
@@ -105,7 +103,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	for _, f := range solutionConfig.Run {
 		s.log.Infof("Creating %s %s", f.Type, f.Name)
 		s.log.Debugln("Downloading resource")
-		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionAvailable.Name, solutionReq.Branch, f.Name))
+		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", sName, solutionReq.Branch, f.Name))
 		if err != nil {
 			s.log.Debugln(err)
 			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
@@ -128,24 +126,12 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 			continue
 		}
 
-		var resMetaJSON server.ResName
-		err = jsoniter.Unmarshal(resParsed.Bytes(), &resMetaJSON)
-		if err != nil {
-			s.log.Debugln(err)
-			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-			continue
-		}
+		//Parsing resource partially to get name
+		resName := jsoniter.Get(resParsed.Bytes(), "name").ToString()
 
 		switch f.Type {
 		case "deployment":
-			convertedDeploy, err := s.svc.ConverterClient.ConvertDeployment(ctx, resParsed.String())
-			if err != nil {
-				s.log.Debugln(err)
-				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-				continue
-			}
-
-			err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, *convertedDeploy)
+			err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, resParsed.String())
 			if err != nil {
 				s.log.Debugln(err)
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
@@ -153,7 +139,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 			}
 
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-				err = s.svc.DB.AddDeployment(ctx, resMetaJSON.Metadata.Name, solutionUUID)
+				err = s.svc.DB.AddDeployment(ctx, resName, solutionUUID)
 				return err
 			})
 			if err := s.handleDBError(err); err != nil {
@@ -163,20 +149,14 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 			}
 			ret.Created++
 		case "service":
-			convertedService, err := s.svc.ConverterClient.ConvertService(ctx, resParsed.String())
-			if err != nil {
-				s.log.Debugln(err)
-				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-				continue
-			}
-			err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, *convertedService)
+			err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, resParsed.String())
 			if err != nil {
 				s.log.Debugln(err)
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-				err = s.svc.DB.AddService(ctx, resMetaJSON.Metadata.Name, solutionUUID)
+				err = s.svc.DB.AddService(ctx, resName, solutionUUID)
 				return err
 			})
 			if err := s.handleDBError(err); err != nil {
@@ -194,7 +174,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	if ret.Created == 0 {
 		s.log.Infoln("No resources was created. Deleting solution...")
 		err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-			err := s.svc.DB.DeleteSolution(ctx, solutionReq.Name, httputil.MustGetUserID(ctx))
+			err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionReq.Name, httputil.MustGetUserID(ctx))
 			return err
 		})
 		if err != nil {
@@ -263,16 +243,22 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	return nil
 }
 
-func (s *serverImpl) GetSolutionsList(ctx context.Context) (*stypes.UserSolutionsList, error) {
+func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*stypes.UserSolutionsList, error) {
 	resp, err := s.svc.DB.GetSolutionsList(ctx, httputil.MustGetUserID(ctx))
 	if err != nil {
 		return nil, err
 	}
 
+	if !isAdmin {
+		for i := range resp.Solutions {
+			resp.Solutions[i].ID = ""
+		}
+	}
+
 	return resp, nil
 }
 
-func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error) {
+func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error) {
 	depl, ns, err := s.svc.DB.GetSolutionsDeployments(ctx, solutionName, httputil.MustGetUserID(ctx))
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
@@ -290,7 +276,7 @@ func (s *serverImpl) GetUserSolutionDeployments(ctx context.Context, solutionNam
 	return userdepl, nil
 }
 
-func (s *serverImpl) GetUserSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error) {
+func (s *serverImpl) GetSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error) {
 	svc, ns, err := s.svc.DB.GetSolutionsServices(ctx, solutionName, httputil.MustGetUserID(ctx))
 	if err := s.handleDBError(err); err != nil {
 		return nil, err

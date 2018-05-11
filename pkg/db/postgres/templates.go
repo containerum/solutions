@@ -94,7 +94,7 @@ func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.A
 	pgdb.log.Infoln("Get solutions templates list")
 	var ret stypes.AvailableSolutionsList
 
-	query := "SELECT name, cpu, ram, images, url, active FROM templates"
+	query := "SELECT name, id, cpu, ram, images, url, active FROM templates"
 
 	if !isAdmin {
 		query = query + " WHERE active = 'true'"
@@ -108,7 +108,7 @@ func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.A
 	for rows.Next() {
 		solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
 		var images string
-		err := rows.Scan(&solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL, &solution.Active)
+		err := rows.Scan(&solution.Name, &solution.ID, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL, &solution.Active)
 		if err != nil {
 			return nil, err
 		}

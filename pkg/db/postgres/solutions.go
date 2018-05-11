@@ -55,7 +55,7 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*stypes.
 
 	ret.Solutions = make([]stypes.UserSolution, 0)
 
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.Name, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.Name, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
 		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.is_deleted !='true'", userID)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*stypes.
 	for rows.Next() {
 		solution := stypes.UserSolution{}
 		var env string
-		err := rows.Scan(&solution.Template, &solution.Name, &solution.Namespace, &env, &solution.Branch)
+		err := rows.Scan(&solution.Template, &solution.ID, &solution.Name, &solution.Namespace, &env, &solution.Branch)
 		if err != nil {
 			return nil, err
 		}
@@ -82,6 +82,21 @@ func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string, userID string
 	pgdb.log.Infoln("Deleting solution")
 
 	res, err := pgdb.eLog.ExecContext(ctx, `UPDATE solutions SET is_deleted = 'true', deleted_at=$1 WHERE name=$2 AND user_id=$3 AND is_deleted != 'true'`, time.Now(), name, userID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if rows == 0 {
+		return sErrors.ErrSolutionNotExist()
+	}
+	return nil
+}
+
+func (pgdb *pgDB) CompletelyDeleteSolution(ctx context.Context, name string, userID string) error {
+	pgdb.log.Infoln("Deleting solution")
+
+	res, err := pgdb.eLog.ExecContext(ctx, "DELETE FROM solutions WHERE name=$1 AND solutions.user_id=$2", name, userID)
 	if err != nil {
 		return err
 	}

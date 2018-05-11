@@ -58,6 +58,14 @@ func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*stype
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
+
+	if !isAdmin {
+		for i := range resp.Solutions {
+			resp.Solutions[i].ID = ""
+			resp.Solutions[i].Active = false
+		}
+	}
+
 	return resp, nil
 }
 

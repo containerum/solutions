@@ -32,6 +32,7 @@ type DB interface {
 	AddDeployment(ctx context.Context, name string, solutionID string) error
 	AddService(ctx context.Context, name string, solutionID string) error
 	DeleteSolution(ctx context.Context, name string, userID string) error
+	CompletelyDeleteSolution(ctx context.Context, name string, userID string) error
 	GetSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error)
 	GetSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error)
 

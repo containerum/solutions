@@ -3,16 +3,16 @@ package handlers
 import (
 	"net/http"
 
-	"fmt"
-
 	"strings"
 
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/validation"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
 	stypes "github.com/containerum/kube-client/pkg/model"
+	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )
@@ -20,6 +20,107 @@ import (
 const (
 	branchMaster = "master"
 )
+
+// swagger:operation GET /user_solutions UserSolutions GetSolutionsList
+// Get running solutions list.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+// responses:
+//  '200':
+//    description: running solutions list
+//    schema:
+//      $ref: '#/definitions/UserSolutionsList'
+//  default:
+//    $ref: '#/responses/error'
+func GetSolutionsList(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	resp, err := ss.GetSolutionsList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	if err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableGetSolutionsList(), ctx)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// swagger:operation GET /user_solutions/{solution}/deployments UserSolutions GetSolutionsDeployments
+// Get solution deployments.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '200':
+//    description: solution deployments
+//    schema:
+//      $ref: '#/definitions/DeploymentsList'
+//  default:
+//    $ref: '#/responses/error'
+func GetSolutionsDeployments(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	resp, err := ss.GetSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
+	if err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
+// swagger:operation GET /user_solutions/{solution}/services UserSolutions GetSolutionsServices
+// Get solution services.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '200':
+//    description: solutions services
+//    schema:
+//      $ref: '#/definitions/ServicesList'
+//  default:
+//    $ref: '#/responses/error'
+func GetSolutionsServices(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	resp, err := ss.GetSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
+	if err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
 
 // swagger:operation POST /user_solutions UserSolutions RunSolution
 // Run solution.
@@ -49,20 +150,11 @@ func RunSolution(ctx *gin.Context) {
 		return
 	}
 
-	valerrs := []error{}
-	if request.Template == "" {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Template"))
+	cherr := validation.ValidateSolution(request)
+	if cherr != nil {
+		gonic.Gonic(cherr, ctx)
 	}
-	if request.Name == "" {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
-	}
-	if request.Namespace == "" {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Namespace"))
-	}
-	if len(valerrs) > 0 {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...), ctx)
-		return
-	}
+
 	if request.Branch != "" {
 		request.Branch = strings.TrimSpace(request.Branch)
 	} else {
@@ -114,105 +206,4 @@ func DeleteSolution(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusAccepted)
-}
-
-// swagger:operation GET /user_solutions UserSolutions GetSolutionsList
-// Get running solutions list.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-// responses:
-//  '200':
-//    description: running solutions list
-//    schema:
-//      $ref: '#/definitions/UserSolutionsList'
-//  default:
-//    $ref: '#/responses/error'
-func GetSolutionsList(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetSolutionsList(ctx.Request.Context())
-	if err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionsList(), ctx)
-		}
-		return
-	}
-
-	ctx.JSON(http.StatusOK, resp)
-}
-
-// swagger:operation GET /user_solutions/{solution}/deployments UserSolutions GetSolutionsDeployments
-// Get solution deployments.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
-// responses:
-//  '200':
-//    description: solution deployments
-//    schema:
-//      $ref: '#/definitions/DeploymentsList'
-//  default:
-//    $ref: '#/responses/error'
-func GetSolutionsDeployments(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetUserSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
-		}
-		return
-	}
-
-	ctx.JSON(http.StatusOK, resp)
-}
-
-// swagger:operation GET /user_solutions/{solution}/services UserSolutions GetSolutionsServices
-// Get solution services.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
-// responses:
-//  '200':
-//    description: solutions services
-//    schema:
-//      $ref: '#/definitions/ServicesList'
-//  default:
-//    $ref: '#/responses/error'
-func GetSolutionsServices(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetUserSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
-		}
-		return
-	}
-
-	ctx.JSON(http.StatusOK, resp)
 }
