@@ -21,7 +21,6 @@ const (
 	csvURLFlag       = "csv_url"
 	kubeURLFlag      = "kube_url"
 	resourceURLFlag  = "resource_url"
-	converterURLFlag = "converter_url"
 	corsFlag         = "cors"
 )
 
@@ -82,12 +81,6 @@ var flags = []cli.Flag{
 		Name:   resourceURLFlag,
 		Value:  "http://resource-service:1213",
 		Usage:  "Resource service URL",
-	},
-	cli.StringFlag{
-		EnvVar: "CH_SOLUTIONS_CONVERTER_URL",
-		Name:   converterURLFlag,
-		Value:  "http://model-converter:6543",
-		Usage:  "Model converter service URL",
 	},
 	cli.BoolFlag{
 		EnvVar: "CH_SOLUTIONS_CORS",
