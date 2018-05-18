@@ -3,23 +3,34 @@ package main
 import (
 	"errors"
 
-	"git.containerum.net/ch/solutions/pkg/models"
-	"git.containerum.net/ch/solutions/pkg/models/postgres"
+	"git.containerum.net/ch/solutions/pkg/db"
+	"git.containerum.net/ch/solutions/pkg/db/postgres"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/server/impl"
 	"github.com/urfave/cli"
 )
 
 const (
-	debugFlag        = "debug"
+	portFlag         = "port"
 	solutionsFlag    = "solutions"
+	debugFlag        = "debug"
 	textlogFlag      = "textlog"
 	dbFlag           = "db"
 	dbURLFlag        = "db_url"
 	dbMigrationsFlag = "db_migrations"
+	csvURLFlag       = "csv_url"
+	kubeURLFlag      = "kube_url"
+	resourceURLFlag  = "resource_url"
+	corsFlag         = "cors"
 )
 
 var flags = []cli.Flag{
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_PORT",
+		Name:   portFlag,
+		Value:  "6767",
+		Usage:  "port for solutions server",
+	},
 	cli.StringFlag{
 		EnvVar: "CH_SOLUTIONS",
 		Name:   solutionsFlag,
@@ -53,6 +64,29 @@ var flags = []cli.Flag{
 		Value:  "../../pkg/migrations/",
 		Usage:  "Location of DB migrations",
 	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_CSV_URL",
+		Name:   csvURLFlag,
+		Value:  "https://raw.githubusercontent.com/containerum/solution-list/master/containerum-solutions.csv",
+		Usage:  "Solutions list CSV file URL",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_KUBE_API_URL",
+		Name:   kubeURLFlag,
+		Value:  "http://kube-api:1214",
+		Usage:  "Kube-API service URL",
+	},
+	cli.StringFlag{
+		EnvVar: "CH_SOLUTIONS_RESOURCE_URL",
+		Name:   resourceURLFlag,
+		Value:  "http://resource-service:1213",
+		Usage:  "Resource service URL",
+	},
+	cli.BoolFlag{
+		EnvVar: "CH_SOLUTIONS_CORS",
+		Name:   "cors",
+		Usage:  "enable CORS",
+	},
 }
 
 func getSolutionsSrv(c *cli.Context, services server.Services) (server.SolutionsService, error) {
@@ -64,7 +98,7 @@ func getSolutionsSrv(c *cli.Context, services server.Services) (server.Solutions
 	}
 }
 
-func getDB(c *cli.Context) (models.DB, error) {
+func getDB(c *cli.Context) (db.DB, error) {
 	switch c.String(dbFlag) {
 	case "postgres":
 		return postgres.DBConnect(c.String(dbURLFlag), c.String(dbMigrationsFlag))

@@ -6,15 +6,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"text/tabwriter"
 	"time"
 
-	"git.containerum.net/ch/solutions/pkg/models"
+	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/router"
 	"git.containerum.net/ch/solutions/pkg/server"
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
+	"git.containerum.net/ch/solutions/pkg/clients"
 	"github.com/urfave/cli"
 )
 
@@ -25,11 +27,6 @@ func getService(service interface{}, err error) interface{} {
 
 func initServer(c *cli.Context) error {
 	if c.Bool(debugFlag) {
-		fmt.Println("Flags:")
-		for _, f := range c.GlobalFlagNames() {
-			fmt.Printf("%+v: %v\n", f, c.String(f))
-		}
-
 		gin.SetMode(gin.DebugMode)
 		log.SetLevel(log.DebugLevel)
 	} else {
@@ -43,16 +40,25 @@ func initServer(c *cli.Context) error {
 		log.SetFormatter(&log.JSONFormatter{})
 	}
 
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.TabIndent|tabwriter.Debug)
+	for _, f := range c.GlobalFlagNames() {
+		fmt.Fprintf(w, "Flag: %s\t Value: %s\n", f, c.String(f))
+	}
+	w.Flush()
+
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
-		DB: getService(getDB(c)).(models.DB),
+		DB:             getService(getDB(c)).(db.DB),
+		DownloadClient: clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
+		ResourceClient: clients.NewHTTPResourceClient(c.String(resourceURLFlag)),
+		KubeAPIClient:  clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag)),
 	})
 	exitOnErr(err)
 
-	app := router.CreateRouter(&solutionssrv)
+	app := router.CreateRouter(&solutionssrv, c.Bool(corsFlag))
 
 	// for graceful shutdown
 	srv := &http.Server{
-		Addr:    ":6666",
+		Addr:    ":" + c.String(portFlag),
 		Handler: app,
 	}
 
