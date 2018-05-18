@@ -1,0 +1,8 @@
+env:
+  CH_SOLUTIONS: "impl"
+  CH_SOLUTIONS_MIGRATIONS_PATH: "migrations"
+  CH_SOLUTIONS_TEXTLOG: "true"
+  CH_SOLUTIONS_DEBUG: "true"
+  CH_SOLUTIONS_DB: "postgres"
+  CH_SOLUTIONS_DB_URL: "postgres://solutions:ohpeize7IC7AeVoo@postgres-master.postgres.svc:5432/solutions?sslmode=disable"
+  CH_SOLUTIONS_CSV_URL: "https://raw.githubusercontent.com/containerum/solution-list/master/containerum-solutions.csv"
