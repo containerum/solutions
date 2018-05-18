@@ -51,7 +51,7 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 	resp, err := c.rest.R().SetContext(ctx).
 		SetHeaders(headersMap).
 		SetBody(deployment).
-		Post(fmt.Sprintf("/namespace/%s/deployment", namespace))
+		Post(fmt.Sprintf("/namespaces/%s/deployments", namespace))
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (c *httpResourceClient) CreateService(ctx context.Context, namespace string
 	resp, err := c.rest.R().SetContext(ctx).
 		SetHeaders(headersMap).
 		SetBody(service).
-		Post(fmt.Sprintf("/namespace/%s/service", namespace))
+		Post(fmt.Sprintf("/namespaces/%s/services", namespace))
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace str
 	headersMap := utils.RequestHeadersMap(ctx)
 	resp, err := c.rest.R().SetContext(ctx).
 		SetHeaders(headersMap).
-		Delete(fmt.Sprintf("/namespace/%s/deployment/%s", namespace, deploymentName))
+		Delete(fmt.Sprintf("/namespaces/%s/deployments/%s", namespace, deploymentName))
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string
 	headersMap := utils.RequestHeadersMap(ctx)
 	resp, err := c.rest.R().SetContext(ctx).
 		SetHeaders(headersMap).
-		Delete(fmt.Sprintf("/namespace/%s/service/%s", namespace, serviceName))
+		Delete(fmt.Sprintf("/namespaces/%s/services/%s", namespace, serviceName))
 	if err != nil {
 		return err
 	}
