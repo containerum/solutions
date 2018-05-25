@@ -5,8 +5,6 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"strings"
-
 	"net/url"
 
 	kube_types "git.containerum.net/ch/kube-api/pkg/model"
@@ -30,17 +28,17 @@ const (
 func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSolution) (*stypes.RunSolutionResponce, error) {
 	s.log.Infoln("Running solution ", solutionReq.Name)
 	s.log.Debugln("Getting template from DB")
-	solutionAvailable, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
+	solutionTemplate, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
 	if err = s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
-	solutionURL, err := url.Parse(solutionAvailable.URL)
+	solutionURL, err := url.Parse(solutionTemplate.URL)
 	if err != nil {
 		return nil, err
 	}
 
-	sName := strings.TrimSpace(solutionURL.Path[1:])
+	sName := solutionURL.Path[1:]
 
 	s.log.Debugln("Downloading template config file")
 	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, solutionReq.Branch))
@@ -87,7 +85,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 
 	s.log.Debugln("Creating solution")
 	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		err = s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), solutionAvailable.ID, solutionUUID, string(environments))
+		err = s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), solutionTemplate.ID, solutionUUID, string(environments))
 		return err
 	})
 	if err = s.handleDBError(err); err != nil {
@@ -142,12 +140,6 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 				err = s.svc.DB.AddDeployment(ctx, resName, solutionUUID)
 				return err
 			})
-			if err := s.handleDBError(err); err != nil {
-				s.log.Debugln(err)
-				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-				continue
-			}
-			ret.Created++
 		case "service":
 			err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, resParsed.String())
 			if err != nil {
@@ -159,16 +151,16 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 				err = s.svc.DB.AddService(ctx, resName, solutionUUID)
 				return err
 			})
-			if err := s.handleDBError(err); err != nil {
-				s.log.Debugln(err)
-				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-				continue
-			}
-			ret.Created++
 		default:
 			ret.Errors = append(ret.Errors, fmt.Sprintf("Unknown resource type: %v. Skipping.", f.Type))
 			continue
 		}
+		if err := s.handleDBError(err); err != nil {
+			s.log.Debugln(err)
+			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+			continue
+		}
+		ret.Created++
 	}
 
 	if ret.Created == 0 {
@@ -180,7 +172,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		if err != nil {
 			s.log.Errorln(err)
 		}
-		return nil, sErrors.ErrUnableCreateSolution()
+		return nil, sErrors.ErrUnableCreateSolution().AddDetails(ret.Errors...)
 	}
 
 	ret.NotCreated = len(ret.Errors)
