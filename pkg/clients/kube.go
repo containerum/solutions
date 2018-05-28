@@ -29,12 +29,12 @@ type httpKubeAPIClient struct {
 }
 
 // NewHTTPKubeAPIClient returns client for resource-service working via restful api
-func NewHTTPKubeAPIClient(serverURL string) KubeAPIClient {
+func NewHTTPKubeAPIClient(serverURL string, debug bool) KubeAPIClient {
 	log := logrus.WithField("component", "kube_api_client")
 	client := resty.New().
 		SetHostURL(serverURL).
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
-		SetDebug(true).
+		SetDebug(debug).
 		SetTimeout(3 * time.Second).
 		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal

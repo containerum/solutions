@@ -5,8 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"strings"
-
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
@@ -41,11 +39,10 @@ func GetTemplatesList(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionsTemplatesList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetTemplatesList(), ctx)
 		}
 		return
 	}
-
 	ctx.JSON(http.StatusOK, resp)
 }
 
@@ -72,7 +69,7 @@ func GetTemplatesEnv(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	branch := branchMaster
 	if ctx.Query("branch") != "" {
-		branch = strings.TrimSpace(ctx.Query("branch"))
+		branch = ctx.Query("branch")
 	}
 
 	resp, err := ss.GetTemplatesEnvList(ctx.Request.Context(), ctx.Param("solution"), branch)
@@ -81,7 +78,7 @@ func GetTemplatesEnv(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetTemplate(), ctx)
 		}
 		return
 	}
@@ -111,7 +108,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	branch := branchMaster
 	if ctx.Query("branch") != "" {
-		branch = strings.TrimSpace(ctx.Query("branch"))
+		branch = ctx.Query("branch")
 	}
 
 	resp, err := ss.GetTemplatesResourcesList(ctx.Request.Context(), ctx.Param("solution"), branch)
@@ -120,7 +117,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableGetTemplate(), ctx)
 		}
 		return
 	}
@@ -146,29 +143,25 @@ func GetTemplatesResources(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func AddTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-
 	var request stypes.AvailableSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
-	cherr := validation.ValidateTemplate(request)
-	if cherr != nil {
-		gonic.Gonic(cherr, ctx)
+	if err := validation.ValidateTemplate(request); err != nil {
+		gonic.Gonic(err, ctx)
 	}
 
-	err := ss.AddTemplate(ctx.Request.Context(), request)
-	if err != nil {
+	if err := ss.AddTemplate(ctx.Request.Context(), request); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionsTemplatesList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableAddTemplate(), ctx)
 		}
 		return
 	}
-
 	ctx.Status(http.StatusCreated)
 }
 
@@ -204,22 +197,19 @@ func UpdateTemplate(ctx *gin.Context) {
 
 	request.Name = ctx.Param("solution")
 
-	cherr := validation.ValidateTemplate(request)
-	if cherr != nil {
-		gonic.Gonic(cherr, ctx)
+	if err := validation.ValidateTemplate(request); err != nil {
+		gonic.Gonic(err, ctx)
 	}
 
-	err := ss.UpdateTemplate(ctx.Request.Context(), request)
-	if err != nil {
+	if err := ss.UpdateTemplate(ctx.Request.Context(), request); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableUpdateTemplate(), ctx)
 		}
 		return
 	}
-
 	ctx.Status(http.StatusAccepted)
 }
 
@@ -243,13 +233,12 @@ func UpdateTemplate(ctx *gin.Context) {
 func ActivateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	err := ss.ActivateTemplate(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
+	if err := ss.ActivateTemplate(ctx.Request.Context(), ctx.Param("solution")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableActivateTemplate(), ctx)
 		}
 		return
 	}
@@ -277,13 +266,12 @@ func ActivateTemplate(ctx *gin.Context) {
 func DeactivateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	err := ss.DeactivateTemplate(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
+	if err := ss.DeactivateTemplate(ctx.Request.Context(), ctx.Param("solution")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableDeactivateTemplate(), ctx)
 		}
 		return
 	}
@@ -310,13 +298,12 @@ func DeactivateTemplate(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func DeleteTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	err := ss.DeleteTemplate(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
+	if err := ss.DeleteTemplate(ctx.Request.Context(), ctx.Param("solution")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateSolutionsList(), ctx)
+			gonic.Gonic(sErrors.ErrUnableDeleteTemplate(), ctx)
 		}
 		return
 	}

@@ -23,19 +23,19 @@ SID = "Solutions"
     Kind = 3
 
 [[error]]
-    Name = "ErrUnableUpdateSolutionsList"
+    Name = "ErrUnableUpdateTemplate"
     StatusHTTP = 500
-    Message = "Unable to update solutions template list"
+    Message = "Unable to update template"
     Kind = 4
 
 [[error]]
-    Name = "ErrUnableGetSolutionsTemplatesList"
+    Name = "ErrUnableGetTemplatesList"
     StatusHTTP = 500
     Message = "Unable to get solutions templates list"
     Kind = 5
 
 [[error]]
-    Name = "ErrUnableGetSolutionTemplate"
+    Name = "ErrUnableGetTemplate"
     StatusHTTP = 500
     Message = "Unable to get solutions template"
     Kind = 6
@@ -64,14 +64,6 @@ SID = "Solutions"
     Message = "Unable to delete solution"
     Kind = 10
 
-
-[[error]]
-    Name = "ErrSolutionAlreadyExists"
-    StatusHTTP = 409
-    Message = "Solution with this name already exists"
-    Kind = 11
-
-
 [[error]]
     Name = "ErrSolutionNotExist"
     StatusHTTP = 404
@@ -85,25 +77,37 @@ SID = "Solutions"
     Kind = 13
 
 [[error]]
-    Name = "ErrUnableAddSolution"
+    Name = "ErrUnableAddTemplate"
     StatusHTTP = 500
     Message = "Unable to add solution template"
     Kind = 14
 
 [[error]]
-    Name = "ErrUnableUpdateSolution"
-    StatusHTTP = 500
-    Message = "Unable to update solution template"
-    Kind = 15
-
-[[error]]
-    Name = "ErrTemplateAlreadyExists"
+    Name = "ErrResourceAlreadyExists"
     StatusHTTP = 409
-    Message = "Template with this name already exists"
-    Kind = 16
+    Message = "Resource with this name already exists"
+    Kind = 15
 
 [[error]]
     Name = "ErrTemplateNotExist"
     StatusHTTP = 404
     Message = "Template with this name doesn't exist"
+    Kind = 16
+
+[[error]]
+    Name = "ErrUnableActivateTemplate"
+    StatusHTTP = 500
+    Message = "Unable to activate template"
     Kind = 17
+
+[[error]]
+    Name = "ErrUnableDeactivateTemplate"
+    StatusHTTP = 500
+    Message = "Unable to activate template"
+    Kind = 18
+
+[[error]]
+    Name = "ErrUnableDeleteTemplate"
+    StatusHTTP = 500
+    Message = "Unable to activate template"
+    Kind = 19

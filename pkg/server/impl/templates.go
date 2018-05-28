@@ -2,56 +2,14 @@ package impl
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 
-	"strings"
-
-	"fmt"
-
+	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/server"
 	stypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
-
-func (s *serverImpl) AddTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
-	err := s.svc.DB.CreateTemplate(ctx, solution)
-	if err := s.handleDBError(err); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *serverImpl) UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
-	err := s.svc.DB.UpdateTemplate(ctx, solution)
-	if err := s.handleDBError(err); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *serverImpl) DeleteTemplate(ctx context.Context, solution string) error {
-	err := s.svc.DB.DeleteTemplate(ctx, solution)
-	if err := s.handleDBError(err); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *serverImpl) ActivateTemplate(ctx context.Context, solution string) error {
-	err := s.svc.DB.ActivateTemplate(ctx, solution)
-	if err := s.handleDBError(err); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *serverImpl) DeactivateTemplate(ctx context.Context, solution string) error {
-	err := s.svc.DB.DeactivateTemplate(ctx, solution)
-	if err := s.handleDBError(err); err != nil {
-		return err
-	}
-	return nil
-}
 
 func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error) {
 	resp, err := s.svc.DB.GetTemplatesList(ctx, isAdmin)
@@ -80,20 +38,14 @@ func (s *serverImpl) GetTemplatesEnvList(ctx context.Context, name string, branc
 		return nil, err
 	}
 
-	sName := strings.TrimSpace(solurl.Path[1:])
-	sFile := ".containerum.json"
-
-	containerumJSONURL := "https://raw.githubusercontent.com/" + sName + "/" + branch + "/" + sFile
-
-	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, containerumJSONURL)
+	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", solurl.Path[1:], branch))
 	if err != nil {
 		return nil, err
 	}
 
 	var solutionStr server.Solution
 
-	err = jsoniter.Unmarshal(solutionJSON, &solutionStr)
-	if err != nil {
+	if err = jsoniter.Unmarshal(solutionJSON, &solutionStr); err != nil {
 		return nil, err
 	}
 
@@ -108,20 +60,17 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 		return nil, err
 	}
 
-	urlcsv, err := url.Parse(solution.URL)
+	solurl, err := url.Parse(solution.URL)
 	if err != nil {
 		return nil, err
 	}
 
-	sName := strings.TrimSpace(urlcsv.Path[1:])
-
-	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, branch))
+	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", solurl.Path[1:], branch))
 	if err != nil {
 		return nil, err
 	}
 
 	var solutionStr server.Solution
-
 	err = jsoniter.Unmarshal(solutionJSON, &solutionStr)
 	if err != nil {
 		return nil, err
@@ -134,4 +83,39 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 	}
 
 	return &resp, nil
+}
+
+func (s *serverImpl) AddTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
+	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.CreateTemplate(ctx, solution)
+	})
+	return s.handleDBError(err)
+}
+
+func (s *serverImpl) UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
+	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.UpdateTemplate(ctx, solution)
+	})
+	return s.handleDBError(err)
+}
+
+func (s *serverImpl) ActivateTemplate(ctx context.Context, solution string) error {
+	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.ActivateTemplate(ctx, solution)
+	})
+	return s.handleDBError(err)
+}
+
+func (s *serverImpl) DeactivateTemplate(ctx context.Context, solution string) error {
+	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.DeactivateTemplate(ctx, solution)
+	})
+	return s.handleDBError(err)
+}
+
+func (s *serverImpl) DeleteTemplate(ctx context.Context, solution string) error {
+	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.DeleteTemplate(ctx, solution)
+	})
+	return s.handleDBError(err)
 }

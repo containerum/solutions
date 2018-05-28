@@ -19,8 +19,6 @@ import (
 )
 
 const (
-	namespaceKey = "NS"
-
 	unableToCreate = "unable to create %s %s: %s"
 	unableToDelete = "unable to delete %s %s: %s"
 )
@@ -38,16 +36,16 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		return nil, err
 	}
 
-	sName := solutionURL.Path[1:]
+	solutionPath := solutionURL.Path[1:]
 
 	s.log.Debugln("Downloading template config file")
-	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", sName, solutionReq.Branch))
+	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", solutionPath, solutionReq.Branch))
 	if err != nil {
 		return nil, err
 	}
 
 	s.log.Debugln("Generating random values for template env")
-	solutionTmpl, err := template.New("solution").Funcs(template.FuncMap{
+	solutionRandEnvTmpl, err := template.New("solution_rand").Funcs(template.FuncMap{
 		"rand_string": utils.RandString,
 	}).Parse(string(solutionF))
 	if err != nil {
@@ -55,14 +53,12 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	}
 
 	var solutionBuf bytes.Buffer
-	err = solutionTmpl.Execute(&solutionBuf, nil)
-	if err != nil {
+	if err := solutionRandEnvTmpl.Execute(&solutionBuf, nil); err != nil {
 		return nil, err
 	}
 
 	var solutionConfig *server.Solution
-	err = jsoniter.Unmarshal(solutionBuf.Bytes(), &solutionConfig)
-	if err != nil {
+	if err = jsoniter.Unmarshal(solutionBuf.Bytes(), &solutionConfig); err != nil {
 		return nil, err
 	}
 
@@ -71,37 +67,33 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 	}
 
 	s.log.Debugln("Setting envs")
-	solutionConfig.Env[namespaceKey] = solutionReq.Namespace
-
 	for k, v := range solutionReq.Env {
 		solutionConfig.Env[k] = v
 	}
 
 	solutionUUID := uuid.New().String()
-	environments, err := jsoniter.Marshal(solutionConfig.Env)
+	solutionEnvironments, err := jsoniter.MarshalToString(solutionConfig.Env)
 	if err != nil {
 		return nil, err
 	}
 
-	s.log.Debugln("Creating solution")
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		err = s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), solutionTemplate.ID, solutionUUID, string(environments))
-		return err
-	})
-	if err = s.handleDBError(err); err != nil {
-		return nil, err
-	}
-
-	s.log.Debugln("Creating solution resources")
 	ret := stypes.RunSolutionResponce{
-		Errors:  []string{},
-		Created: 0,
+		Errors:     []string{},
+		Created:    0,
+		NotCreated: 0,
 	}
 
+	s.log.Debugln("Creating solution")
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), solutionTemplate.ID, solutionUUID, solutionEnvironments)
+	}); err != nil {
+		return nil, s.handleDBError(err)
+	}
+	s.log.Debugln("Creating solution resources")
 	for _, f := range solutionConfig.Run {
 		s.log.Infof("Creating %s %s", f.Type, f.Name)
 		s.log.Debugln("Downloading resource")
-		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", sName, solutionReq.Branch, f.Name))
+		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionPath, solutionReq.Branch, f.Name))
 		if err != nil {
 			s.log.Debugln(err)
 			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
@@ -129,8 +121,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 
 		switch f.Type {
 		case "deployment":
-			err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, resParsed.String())
-			if err != nil {
+			if err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, resParsed.String()); err != nil {
 				s.log.Debugln(err)
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
@@ -141,8 +132,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 				return err
 			})
 		case "service":
-			err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, resParsed.String())
-			if err != nil {
+			if err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, resParsed.String()); err != nil {
 				s.log.Debugln(err)
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
@@ -165,11 +155,10 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 
 	if ret.Created == 0 {
 		s.log.Infoln("No resources was created. Deleting solution...")
-		err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 			err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionReq.Name, httputil.MustGetUserID(ctx))
 			return err
-		})
-		if err != nil {
+		}); err != nil {
 			s.log.Errorln(err)
 		}
 		return nil, sErrors.ErrUnableCreateSolution().AddDetails(ret.Errors...)
@@ -188,35 +177,33 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	var ns *string
 
 	s.log.Debugln("Getting solution resources")
-	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		depl, ns, err = s.svc.DB.GetSolutionsDeployments(ctx, solution, httputil.MustGetUserID(ctx))
 		return err
-	})
-	if err := s.handleDBError(err); err != nil {
-		return err
+	}); err != nil {
+		return s.handleDBError(err)
 	}
 
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		var err error
 		svc, _, err = s.svc.DB.GetSolutionsServices(ctx, solution, httputil.MustGetUserID(ctx))
 		return err
-	})
-	if err := s.handleDBError(err); err != nil {
-		return err
+	}); err != nil {
+		return s.handleDBError(err)
 	}
 
 	s.log.Debugln("Deleting solution resources")
 	errs := []error{}
 	for _, r := range depl {
-		err = s.svc.ResourceClient.DeleteDeployment(ctx, *ns, r)
+		err := s.svc.ResourceClient.DeleteDeployment(ctx, *ns, r)
 		if err != nil {
 			errs = append(errs, fmt.Errorf(unableToDelete, "deployment", r, err))
 		}
 	}
 
 	for _, r := range svc {
-		err = s.svc.ResourceClient.DeleteService(ctx, *ns, r)
+		err := s.svc.ResourceClient.DeleteService(ctx, *ns, r)
 		if err != nil {
 			errs = append(errs, fmt.Errorf(unableToDelete, "service", r, err))
 		}
@@ -227,13 +214,10 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	}
 
 	s.log.Debugln("Deleting solution")
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		var err error
-		err = s.svc.DB.DeleteSolution(ctx, solution, httputil.MustGetUserID(ctx))
-		return err
-	})
-	if err := s.handleDBError(err); err != nil {
-		return err
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.DeleteSolution(ctx, solution, httputil.MustGetUserID(ctx))
+	}); err != nil {
+		return s.handleDBError(err)
 	}
 
 	s.log.Debugln("Solution deleted")

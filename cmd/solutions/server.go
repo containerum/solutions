@@ -13,7 +13,6 @@ import (
 	"git.containerum.net/ch/solutions/pkg/router"
 	"git.containerum.net/ch/solutions/pkg/server"
 
-	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 
 	"git.containerum.net/ch/solutions/pkg/clients"
@@ -26,31 +25,19 @@ func getService(service interface{}, err error) interface{} {
 }
 
 func initServer(c *cli.Context) error {
-	if c.Bool(debugFlag) {
-		gin.SetMode(gin.DebugMode)
-		log.SetLevel(log.DebugLevel)
-	} else {
-		gin.SetMode(gin.ReleaseMode)
-		log.SetLevel(log.InfoLevel)
-	}
-
-	if c.Bool(textlogFlag) {
-		log.SetFormatter(&log.TextFormatter{})
-	} else {
-		log.SetFormatter(&log.JSONFormatter{})
-	}
-
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', tabwriter.TabIndent|tabwriter.Debug)
 	for _, f := range c.GlobalFlagNames() {
 		fmt.Fprintf(w, "Flag: %s\t Value: %s\n", f, c.String(f))
 	}
 	w.Flush()
 
+	setupLogs(c)
+
 	solutionssrv, err := getSolutionsSrv(c, server.Services{
 		DB:             getService(getDB(c)).(db.DB),
-		DownloadClient: clients.NewHTTPDownloadClient(c.String(csvURLFlag)),
-		ResourceClient: clients.NewHTTPResourceClient(c.String(resourceURLFlag)),
-		KubeAPIClient:  clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag)),
+		DownloadClient: clients.NewHTTPDownloadClient(c.Bool(debugFlag)),
+		ResourceClient: clients.NewHTTPResourceClient(c.String(resourceURLFlag), c.Bool(debugFlag)),
+		KubeAPIClient:  clients.NewHTTPKubeAPIClient(c.String(kubeURLFlag), c.Bool(debugFlag)),
 	})
 	exitOnErr(err)
 

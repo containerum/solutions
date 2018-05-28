@@ -5,12 +5,11 @@ import (
 
 	"errors"
 
+	"time"
+
 	"github.com/go-resty/resty"
-	"github.com/json-iterator/go"
 	"github.com/sirupsen/logrus"
 )
-
-var csvURL string
 
 // DownloadClient is an interface to resource-service.
 type DownloadClient interface {
@@ -23,15 +22,12 @@ type httpDownloadClient struct {
 }
 
 // NewHTTPDownloadClient returns client for resource-service working via restful api
-func NewHTTPDownloadClient(serverURL string) DownloadClient {
+func NewHTTPDownloadClient(debug bool) DownloadClient {
 	log := logrus.WithField("component", "download_client")
 	client := resty.New().
-		SetLogger(log.WriterLevel(logrus.DebugLevel))
-	client.JSONMarshal = jsoniter.Marshal
-	client.JSONUnmarshal = jsoniter.Unmarshal
-
-	csvURL = serverURL
-
+		SetLogger(log.WriterLevel(logrus.DebugLevel)).
+		SetDebug(debug).
+		SetTimeout(3 * time.Second)
 	return &httpDownloadClient{
 		rest: client,
 		log:  log,
