@@ -7,8 +7,8 @@ import (
 	"git.containerum.net/ch/solutions/pkg/db/postgres"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/server/impl"
-	"github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 

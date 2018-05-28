@@ -137,7 +137,7 @@ func (service *ServiceWithOwner) ToKube(nsName string, labels map[string]string)
 	}
 
 	if labels == nil {
-		return nil, []error{kubeErrors.ErrInternalError()}
+		return nil, []error{kubeErrors.ErrInternalError().AddDetails("invalid namespace labels")}
 	}
 	labels[appLabel] = service.Deploy
 	labels[hiddenLabel] = strconv.FormatBool(service.Hidden)
