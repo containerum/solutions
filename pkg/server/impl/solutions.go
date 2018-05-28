@@ -23,7 +23,7 @@ const (
 	unableToDelete = "unable to delete %s %s: %s"
 )
 
-func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSolution) (*stypes.RunSolutionResponce, error) {
+func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSolution) (*stypes.RunSolutionResponse, error) {
 	s.log.Infoln("Running solution ", solutionReq.Name)
 	s.log.Debugln("Getting template from DB")
 	solutionTemplate, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
@@ -77,7 +77,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		return nil, err
 	}
 
-	ret := stypes.RunSolutionResponce{
+	ret := stypes.RunSolutionResponse{
 		Errors:     []string{},
 		Created:    0,
 		NotCreated: 0,
