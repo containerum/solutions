@@ -57,7 +57,7 @@ func (s *serverImpl) handleDBError(err error) error {
 		if pqerr, ok := err.(*pq.Error); ok {
 			switch pqerr.Code {
 			case "23505": //unique_violation
-				return sErrors.ErrSolutionAlreadyExists()
+				return sErrors.ErrResourceAlreadyExists()
 			default:
 				s.log.WithError(pqerr)
 			}

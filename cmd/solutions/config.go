@@ -7,6 +7,8 @@ import (
 	"git.containerum.net/ch/solutions/pkg/db/postgres"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/server/impl"
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
 
@@ -18,7 +20,6 @@ const (
 	dbFlag           = "db"
 	dbURLFlag        = "db_url"
 	dbMigrationsFlag = "db_migrations"
-	csvURLFlag       = "csv_url"
 	kubeURLFlag      = "kube_url"
 	resourceURLFlag  = "resource_url"
 	corsFlag         = "cors"
@@ -65,12 +66,6 @@ var flags = []cli.Flag{
 		Usage:  "Location of DB migrations",
 	},
 	cli.StringFlag{
-		EnvVar: "CH_SOLUTIONS_CSV_URL",
-		Name:   csvURLFlag,
-		Value:  "https://raw.githubusercontent.com/containerum/solution-list/master/containerum-solutions.csv",
-		Usage:  "Solutions list CSV file URL",
-	},
-	cli.StringFlag{
 		EnvVar: "CH_SOLUTIONS_KUBE_API_URL",
 		Name:   kubeURLFlag,
 		Value:  "http://kube-api:1214",
@@ -87,6 +82,22 @@ var flags = []cli.Flag{
 		Name:   "cors",
 		Usage:  "enable CORS",
 	},
+}
+
+func setupLogs(c *cli.Context) {
+	if c.Bool("debug") {
+		gin.SetMode(gin.DebugMode)
+		logrus.SetLevel(logrus.DebugLevel)
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+		logrus.SetLevel(logrus.InfoLevel)
+	}
+
+	if c.Bool("textlog") {
+		logrus.SetFormatter(&logrus.TextFormatter{})
+	} else {
+		logrus.SetFormatter(&logrus.JSONFormatter{})
+	}
 }
 
 func getSolutionsSrv(c *cli.Context, services server.Services) (server.SolutionsService, error) {

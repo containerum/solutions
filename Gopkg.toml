@@ -41,7 +41,7 @@
 
 [[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "^0.13.1"
+  version = "^0.15.1"
 
 [[constraint]]
   name = "github.com/go-resty/resty"

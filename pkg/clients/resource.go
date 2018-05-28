@@ -28,12 +28,12 @@ type httpResourceClient struct {
 }
 
 // NewHTTPResourceClient returns client for resource-service working via restful api
-func NewHTTPResourceClient(serverURL string) ResourceClient {
+func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 	log := logrus.WithField("component", "resource_client")
 	client := resty.New().
 		SetHostURL(serverURL).
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
-		SetDebug(true).
+		SetDebug(debug).
 		SetTimeout(3 * time.Second).
 		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal

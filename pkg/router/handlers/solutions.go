@@ -3,8 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"strings"
-
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
@@ -150,14 +148,11 @@ func RunSolution(ctx *gin.Context) {
 		return
 	}
 
-	cherr := validation.ValidateSolution(request)
-	if cherr != nil {
-		gonic.Gonic(cherr, ctx)
+	if err := validation.ValidateSolution(request); err != nil {
+		gonic.Gonic(err, ctx)
 	}
 
-	if request.Branch != "" {
-		request.Branch = strings.TrimSpace(request.Branch)
-	} else {
+	if request.Branch == "" {
 		request.Branch = branchMaster
 	}
 
@@ -194,8 +189,7 @@ func RunSolution(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func DeleteSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution"))
-	if err != nil {
+	if err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {

@@ -45,8 +45,8 @@ func ErrRequestValidationFailed(params ...func(*cherry.Err)) *cherry.Err {
 	return err
 }
 
-func ErrUnableUpdateSolutionsList(params ...func(*cherry.Err)) *cherry.Err {
-	err := &cherry.Err{Message: "Unable to update solutions template list", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x4}, Details: []string(nil), Fields: cherry.Fields(nil)}
+func ErrUnableUpdateTemplate(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Unable to update template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x4}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
 		param(err)
 	}
@@ -57,7 +57,7 @@ func ErrUnableUpdateSolutionsList(params ...func(*cherry.Err)) *cherry.Err {
 	return err
 }
 
-func ErrUnableGetSolutionsTemplatesList(params ...func(*cherry.Err)) *cherry.Err {
+func ErrUnableGetTemplatesList(params ...func(*cherry.Err)) *cherry.Err {
 	err := &cherry.Err{Message: "Unable to get solutions templates list", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x5}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
 		param(err)
@@ -69,7 +69,7 @@ func ErrUnableGetSolutionsTemplatesList(params ...func(*cherry.Err)) *cherry.Err
 	return err
 }
 
-func ErrUnableGetSolutionTemplate(params ...func(*cherry.Err)) *cherry.Err {
+func ErrUnableGetTemplate(params ...func(*cherry.Err)) *cherry.Err {
 	err := &cherry.Err{Message: "Unable to get solutions template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x6}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
 		param(err)
@@ -129,18 +129,6 @@ func ErrUnableDeleteSolution(params ...func(*cherry.Err)) *cherry.Err {
 	return err
 }
 
-func ErrSolutionAlreadyExists(params ...func(*cherry.Err)) *cherry.Err {
-	err := &cherry.Err{Message: "Solution with this name already exists", StatusHTTP: 409, ID: cherry.ErrID{SID: "Solutions", Kind: 0xb}, Details: []string(nil), Fields: cherry.Fields(nil)}
-	for _, param := range params {
-		param(err)
-	}
-	for i, detail := range err.Details {
-		det := renderTemplate(detail)
-		err.Details[i] = det
-	}
-	return err
-}
-
 func ErrSolutionNotExist(params ...func(*cherry.Err)) *cherry.Err {
 	err := &cherry.Err{Message: "Solution with this name doesn't exist", StatusHTTP: 404, ID: cherry.ErrID{SID: "Solutions", Kind: 0xc}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
@@ -165,7 +153,7 @@ func ErrInternalError(params ...func(*cherry.Err)) *cherry.Err {
 	return err
 }
 
-func ErrUnableAddSolution(params ...func(*cherry.Err)) *cherry.Err {
+func ErrUnableAddTemplate(params ...func(*cherry.Err)) *cherry.Err {
 	err := &cherry.Err{Message: "Unable to add solution template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0xe}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
 		param(err)
@@ -177,20 +165,8 @@ func ErrUnableAddSolution(params ...func(*cherry.Err)) *cherry.Err {
 	return err
 }
 
-func ErrUnableUpdateSolution(params ...func(*cherry.Err)) *cherry.Err {
-	err := &cherry.Err{Message: "Unable to update solution template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0xf}, Details: []string(nil), Fields: cherry.Fields(nil)}
-	for _, param := range params {
-		param(err)
-	}
-	for i, detail := range err.Details {
-		det := renderTemplate(detail)
-		err.Details[i] = det
-	}
-	return err
-}
-
-func ErrTemplateAlreadyExists(params ...func(*cherry.Err)) *cherry.Err {
-	err := &cherry.Err{Message: "Template with this name already exists", StatusHTTP: 409, ID: cherry.ErrID{SID: "Solutions", Kind: 0x10}, Details: []string(nil), Fields: cherry.Fields(nil)}
+func ErrResourceAlreadyExists(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Resource with this name already exists", StatusHTTP: 409, ID: cherry.ErrID{SID: "Solutions", Kind: 0xf}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
 		param(err)
 	}
@@ -202,7 +178,43 @@ func ErrTemplateAlreadyExists(params ...func(*cherry.Err)) *cherry.Err {
 }
 
 func ErrTemplateNotExist(params ...func(*cherry.Err)) *cherry.Err {
-	err := &cherry.Err{Message: "Template with this name doesn't exist", StatusHTTP: 404, ID: cherry.ErrID{SID: "Solutions", Kind: 0x11}, Details: []string(nil), Fields: cherry.Fields(nil)}
+	err := &cherry.Err{Message: "Template with this name doesn't exist", StatusHTTP: 404, ID: cherry.ErrID{SID: "Solutions", Kind: 0x10}, Details: []string(nil), Fields: cherry.Fields(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
+
+func ErrUnableActivateTemplate(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Unable to activate template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x11}, Details: []string(nil), Fields: cherry.Fields(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
+
+func ErrUnableDeactivateTemplate(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Unable to activate template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x12}, Details: []string(nil), Fields: cherry.Fields(nil)}
+	for _, param := range params {
+		param(err)
+	}
+	for i, detail := range err.Details {
+		det := renderTemplate(detail)
+		err.Details[i] = det
+	}
+	return err
+}
+
+func ErrUnableDeleteTemplate(params ...func(*cherry.Err)) *cherry.Err {
+	err := &cherry.Err{Message: "Unable to activate template", StatusHTTP: 500, ID: cherry.ErrID{SID: "Solutions", Kind: 0x13}, Details: []string(nil), Fields: cherry.Fields(nil)}
 	for _, param := range params {
 		param(err)
 	}
