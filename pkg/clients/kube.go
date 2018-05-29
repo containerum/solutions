@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	kube_types "git.containerum.net/ch/kube-api/pkg/model"
+	kube_typess "github.com/containerum/kube-client/pkg/model"
 
 	"github.com/containerum/cherry"
 	utils "github.com/containerum/utils/httputil"
@@ -19,8 +19,8 @@ import (
 
 // KubeAPIClient is an interface to Kube-API.
 type KubeAPIClient interface {
-	GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_types.DeploymentsList, error)
-	GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_types.ServicesList, error)
+	GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_typess.DeploymentsList, error)
+	GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_typess.ServicesList, error)
 }
 
 type httpKubeAPIClient struct {
@@ -45,16 +45,16 @@ func NewHTTPKubeAPIClient(serverURL string, debug bool) KubeAPIClient {
 	}
 }
 
-func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_types.DeploymentsList, error) {
+func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_typess.DeploymentsList, error) {
 	c.log.Info("Getting user deployments")
 	headersMap := utils.RequestHeadersMap(ctx)
 
-	var dlist kube_types.DeploymentsList
+	var dlist kube_typess.DeploymentsList
 
-	dlist.Deployments = make([]kube_types.DeploymentWithOwner, 0)
+	dlist.Deployments = make([]kube_typess.Deployment, 0)
 
 	for _, d := range depl {
-		var depl kube_types.DeploymentWithOwner
+		var depl kube_typess.Deployment
 
 		resp, err := c.rest.R().SetContext(ctx).
 			SetResult(&depl).
@@ -73,16 +73,16 @@ func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace st
 	return &dlist, nil
 }
 
-func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_types.ServicesList, error) {
+func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_typess.ServicesList, error) {
 	c.log.Info("Getting user services")
 	headersMap := utils.RequestHeadersMap(ctx)
 
-	var dlist kube_types.ServicesList
+	var dlist kube_typess.ServicesList
 
-	dlist.Services = make([]kube_types.ServiceWithOwner, 0)
+	dlist.Services = make([]kube_typess.Service, 0)
 
 	for _, r := range svc {
-		var service kube_types.ServiceWithOwner
+		var service kube_typess.Service
 
 		resp, err := c.rest.R().SetContext(ctx).
 			SetResult(&service).

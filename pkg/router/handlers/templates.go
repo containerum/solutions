@@ -11,7 +11,7 @@ import (
 	"git.containerum.net/ch/solutions/pkg/validation"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin/binding"
 )
@@ -143,7 +143,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func AddTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	var request stypes.AvailableSolution
+	var request kube_types.AvailableSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
@@ -189,7 +189,7 @@ func AddTemplate(ctx *gin.Context) {
 func UpdateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	var request stypes.AvailableSolution
+	var request kube_types.AvailableSolution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return

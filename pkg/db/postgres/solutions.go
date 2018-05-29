@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"git.containerum.net/ch/solutions/pkg/sErrors"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 
-func (pgdb *pgDB) AddSolution(ctx context.Context, solution stypes.UserSolution, userID, templateID, uuid, env string) error {
+func (pgdb *pgDB) AddSolution(ctx context.Context, solution kube_types.UserSolution, userID, templateID, uuid, env string) error {
 	pgdb.log.Infoln("Saving solution")
 
 	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template_id, name, namespace, user_id) "+
@@ -49,11 +49,11 @@ func (pgdb *pgDB) AddService(ctx context.Context, name string, solutionID string
 	return err
 }
 
-func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error) {
+func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_types.UserSolutionsList, error) {
 	pgdb.log.Infoln("Get solutions list")
-	var ret stypes.UserSolutionsList
+	var ret kube_types.UserSolutionsList
 
-	ret.Solutions = make([]stypes.UserSolution, 0)
+	ret.Solutions = make([]kube_types.UserSolution, 0)
 
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.Name, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
 		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.is_deleted !='true'", userID)
@@ -62,7 +62,7 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*stypes.
 	}
 	defer rows.Close()
 	for rows.Next() {
-		solution := stypes.UserSolution{}
+		solution := kube_types.UserSolution{}
 		var env string
 		err := rows.Scan(&solution.Template, &solution.ID, &solution.Name, &solution.Namespace, &env, &solution.Branch)
 		if err != nil {

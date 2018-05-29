@@ -36,12 +36,8 @@
   version = "~v1.0.1-rc2"
 
 [[constraint]]
-  branch = "develop"
-  name = "git.containerum.net/ch/kube-api"
-
-[[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "^0.15.1"
+  version = "^0.17.4"
 
 [[constraint]]
   name = "github.com/go-resty/resty"
