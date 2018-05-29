@@ -5,26 +5,25 @@ import (
 
 	"io"
 
-	kube_types "git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/solutions/pkg/db"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 
 	"git.containerum.net/ch/solutions/pkg/clients"
 )
 
 // SolutionsService is an interface for server "business logic"
 type SolutionsService interface {
-	AddTemplate(ctx context.Context, solution stypes.AvailableSolution) error
-	UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error
+	AddTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
+	UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
 	DeleteTemplate(ctx context.Context, solution string) error
-	GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
-	GetTemplatesEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error)
-	GetTemplatesResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error)
+	GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error)
+	GetTemplatesEnvList(ctx context.Context, name string, branch string) (*kube_types.SolutionEnv, error)
+	GetTemplatesResourcesList(ctx context.Context, name string, branch string) (*kube_types.SolutionResources, error)
 	ActivateTemplate(ctx context.Context, solution string) error
 	DeactivateTemplate(ctx context.Context, solution string) error
 
-	GetSolutionsList(ctx context.Context, isAdmin bool) (*stypes.UserSolutionsList, error)
-	RunSolution(ctx context.Context, solutionReq stypes.UserSolution) (*stypes.RunSolutionResponse, error)
+	GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_types.UserSolutionsList, error)
+	RunSolution(ctx context.Context, solutionReq kube_types.UserSolution) (*kube_types.RunSolutionResponse, error)
 	DeleteSolution(ctx context.Context, solution string) error
 	GetSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error)
 	GetSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error)

@@ -5,14 +5,14 @@ import (
 
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"github.com/containerum/cherry"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 )
 
 const (
 	fieldShouldExist = "field %v should be provided"
 )
 
-func ValidateTemplate(template stypes.AvailableSolution) *cherry.Err {
+func ValidateTemplate(template kube_types.AvailableSolution) *cherry.Err {
 	valerrs := []error{}
 	if template.Name == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
@@ -39,7 +39,7 @@ func ValidateTemplate(template stypes.AvailableSolution) *cherry.Err {
 	return nil
 }
 
-func ValidateSolution(solution stypes.UserSolution) *cherry.Err {
+func ValidateSolution(solution kube_types.UserSolution) *cherry.Err {
 	valerrs := []error{}
 	if solution.Template == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Template"))

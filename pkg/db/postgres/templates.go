@@ -4,11 +4,11 @@ import (
 	"context"
 
 	"git.containerum.net/ch/solutions/pkg/sErrors"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 
-func (pgdb *pgDB) CreateTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
+func (pgdb *pgDB) CreateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
 	pgdb.log.Infoln("Saving solution template")
 
 	images, _ := jsoniter.Marshal(solution.Images)
@@ -25,7 +25,7 @@ func (pgdb *pgDB) CreateTemplate(ctx context.Context, solution stypes.AvailableS
 	return err
 }
 
-func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
+func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
 	pgdb.log.Infoln("Updating solution template")
 
 	images, _ := jsoniter.Marshal(solution.Images)
@@ -90,9 +90,9 @@ func (pgdb *pgDB) DeleteTemplate(ctx context.Context, solution string) error {
 	return err
 }
 
-func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error) {
+func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error) {
 	pgdb.log.Infoln("Get solutions templates list")
-	var ret stypes.AvailableSolutionsList
+	var ret kube_types.AvailableSolutionsList
 
 	query := "SELECT name, id, cpu, ram, images, url, active FROM templates"
 
@@ -106,7 +106,7 @@ func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.A
 	}
 	defer rows.Close()
 	for rows.Next() {
-		solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
+		solution := kube_types.AvailableSolution{Limits: &kube_types.SolutionLimits{}}
 		var images string
 		err := rows.Scan(&solution.Name, &solution.ID, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL, &solution.Active)
 		if err != nil {
@@ -122,7 +122,7 @@ func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.A
 	return &ret, rows.Err()
 }
 
-func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*stypes.AvailableSolution, error) {
+func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*kube_types.AvailableSolution, error) {
 	pgdb.log.Infoln("Get solution template ", name)
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT id, name, cpu, ram, images, url FROM templates WHERE name = $1 AND active = 'true'", name)
 	if err != nil {
@@ -133,7 +133,7 @@ func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*stypes.Availab
 		return nil, sErrors.ErrSolutionNotExist()
 	}
 
-	solution := stypes.AvailableSolution{Limits: &stypes.SolutionLimits{}}
+	solution := kube_types.AvailableSolution{Limits: &kube_types.SolutionLimits{}}
 	var images string
 	err = rows.Scan(&solution.ID, &solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL)
 	if err != nil {

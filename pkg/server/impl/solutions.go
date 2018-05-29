@@ -7,12 +7,11 @@ import (
 	"html/template"
 	"net/url"
 
-	kube_types "git.containerum.net/ch/kube-api/pkg/model"
 	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/utils"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/google/uuid"
 	"github.com/json-iterator/go"
@@ -23,7 +22,7 @@ const (
 	unableToDelete = "unable to delete %s %s: %s"
 )
 
-func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSolution) (*stypes.RunSolutionResponse, error) {
+func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.UserSolution) (*kube_types.RunSolutionResponse, error) {
 	s.log.Infoln("Running solution ", solutionReq.Name)
 	s.log.Debugln("Getting template from DB")
 	solutionTemplate, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
@@ -77,7 +76,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq stypes.UserSol
 		return nil, err
 	}
 
-	ret := stypes.RunSolutionResponse{
+	ret := kube_types.RunSolutionResponse{
 		Errors:     []string{},
 		Created:    0,
 		NotCreated: 0,
@@ -224,7 +223,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error 
 	return nil
 }
 
-func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*stypes.UserSolutionsList, error) {
+func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_types.UserSolutionsList, error) {
 	resp, err := s.svc.DB.GetSolutionsList(ctx, httputil.MustGetUserID(ctx))
 	if err != nil {
 		return nil, err
@@ -246,7 +245,7 @@ func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName st
 	}
 
 	if ns == nil || len(depl) == 0 {
-		return &kube_types.DeploymentsList{Deployments: make([]kube_types.DeploymentWithOwner, 0)}, nil
+		return &kube_types.DeploymentsList{Deployments: make([]kube_types.Deployment, 0)}, nil
 	}
 
 	userdepl, err := s.svc.KubeAPIClient.GetUserDeployments(ctx, *ns, depl)
@@ -264,7 +263,7 @@ func (s *serverImpl) GetSolutionServices(ctx context.Context, solutionName strin
 	}
 
 	if ns == nil || len(svc) == 0 {
-		return &kube_types.ServicesList{Services: make([]kube_types.ServiceWithOwner, 0)}, nil
+		return &kube_types.ServicesList{Services: make([]kube_types.Service, 0)}, nil
 	}
 
 	usersvc, err := s.svc.KubeAPIClient.GetUserServices(ctx, *ns, svc)

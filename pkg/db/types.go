@@ -7,7 +7,7 @@ import (
 
 	"errors"
 
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 )
 
 // Errors which may occur in transactional operations
@@ -19,16 +19,16 @@ var (
 
 // DB is an interface for persistent data storage (also sometimes called DAO).
 type DB interface {
-	CreateTemplate(ctx context.Context, solution stypes.AvailableSolution) error
-	UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error
+	CreateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
+	UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
 	DeleteTemplate(ctx context.Context, solution string) error
-	GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error)
-	GetTemplate(ctx context.Context, name string) (*stypes.AvailableSolution, error)
+	GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error)
+	GetTemplate(ctx context.Context, name string) (*kube_types.AvailableSolution, error)
 	ActivateTemplate(ctx context.Context, solution string) error
 	DeactivateTemplate(ctx context.Context, solution string) error
 
-	GetSolutionsList(ctx context.Context, userID string) (*stypes.UserSolutionsList, error)
-	AddSolution(ctx context.Context, solution stypes.UserSolution, userID, templateID, uuid, env string) error
+	GetSolutionsList(ctx context.Context, userID string) (*kube_types.UserSolutionsList, error)
+	AddSolution(ctx context.Context, solution kube_types.UserSolution, userID, templateID, uuid, env string) error
 	AddDeployment(ctx context.Context, name string, solutionID string) error
 	AddService(ctx context.Context, name string, solutionID string) error
 	DeleteSolution(ctx context.Context, name string, userID string) error

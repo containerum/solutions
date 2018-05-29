@@ -7,11 +7,11 @@ import (
 
 	"git.containerum.net/ch/solutions/pkg/db"
 	"git.containerum.net/ch/solutions/pkg/server"
-	stypes "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
 
-func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*stypes.AvailableSolutionsList, error) {
+func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error) {
 	resp, err := s.svc.DB.GetTemplatesList(ctx, isAdmin)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*stype
 	return resp, nil
 }
 
-func (s *serverImpl) GetTemplatesEnvList(ctx context.Context, name string, branch string) (*stypes.SolutionEnv, error) {
+func (s *serverImpl) GetTemplatesEnvList(ctx context.Context, name string, branch string) (*kube_types.SolutionEnv, error) {
 	solution, err := s.svc.DB.GetTemplate(ctx, name)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
@@ -49,12 +49,12 @@ func (s *serverImpl) GetTemplatesEnvList(ctx context.Context, name string, branc
 		return nil, err
 	}
 
-	resp := stypes.SolutionEnv{Env: solutionStr.Env}
+	resp := kube_types.SolutionEnv{Env: solutionStr.Env}
 
 	return &resp, nil
 }
 
-func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string, branch string) (*stypes.SolutionResources, error) {
+func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string, branch string) (*kube_types.SolutionResources, error) {
 	solution, err := s.svc.DB.GetTemplate(ctx, name)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 		return nil, err
 	}
 
-	resp := stypes.SolutionResources{map[string]int{}}
+	resp := kube_types.SolutionResources{map[string]int{}}
 
 	for _, r := range solutionStr.Run {
 		resp.Resources[r.Type]++
@@ -85,14 +85,14 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 	return &resp, nil
 }
 
-func (s *serverImpl) AddTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
+func (s *serverImpl) AddTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		return s.svc.DB.CreateTemplate(ctx, solution)
 	})
 	return s.handleDBError(err)
 }
 
-func (s *serverImpl) UpdateTemplate(ctx context.Context, solution stypes.AvailableSolution) error {
+func (s *serverImpl) UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		return s.svc.DB.UpdateTemplate(ctx, solution)
 	})
