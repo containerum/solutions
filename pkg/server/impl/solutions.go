@@ -115,29 +115,42 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 			continue
 		}
 
-		//Parsing resource partially to get name
-		resName := jsoniter.Get(resParsed.Bytes(), "name").ToString()
-
 		switch f.Type {
 		case "deployment":
-			if err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, resParsed.String()); err != nil {
+			var parsedDeploy kube_types.Deployment
+			err := jsoniter.Unmarshal(resParsed.Bytes(), &parsedDeploy)
+			if err != nil {
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
+			}
+			parsedDeploy.SolutionID = solutionUUID
+			if err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, parsedDeploy); err != nil {
 				s.log.Debugln(err)
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
 
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-				err = s.svc.DB.AddDeployment(ctx, resName, solutionUUID)
+				err = s.svc.DB.AddDeployment(ctx, parsedDeploy.Name, solutionUUID)
 				return err
 			})
 		case "service":
-			if err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, resParsed.String()); err != nil {
+			var parsedService kube_types.Service
+			err := jsoniter.Unmarshal(resParsed.Bytes(), &parsedService)
+			if err != nil {
+				s.log.Debugln(err)
+				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
+				continue
+			}
+			parsedService.SolutionID = solutionUUID
+			if err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, parsedService); err != nil {
 				s.log.Debugln(err)
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
 			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-				err = s.svc.DB.AddService(ctx, resName, solutionUUID)
+				err = s.svc.DB.AddService(ctx, parsedService.Name, solutionUUID)
 				return err
 			})
 		default:

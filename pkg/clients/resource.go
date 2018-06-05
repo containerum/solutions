@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/containerum/cherry"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 	utils "github.com/containerum/utils/httputil"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
@@ -16,8 +17,8 @@ import (
 
 // ResourceClient is an interface to resource-service.
 type ResourceClient interface {
-	CreateDeployment(ctx context.Context, namespace string, deployment string) error
-	CreateService(ctx context.Context, namespace string, service string) error
+	CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error
+	CreateService(ctx context.Context, namespace string, service kube_types.Service) error
 	DeleteDeployment(ctx context.Context, namespace string, deploymentName string) error
 	DeleteService(ctx context.Context, namespace string, serviceName string) error
 }
@@ -44,7 +45,7 @@ func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 	}
 }
 
-func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace string, deployment string) error {
+func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error {
 	c.log.Info("Creating deployment")
 	headersMap := utils.RequestHeadersMap(ctx)
 
@@ -61,7 +62,7 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 	return nil
 }
 
-func (c *httpResourceClient) CreateService(ctx context.Context, namespace string, service string) error {
+func (c *httpResourceClient) CreateService(ctx context.Context, namespace string, service kube_types.Service) error {
 	c.log.Info("Creating service")
 	headersMap := utils.RequestHeadersMap(ctx)
 	resp, err := c.rest.R().SetContext(ctx).

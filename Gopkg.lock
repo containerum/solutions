@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   name = "github.com/containerum/cherry"
   packages = [
     ".",
@@ -14,8 +20,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "262983343732e6686e3b4e06d61f95269127686e"
-  version = "v0.17.4"
+  revision = "a0d48690bb16b4aca3eb444bc4dad8ea4a86f031"
+  version = "v0.19.8"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -25,6 +31,15 @@
   ]
   revision = "0d81250fc88af062d5836ecd83db9867eb6ee34c"
   version = "v1.0.3"
+
+[[projects]]
+  name = "github.com/docker/distribution"
+  packages = [
+    "digest",
+    "reference"
+  ]
+  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
+  version = "v2.6.2"
 
 [[projects]]
   branch = "master"
@@ -138,8 +153,8 @@
 [[projects]]
   name = "github.com/ninedraft/boxofstuff"
   packages = ["strset"]
-  revision = "a75053006032b83ac7c7c9d5ed2af949e954b372"
-  version = "v0.1.0"
+  revision = "a57c6ea397e253eec08da7ff4305febfd0db5f7e"
+  version = "v0.1.1"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -163,7 +178,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "ab813273cd59e1333f7ae7bff5d027d4aadf528c"
+  revision = "df8d4716b3472e4a531c33cedbe537dae921a1a9"
 
 [[projects]]
   branch = "master"
@@ -175,7 +190,7 @@
     "webdav",
     "webdav/internal/xml"
   ]
-  revision = "dfa909b99c79129e1100513e5cd36307665e5723"
+  revision = "1e491301e022f8f977054da4c2d852decd59571f"
 
 [[projects]]
   branch = "master"
@@ -234,6 +249,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "822c8b9a4e04a7e8549fd94ed1473cca90679d7cee47a4b7835806ab10b881ef"
+  inputs-digest = "dc87effd601ff1fb0e0a21ec71a0d73309ccd49c474ec60f12348047f735a61f"
   solver-name = "gps-cdcl"
   solver-version = 1
