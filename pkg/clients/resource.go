@@ -7,6 +7,8 @@ import (
 
 	"time"
 
+	"git.containerum.net/ch/kube-api/pkg/kubeErrors"
+	"git.containerum.net/ch/resource-service/pkg/rsErrors"
 	"github.com/containerum/cherry"
 	kube_types "github.com/containerum/kube-client/pkg/model"
 	utils "github.com/containerum/utils/httputil"
@@ -102,6 +104,14 @@ func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string
 	if err != nil {
 		return err
 	}
+
+	chErr, ok := resp.Error().(*cherry.Err)
+	if ok {
+		if cherry.Equals(chErr, rserrors.ErrResourceNotExists()) || cherry.Equals(chErr, kubeErrors.ErrResourceNotExist()) {
+			return nil
+		}
+	}
+
 	if resp.Error() != nil {
 		return resp.Error().(*cherry.Err)
 	}

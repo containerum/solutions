@@ -42,3 +42,12 @@
 [[constraint]]
   name = "github.com/go-resty/resty"
   version = "~1.5"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/resource-service"
+
+[[constraint]]
+  branch = "develop"
+  name = "git.containerum.net/ch/kube-api"
+
