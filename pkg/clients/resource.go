@@ -9,6 +9,7 @@ import (
 
 	"github.com/containerum/cherry"
 	kube_types "github.com/containerum/kube-client/pkg/model"
+	"github.com/containerum/utils/httputil"
 	utils "github.com/containerum/utils/httputil"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
@@ -35,7 +36,9 @@ func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 		SetHostURL(serverURL).
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(debug).
-		SetTimeout(3 * time.Second).
+		SetTimeout(3*time.Second).
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
 		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
@@ -47,11 +50,10 @@ func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 
 func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error {
 	c.log.Info("Creating deployment")
-	headersMap := utils.RequestHeadersMap(ctx)
 
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
 		SetBody(deployment).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post(fmt.Sprintf("/namespaces/%s/deployments", namespace))
 	if err != nil {
 		return err
@@ -64,10 +66,9 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 
 func (c *httpResourceClient) CreateService(ctx context.Context, namespace string, service kube_types.Service) error {
 	c.log.Info("Creating service")
-	headersMap := utils.RequestHeadersMap(ctx)
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
 		SetBody(service).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post(fmt.Sprintf("/namespaces/%s/services", namespace))
 	if err != nil {
 		return err
@@ -88,7 +89,14 @@ func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace str
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*cherry.Err)
+		if chErr, ok := resp.Error().(*cherry.Err); ok {
+			if chErr.StatusHTTP != 404 {
+				return chErr
+			} else {
+				return nil
+			}
+		}
+		return resp.Error().(error)
 	}
 	return nil
 }
@@ -103,7 +111,14 @@ func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string
 		return err
 	}
 	if resp.Error() != nil {
-		return resp.Error().(*cherry.Err)
+		if chErr, ok := resp.Error().(*cherry.Err); ok {
+			if chErr.StatusHTTP != 404 {
+				return chErr
+			} else {
+				return nil
+			}
+		}
+		return resp.Error().(error)
 	}
 	return nil
 }
