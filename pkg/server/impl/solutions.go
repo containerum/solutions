@@ -22,31 +22,15 @@ const (
 	unableToDelete = "unable to delete %s %s: %s"
 )
 
-func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.UserSolution) (*kube_types.RunSolutionResponse, error) {
-	s.log.Infoln("Running solution ", solutionReq.Name)
-	s.log.Debugln("Getting template from DB")
-	solutionTemplate, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
-	if err = s.handleDBError(err); err != nil {
-		return nil, err
-	}
-
-	solutionURL, err := url.Parse(solutionTemplate.URL)
+func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string, solutionReq kube_types.UserSolution) (*server.Solution, error) {
+	solutionConfigFile, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", solutionPath, solutionReq.Branch))
 	if err != nil {
 		return nil, err
 	}
 
-	solutionPath := solutionURL.Path[1:]
-
-	s.log.Debugln("Downloading template config file")
-	solutionF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", solutionPath, solutionReq.Branch))
-	if err != nil {
-		return nil, err
-	}
-
-	s.log.Debugln("Generating random values for template env")
 	solutionRandEnvTmpl, err := template.New("solution_rand").Funcs(template.FuncMap{
 		"rand_string": utils.RandString,
-	}).Parse(string(solutionF))
+	}).Parse(string(solutionConfigFile))
 	if err != nil {
 		return nil, err
 	}
@@ -65,13 +49,124 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 		solutionReq.Env = make(map[string]string, 0)
 	}
 
-	s.log.Debugln("Setting envs")
 	for k, v := range solutionReq.Env {
 		solutionConfig.Env[k] = v
 	}
+	return solutionConfig, nil
+}
+
+func createSolution(ctx context.Context, s *serverImpl, solutionConfig *server.Solution, templateID, solutionUUID string, solutionReq kube_types.UserSolution) error {
+	solutionEnvironments, err := jsoniter.MarshalToString(solutionConfig.Env)
+	if err != nil {
+		return err
+	}
+
+	s.log.Debugln("Creating solution")
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), templateID, solutionUUID, solutionEnvironments)
+	}); err != nil {
+		return s.handleDBError(err)
+	}
+	return nil
+}
+
+func parseResource(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionConfig *server.Solution, solutionPath string, solutionReq kube_types.UserSolution) (*bytes.Buffer, error) {
+	s.log.Infof("Creating %s %s", resourceConfig.Type, resourceConfig.Name)
+	s.log.Debugln("Downloading resource")
+	resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionPath, solutionReq.Branch, resourceConfig.Name))
+	if err != nil {
+		s.log.Debugln(err)
+		return nil, fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+
+	s.log.Debugln("Setting envs to resource config")
+	resTmpl, err := template.New("res").Parse(string(resF))
+	if err != nil {
+		s.log.Debugln(err)
+		return nil, fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+
+	var resParsed bytes.Buffer
+	err = resTmpl.Execute(&resParsed, solutionConfig.Env)
+	if err != nil {
+		s.log.Debugln(err)
+		return nil, fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+	return &resParsed, nil
+}
+
+func createDeployment(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionUUID, solutionNamespace string, parsedRes bytes.Buffer) error {
+	var parsedDeploy kube_types.Deployment
+	err := jsoniter.Unmarshal(parsedRes.Bytes(), &parsedDeploy)
+	if err != nil {
+		s.log.Debugln(err)
+		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+	parsedDeploy.SolutionID = solutionUUID
+	if err = s.svc.ResourceClient.CreateDeployment(ctx, solutionNamespace, parsedDeploy); err != nil {
+		s.log.Debugln(err)
+		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+
+	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.AddDeployment(ctx, parsedDeploy.Name, solutionUUID)
+	})
+	return err
+}
+
+func createService(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionUUID, solutionNamespace string, parsedRes bytes.Buffer) error {
+	var parsedService kube_types.Service
+	err := jsoniter.Unmarshal(parsedRes.Bytes(), &parsedService)
+	if err != nil {
+		s.log.Debugln(err)
+		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+	parsedService.SolutionID = solutionUUID
+	if err = s.svc.ResourceClient.CreateService(ctx, solutionNamespace, parsedService); err != nil {
+		s.log.Debugln(err)
+		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
+	}
+
+	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.AddService(ctx, parsedService.Name, solutionUUID)
+	})
+	return err
+}
+
+func rollbackSolution(ctx context.Context, s *serverImpl, solutionName string) {
+	s.log.Infoln("No resources was created. Deleting solution...")
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionName, httputil.MustGetUserID(ctx))
+		return err
+	}); err != nil {
+		s.log.Errorln(err)
+	}
+}
+
+func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.UserSolution) (*kube_types.RunSolutionResponse, error) {
+	s.log.Infoln("Running solution ", solutionReq.Name)
+	s.log.Debugln("Getting template info from DB")
+	solutionTemplate, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
+	if err = s.handleDBError(err); err != nil {
+		return nil, err
+	}
+
+	solutionURL, err := url.Parse(solutionTemplate.URL)
+	if err != nil {
+		return nil, err
+	}
+
+	solutionPath := solutionURL.Path[1:]
+
+	s.log.Debugln("Parsing solution config")
+	solutionConfig, err := parseSolutionConfig(ctx, s, solutionPath, solutionReq)
+	if err != nil {
+		return nil, err
+	}
 
 	solutionUUID := uuid.New().String()
-	solutionEnvironments, err := jsoniter.MarshalToString(solutionConfig.Env)
+
+	err = createSolution(ctx, s, solutionConfig, solutionTemplate.ID, solutionUUID, solutionReq)
 	if err != nil {
 		return nil, err
 	}
@@ -82,97 +177,33 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 		NotCreated: 0,
 	}
 
-	s.log.Debugln("Creating solution")
-	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), solutionTemplate.ID, solutionUUID, solutionEnvironments)
-	}); err != nil {
-		return nil, s.handleDBError(err)
-	}
 	s.log.Debugln("Creating solution resources")
 	for _, f := range solutionConfig.Run {
-		s.log.Infof("Creating %s %s", f.Type, f.Name)
-		s.log.Debugln("Downloading resource")
-		resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionPath, solutionReq.Branch, f.Name))
+		parsedRes, err := parseResource(ctx, s, &f, solutionConfig, solutionPath, solutionReq)
 		if err != nil {
-			s.log.Debugln(err)
 			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 			continue
 		}
-
-		s.log.Debugln("Setting envs to resource config")
-		resTmpl, err := template.New("res").Parse(string(resF))
-		if err != nil {
-			s.log.Debugln(err)
-			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-			continue
-		}
-
-		var resParsed bytes.Buffer
-		err = resTmpl.Execute(&resParsed, solutionConfig.Env)
-		if err != nil {
-			s.log.Debugln(err)
-			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-			continue
-		}
-
 		switch f.Type {
 		case "deployment":
-			var parsedDeploy kube_types.Deployment
-			err := jsoniter.Unmarshal(resParsed.Bytes(), &parsedDeploy)
-			if err != nil {
-				s.log.Debugln(err)
+			if err := createDeployment(ctx, s, &f, solutionUUID, solutionReq.Namespace, *parsedRes); err != nil {
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
-			parsedDeploy.SolutionID = solutionUUID
-			if err = s.svc.ResourceClient.CreateDeployment(ctx, solutionReq.Namespace, parsedDeploy); err != nil {
-				s.log.Debugln(err)
-				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-				continue
-			}
-
-			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-				err = s.svc.DB.AddDeployment(ctx, parsedDeploy.Name, solutionUUID)
-				return err
-			})
 		case "service":
-			var parsedService kube_types.Service
-			err := jsoniter.Unmarshal(resParsed.Bytes(), &parsedService)
-			if err != nil {
-				s.log.Debugln(err)
+			if err := createService(ctx, s, &f, solutionUUID, solutionReq.Namespace, *parsedRes); err != nil {
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
-			parsedService.SolutionID = solutionUUID
-			if err = s.svc.ResourceClient.CreateService(ctx, solutionReq.Namespace, parsedService); err != nil {
-				s.log.Debugln(err)
-				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
-				continue
-			}
-			err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-				err = s.svc.DB.AddService(ctx, parsedService.Name, solutionUUID)
-				return err
-			})
 		default:
 			ret.Errors = append(ret.Errors, fmt.Sprintf("Unknown resource type: %v. Skipping.", f.Type))
-			continue
-		}
-		if err := s.handleDBError(err); err != nil {
-			s.log.Debugln(err)
-			ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 			continue
 		}
 		ret.Created++
 	}
 
 	if ret.Created == 0 {
-		s.log.Infoln("No resources was created. Deleting solution...")
-		if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-			err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionReq.Name, httputil.MustGetUserID(ctx))
-			return err
-		}); err != nil {
-			s.log.Errorln(err)
-		}
+		rollbackSolution(ctx, s, solutionReq.Name)
 		return nil, sErrors.ErrUnableCreateSolution().AddDetails(ret.Errors...)
 	}
 
