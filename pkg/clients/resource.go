@@ -20,8 +20,8 @@ import (
 type ResourceClient interface {
 	CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error
 	CreateService(ctx context.Context, namespace string, service kube_types.Service) error
-	DeleteDeployment(ctx context.Context, namespace string, deploymentName string) error
-	DeleteService(ctx context.Context, namespace string, serviceName string) error
+	DeleteDeployments(ctx context.Context, namespace, solutionName string) error
+	DeleteServices(ctx context.Context, namespace, solutionName string) error
 }
 
 type httpResourceClient struct {
@@ -79,46 +79,30 @@ func (c *httpResourceClient) CreateService(ctx context.Context, namespace string
 	return nil
 }
 
-func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace string, deploymentName string) error {
-	c.log.Info("Deleting deployment")
-	headersMap := utils.RequestHeadersMap(ctx)
+func (c *httpResourceClient) DeleteDeployments(ctx context.Context, namespace, solutionName string) error {
+	c.log.Info("Deleting deployments")
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
-		Delete(fmt.Sprintf("/namespaces/%s/deployments/%s", namespace, deploymentName))
+		SetHeaders(utils.RequestHeadersMap(ctx)).
+		Delete(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
 	if err != nil {
 		return err
 	}
 	if resp.Error() != nil {
-		if chErr, ok := resp.Error().(*cherry.Err); ok {
-			if chErr.StatusHTTP != 404 {
-				return chErr
-			} else {
-				return nil
-			}
-		}
-		return resp.Error().(error)
+		return resp.Error().(*cherry.Err)
 	}
 	return nil
 }
 
-func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string, serviceName string) error {
-	c.log.Info("Deleting service")
-	headersMap := utils.RequestHeadersMap(ctx)
+func (c *httpResourceClient) DeleteServices(ctx context.Context, namespace, solutionName string) error {
+	c.log.Info("Deleting services")
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
-		Delete(fmt.Sprintf("/namespaces/%s/services/%s", namespace, serviceName))
+		SetHeaders(utils.RequestHeadersMap(ctx)).
+		Delete(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
 	if err != nil {
 		return err
 	}
 	if resp.Error() != nil {
-		if chErr, ok := resp.Error().(*cherry.Err); ok {
-			if chErr.StatusHTTP != 404 {
-				return chErr
-			} else {
-				return nil
-			}
-		}
-		return resp.Error().(error)
+		return resp.Error().(*cherry.Err)
 	}
 	return nil
 }

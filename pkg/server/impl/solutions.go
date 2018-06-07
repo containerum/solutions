@@ -95,41 +95,33 @@ func parseResource(ctx context.Context, s *serverImpl, resourceConfig *server.Co
 	return &resParsed, nil
 }
 
-func createDeployment(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionUUID, solutionNamespace string, parsedRes bytes.Buffer) error {
+func createDeployment(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionName, solutionNamespace string, parsedRes bytes.Buffer) error {
 	var parsedDeploy kube_types.Deployment
 	err := jsoniter.Unmarshal(parsedRes.Bytes(), &parsedDeploy)
 	if err != nil {
 		s.log.Debugln(err)
 		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
 	}
-	parsedDeploy.SolutionID = solutionUUID
+	parsedDeploy.SolutionID = solutionName
 	if err = s.svc.ResourceClient.CreateDeployment(ctx, solutionNamespace, parsedDeploy); err != nil {
 		s.log.Debugln(err)
 		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
 	}
-
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.AddDeployment(ctx, parsedDeploy.Name, solutionUUID)
-	})
 	return err
 }
 
-func createService(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionUUID, solutionNamespace string, parsedRes bytes.Buffer) error {
+func createService(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionName, solutionNamespace string, parsedRes bytes.Buffer) error {
 	var parsedService kube_types.Service
 	err := jsoniter.Unmarshal(parsedRes.Bytes(), &parsedService)
 	if err != nil {
 		s.log.Debugln(err)
 		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
 	}
-	parsedService.SolutionID = solutionUUID
+	parsedService.SolutionID = solutionName
 	if err = s.svc.ResourceClient.CreateService(ctx, solutionNamespace, parsedService); err != nil {
 		s.log.Debugln(err)
 		return fmt.Errorf(unableToCreate, resourceConfig.Type, resourceConfig.Name, err)
 	}
-
-	err = s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.AddService(ctx, parsedService.Name, solutionUUID)
-	})
 	return err
 }
 
@@ -186,12 +178,12 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 		}
 		switch f.Type {
 		case "deployment":
-			if err := createDeployment(ctx, s, &f, solutionUUID, solutionReq.Namespace, *parsedRes); err != nil {
+			if err := createDeployment(ctx, s, &f, solutionReq.Name, solutionReq.Namespace, *parsedRes); err != nil {
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
 		case "service":
-			if err := createService(ctx, s, &f, solutionUUID, solutionReq.Namespace, *parsedRes); err != nil {
+			if err := createService(ctx, s, &f, solutionReq.Name, solutionReq.Namespace, *parsedRes); err != nil {
 				ret.Errors = append(ret.Errors, fmt.Sprintf(unableToCreate, f.Type, f.Name, err))
 				continue
 			}
@@ -213,52 +205,24 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 	return &ret, nil
 }
 
-func (s *serverImpl) DeleteSolution(ctx context.Context, solution string) error {
-	s.log.Infoln("Deleting solution ", solution)
-	depl := make([]string, 0)
-	svc := make([]string, 0)
-	var ns *string
-
-	s.log.Debugln("Getting solution resources")
-	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		var err error
-		depl, ns, err = s.svc.DB.GetSolutionsDeployments(ctx, solution, httputil.MustGetUserID(ctx))
+func (s *serverImpl) DeleteSolution(ctx context.Context, solutionName string) error {
+	s.log.Infoln("Deleting solution ", solutionName)
+	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
+	if err := s.handleDBError(err); err != nil {
 		return err
-	}); err != nil {
-		return s.handleDBError(err)
 	}
 
-	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		var err error
-		svc, _, err = s.svc.DB.GetSolutionsServices(ctx, solution, httputil.MustGetUserID(ctx))
+	if err := s.svc.ResourceClient.DeleteDeployments(ctx, solution.Namespace, solution.Name); err != nil {
 		return err
-	}); err != nil {
-		return s.handleDBError(err)
 	}
 
-	s.log.Debugln("Deleting solution resources")
-	errs := []error{}
-	for _, r := range depl {
-		err := s.svc.ResourceClient.DeleteDeployment(ctx, *ns, r)
-		if err != nil {
-			errs = append(errs, fmt.Errorf(unableToDelete, "deployment", r, err))
-		}
-	}
-
-	for _, r := range svc {
-		err := s.svc.ResourceClient.DeleteService(ctx, *ns, r)
-		if err != nil {
-			errs = append(errs, fmt.Errorf(unableToDelete, "service", r, err))
-		}
-	}
-
-	if len(errs) != 0 {
-		return sErrors.ErrUnableDeleteSolution().AddDetailsErr(errs...)
+	if err := s.svc.ResourceClient.DeleteServices(ctx, solution.Namespace, solution.Name); err != nil {
+		return err
 	}
 
 	s.log.Debugln("Deleting solution")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeleteSolution(ctx, solution, httputil.MustGetUserID(ctx))
+		return s.svc.DB.DeleteSolution(ctx, solution.Name, httputil.MustGetUserID(ctx))
 	}); err != nil {
 		return s.handleDBError(err)
 	}
@@ -283,16 +247,12 @@ func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_
 }
 
 func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error) {
-	depl, ns, err := s.svc.DB.GetSolutionsDeployments(ctx, solutionName, httputil.MustGetUserID(ctx))
+	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
-	if ns == nil || len(depl) == 0 {
-		return &kube_types.DeploymentsList{Deployments: make([]kube_types.Deployment, 0)}, nil
-	}
-
-	userdepl, err := s.svc.KubeAPIClient.GetUserDeployments(ctx, *ns, depl)
+	userdepl, err := s.svc.KubeAPIClient.GetUserDeployments(ctx, solution.Namespace, solution.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -301,16 +261,12 @@ func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName st
 }
 
 func (s *serverImpl) GetSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error) {
-	svc, ns, err := s.svc.DB.GetSolutionsServices(ctx, solutionName, httputil.MustGetUserID(ctx))
+	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
 
-	if ns == nil || len(svc) == 0 {
-		return &kube_types.ServicesList{Services: make([]kube_types.Service, 0)}, nil
-	}
-
-	usersvc, err := s.svc.KubeAPIClient.GetUserServices(ctx, *ns, svc)
+	usersvc, err := s.svc.KubeAPIClient.GetUserServices(ctx, solution.Namespace, solution.Name)
 	if err != nil {
 		return nil, err
 	}

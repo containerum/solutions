@@ -78,6 +78,25 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_ty
 	return &ret, rows.Err()
 }
 
+func (pgdb *pgDB) GetSolution(ctx context.Context, userID, solutionName string) (*kube_types.UserSolution, error) {
+	pgdb.log.Infoln("Get solution")
+
+	var solution kube_types.UserSolution
+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT id, name, namespace "+
+		"FROM solutions WHERE user_id=$1 AND name=$2 AND is_deleted !='true'", userID, solutionName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	if !rows.Next() {
+		return nil, rows.Err()
+	}
+	err = rows.StructScan(&solution)
+
+	return &solution, rows.Err()
+}
+
 func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string, userID string) error {
 	pgdb.log.Infoln("Deleting solution")
 
@@ -106,50 +125,4 @@ func (pgdb *pgDB) CompletelyDeleteSolution(ctx context.Context, name string, use
 		return sErrors.ErrSolutionNotExist()
 	}
 	return nil
-}
-
-func (pgdb *pgDB) GetSolutionsDeployments(ctx context.Context, solutionName string, userID string) (deployments []string, ns *string, err error) {
-	pgdb.log.Infoln("Get solution deployments")
-
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, deployments.deploy_name "+
-		"FROM solutions JOIN deployments ON solutions.id = deployments.solution_id WHERE solutions.name=$1 AND solutions.user_id=$2 AND solutions.is_deleted !='true'", solutionName, userID)
-	if err != nil {
-		return nil, nil, err
-	}
-	deployments = make([]string, 0)
-
-	defer rows.Close()
-	for rows.Next() {
-		var deploy string
-		err := rows.Scan(&ns, &deploy)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		deployments = append(deployments, deploy)
-	}
-	return deployments, ns, rows.Err()
-}
-
-func (pgdb *pgDB) GetSolutionsServices(ctx context.Context, solutionName string, userID string) (services []string, ns *string, err error) {
-	pgdb.log.Infoln("Get solution services")
-
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT solutions.namespace, services.service_name "+
-		"FROM solutions JOIN services ON solutions.id = services.solution_id WHERE solutions.name=$1 AND solutions.user_id=$2 AND solutions.is_deleted !='true'", solutionName, userID)
-	if err != nil {
-		return nil, nil, err
-	}
-	services = make([]string, 0)
-
-	defer rows.Close()
-	for rows.Next() {
-		var deploy string
-		err := rows.Scan(&ns, &deploy)
-		if err != nil {
-			return nil, nil, err
-		}
-
-		services = append(services, deploy)
-	}
-	return services, ns, rows.Err()
 }

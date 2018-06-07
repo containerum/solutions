@@ -5,7 +5,7 @@ import (
 
 	"fmt"
 
-	kube_typess "github.com/containerum/kube-client/pkg/model"
+	kube_types "github.com/containerum/kube-client/pkg/model"
 
 	"github.com/containerum/cherry"
 	utils "github.com/containerum/utils/httputil"
@@ -19,8 +19,8 @@ import (
 
 // KubeAPIClient is an interface to Kube-API.
 type KubeAPIClient interface {
-	GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_typess.DeploymentsList, error)
-	GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_typess.ServicesList, error)
+	GetUserDeployments(ctx context.Context, namespace, solutionName string) (*kube_types.DeploymentsList, error)
+	GetUserServices(ctx context.Context, namespace, solutionName string) (*kube_types.ServicesList, error)
 }
 
 type httpKubeAPIClient struct {
@@ -45,58 +45,41 @@ func NewHTTPKubeAPIClient(serverURL string, debug bool) KubeAPIClient {
 	}
 }
 
-func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace string, depl []string) (*kube_typess.DeploymentsList, error) {
-	c.log.Info("Getting user deployments")
+func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace, solutionName string) (*kube_types.DeploymentsList, error) {
+	c.log.Info("Getting solution deployments")
 	headersMap := utils.RequestHeadersMap(ctx)
 
-	var dlist kube_typess.DeploymentsList
-
-	dlist.Deployments = make([]kube_typess.Deployment, 0)
-
-	for _, d := range depl {
-		var depl kube_typess.Deployment
-
-		resp, err := c.rest.R().SetContext(ctx).
-			SetResult(&depl).
-			SetHeaders(headersMap).
-			Get(fmt.Sprintf("/namespaces/%s/deployments/%s", namespace, d))
-		if err != nil {
-			return nil, err
-		}
-		if resp.Error() != nil {
-			return nil, resp.Error().(*cherry.Err)
-		}
-
-		dlist.Deployments = append(dlist.Deployments, depl)
+	var dlist kube_types.DeploymentsList
+	resp, err := c.rest.R().SetContext(ctx).
+		SetResult(&dlist).
+		SetHeaders(headersMap).
+		Get(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error() != nil {
+		return nil, resp.Error().(*cherry.Err)
 	}
 
 	return &dlist, nil
 }
 
-func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace string, svc []string) (*kube_typess.ServicesList, error) {
-	c.log.Info("Getting user services")
+func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace, solutionName string) (*kube_types.ServicesList, error) {
+	c.log.Info("Getting solution services")
 	headersMap := utils.RequestHeadersMap(ctx)
 
-	var dlist kube_typess.ServicesList
+	var slist kube_types.ServicesList
 
-	dlist.Services = make([]kube_typess.Service, 0)
-
-	for _, r := range svc {
-		var service kube_typess.Service
-
-		resp, err := c.rest.R().SetContext(ctx).
-			SetResult(&service).
-			SetHeaders(headersMap).
-			Get(fmt.Sprintf("/namespaces/%s/services/%s", namespace, r))
-		if err != nil {
-			return nil, err
-		}
-		if resp.Error() != nil {
-			return nil, resp.Error().(*cherry.Err)
-		}
-
-		dlist.Services = append(dlist.Services, service)
+	resp, err := c.rest.R().SetContext(ctx).
+		SetResult(&slist).
+		SetHeaders(headersMap).
+		Get(fmt.Sprintf("/namespaces/%s/solutions/%s/services", namespace, solutionName))
+	if err != nil {
+		return nil, err
+	}
+	if resp.Error() != nil {
+		return nil, resp.Error().(*cherry.Err)
 	}
 
-	return &dlist, nil
+	return &slist, nil
 }
