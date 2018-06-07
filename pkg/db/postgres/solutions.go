@@ -88,10 +88,16 @@ func (pgdb *pgDB) GetSolution(ctx context.Context, userID, solutionName string) 
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, rows.Err()
+		if rows.Err() != nil {
+			return nil, rows.Err()
+		} else {
+			return nil, sErrors.ErrSolutionNotExist()
+		}
 	}
+
 	err = rows.StructScan(&solution)
 
 	return &solution, rows.Err()
