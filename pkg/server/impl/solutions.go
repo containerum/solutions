@@ -19,7 +19,6 @@ import (
 
 const (
 	unableToCreate = "unable to create %s %s: %s"
-	unableToDelete = "unable to delete %s %s: %s"
 )
 
 func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string, solutionReq kube_types.UserSolution) (*server.Solution, error) {
