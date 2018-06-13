@@ -9,12 +9,13 @@ import (
 
 	"git.containerum.net/ch/solutions/pkg/db"
 	chutils "github.com/containerum/utils/sqlxutil"
+	"github.com/golang-migrate/migrate"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // postgresql database driver
-	"github.com/mattes/migrate"
 
-	migdrv "github.com/mattes/migrate/database/postgres"
-	_ "github.com/mattes/migrate/source/file" // needed to load migrations scripts from files
+	"github.com/golang-migrate/migrate/database"
+	migdrv "github.com/golang-migrate/migrate/database/postgres"
+	_ "github.com/golang-migrate/migrate/source/file" // needed to load migrations scripts from files
 	"github.com/sirupsen/logrus"
 )
 
@@ -27,7 +28,7 @@ type pgDB struct {
 
 // DBConnect initializes connection to postgresql database.
 // github.com/jmoiron/sqlx used to to get work with database.
-// Function tries to ping database and apply migrations using github.com/mattes/migrate.
+// Function tries to ping database and apply migrations using github.com/golang-migrate/migrate.
 // If migrations applying failed database goes to dirty state and requires manual conflict resolution.
 func DBConnect(pgConnStr string, migrationsPath string) (db.DB, error) {
 	log := logrus.WithField("component", "db")
@@ -68,8 +69,23 @@ func (pgdb *pgDB) migrateUp(path string) (*migrate.Migrate, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return nil, err
+	retries := 3
+	for {
+		err := m.Up()
+		switch err {
+		case nil, migrate.ErrNoChange:
+			//OK
+			return m, nil
+		case database.ErrLocked:
+			pgdb.log.WithError(err).Infof("Retrying after %v", m.LockTimeout)
+			if retries == 0 {
+				return nil, err
+			}
+			retries--
+			time.Sleep(m.LockTimeout)
+		default:
+			return nil, err
+		}
 	}
 	return m, nil
 }

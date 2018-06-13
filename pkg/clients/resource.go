@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/containerum/cherry"
+	kube_types "github.com/containerum/kube-client/pkg/model"
+	"github.com/containerum/utils/httputil"
 	utils "github.com/containerum/utils/httputil"
 	"github.com/go-resty/resty"
 	"github.com/json-iterator/go"
@@ -16,10 +18,10 @@ import (
 
 // ResourceClient is an interface to resource-service.
 type ResourceClient interface {
-	CreateDeployment(ctx context.Context, namespace string, deployment string) error
-	CreateService(ctx context.Context, namespace string, service string) error
-	DeleteDeployment(ctx context.Context, namespace string, deploymentName string) error
-	DeleteService(ctx context.Context, namespace string, serviceName string) error
+	CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error
+	CreateService(ctx context.Context, namespace string, service kube_types.Service) error
+	DeleteDeployments(ctx context.Context, namespace, solutionName string) error
+	DeleteServices(ctx context.Context, namespace, solutionName string) error
 }
 
 type httpResourceClient struct {
@@ -34,7 +36,9 @@ func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 		SetHostURL(serverURL).
 		SetLogger(log.WriterLevel(logrus.DebugLevel)).
 		SetDebug(debug).
-		SetTimeout(3 * time.Second).
+		SetTimeout(3*time.Second).
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Accept", "application/json").
 		SetError(cherry.Err{})
 	client.JSONMarshal = jsoniter.Marshal
 	client.JSONUnmarshal = jsoniter.Unmarshal
@@ -44,13 +48,12 @@ func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 	}
 }
 
-func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace string, deployment string) error {
+func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error {
 	c.log.Info("Creating deployment")
-	headersMap := utils.RequestHeadersMap(ctx)
 
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
 		SetBody(deployment).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post(fmt.Sprintf("/namespaces/%s/deployments", namespace))
 	if err != nil {
 		return err
@@ -61,12 +64,11 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 	return nil
 }
 
-func (c *httpResourceClient) CreateService(ctx context.Context, namespace string, service string) error {
+func (c *httpResourceClient) CreateService(ctx context.Context, namespace string, service kube_types.Service) error {
 	c.log.Info("Creating service")
-	headersMap := utils.RequestHeadersMap(ctx)
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
 		SetBody(service).
+		SetHeaders(httputil.RequestXHeadersMap(ctx)).
 		Post(fmt.Sprintf("/namespaces/%s/services", namespace))
 	if err != nil {
 		return err
@@ -77,12 +79,11 @@ func (c *httpResourceClient) CreateService(ctx context.Context, namespace string
 	return nil
 }
 
-func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace string, deploymentName string) error {
-	c.log.Info("Deleting deployment")
-	headersMap := utils.RequestHeadersMap(ctx)
+func (c *httpResourceClient) DeleteDeployments(ctx context.Context, namespace, solutionName string) error {
+	c.log.Info("Deleting deployments")
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
-		Delete(fmt.Sprintf("/namespaces/%s/deployments/%s", namespace, deploymentName))
+		SetHeaders(utils.RequestHeadersMap(ctx)).
+		Delete(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
 	if err != nil {
 		return err
 	}
@@ -92,12 +93,11 @@ func (c *httpResourceClient) DeleteDeployment(ctx context.Context, namespace str
 	return nil
 }
 
-func (c *httpResourceClient) DeleteService(ctx context.Context, namespace string, serviceName string) error {
-	c.log.Info("Deleting service")
-	headersMap := utils.RequestHeadersMap(ctx)
+func (c *httpResourceClient) DeleteServices(ctx context.Context, namespace, solutionName string) error {
+	c.log.Info("Deleting services")
 	resp, err := c.rest.R().SetContext(ctx).
-		SetHeaders(headersMap).
-		Delete(fmt.Sprintf("/namespaces/%s/services/%s", namespace, serviceName))
+		SetHeaders(utils.RequestHeadersMap(ctx)).
+		Delete(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
 	if err != nil {
 		return err
 	}

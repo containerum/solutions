@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/blang/semver"
+  packages = ["."]
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   name = "github.com/containerum/cherry"
   packages = [
     ".",
@@ -14,8 +20,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "262983343732e6686e3b4e06d61f95269127686e"
-  version = "v0.17.4"
+  revision = "43bc2706e4163e6d26d2be0d559591c3c9a81c6b"
+  version = "v0.19.9"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -25,6 +31,15 @@
   ]
   revision = "0d81250fc88af062d5836ecd83db9867eb6ee34c"
   version = "v1.0.3"
+
+[[projects]]
+  name = "github.com/docker/distribution"
+  packages = [
+    "digest",
+    "reference"
+  ]
+  revision = "48294d928ced5dd9b378f7fd7c6f5da3ff3f2c89"
+  version = "v2.6.2"
 
 [[projects]]
   branch = "master"
@@ -66,8 +81,20 @@
 [[projects]]
   name = "github.com/go-resty/resty"
   packages = ["."]
-  revision = "f0976a825c7520308909ce5a9e8b4f8675fdd6de"
-  version = "v1.5"
+  revision = "fc3ad735b5565cada42d34bc298573fd3fe5adc6"
+  version = "v1.6"
+
+[[projects]]
+  name = "github.com/golang-migrate/migrate"
+  packages = [
+    ".",
+    "database",
+    "database/postgres",
+    "source",
+    "source/file"
+  ]
+  revision = "22f249514de9aa3f8a720a7cabbdd45d294f83a1"
+  version = "v3.2.0"
 
 [[projects]]
   name = "github.com/golang/protobuf"
@@ -106,18 +133,6 @@
   revision = "90697d60dd844d5ef6ff15135d0203f65d2f53b8"
 
 [[projects]]
-  name = "github.com/mattes/migrate"
-  packages = [
-    ".",
-    "database",
-    "database/postgres",
-    "source",
-    "source/file"
-  ]
-  revision = "035c07716cd373d88456ec4d701402df52584cb4"
-  version = "v3.0.1"
-
-[[projects]]
   name = "github.com/mattn/go-isatty"
   packages = ["."]
   revision = "0360b2af4f38e8d38c7fce2a9f4e702702d73a39"
@@ -138,8 +153,8 @@
 [[projects]]
   name = "github.com/ninedraft/boxofstuff"
   packages = ["strset"]
-  revision = "a75053006032b83ac7c7c9d5ed2af949e954b372"
-  version = "v0.1.0"
+  revision = "a57c6ea397e253eec08da7ff4305febfd0db5f7e"
+  version = "v0.1.1"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -163,7 +178,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "ab813273cd59e1333f7ae7bff5d027d4aadf528c"
+  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
 
 [[projects]]
   branch = "master"
@@ -175,7 +190,7 @@
     "webdav",
     "webdav/internal/xml"
   ]
-  revision = "dfa909b99c79129e1100513e5cd36307665e5723"
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
 
 [[projects]]
   branch = "master"
@@ -184,7 +199,7 @@
     "unix",
     "windows"
   ]
-  revision = "c11f84a56e43e20a78cee75a7c034031ecf57d1f"
+  revision = "a9e25c09b96b8870693763211309e213c6ef299d"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -234,6 +249,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "822c8b9a4e04a7e8549fd94ed1473cca90679d7cee47a4b7835806ab10b881ef"
+  inputs-digest = "d326092bcf0a60bfe41326d2f3903c1397c29ae648cf427ca098d1b7d02317bb"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -37,8 +37,12 @@
 
 [[constraint]]
   name = "github.com/containerum/kube-client"
-  version = "^0.17.4"
+  version = "^0.19.8"
 
 [[constraint]]
   name = "github.com/go-resty/resty"
-  version = "~1.5"
+  version = "~1.6"
+
+[[constraint]]
+  name = "github.com/golang-migrate/migrate"
+  version = "3.2.0"
