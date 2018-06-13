@@ -151,6 +151,7 @@ func AddTemplate(ctx *gin.Context) {
 
 	if err := validation.ValidateTemplate(request); err != nil {
 		gonic.Gonic(err, ctx)
+		return
 	}
 
 	if err := ss.AddTemplate(ctx.Request.Context(), request); err != nil {
@@ -199,6 +200,7 @@ func UpdateTemplate(ctx *gin.Context) {
 
 	if err := validation.ValidateTemplate(request); err != nil {
 		gonic.Gonic(err, ctx)
+		return
 	}
 
 	if err := ss.UpdateTemplate(ctx.Request.Context(), request); err != nil {
