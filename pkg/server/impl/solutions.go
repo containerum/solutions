@@ -28,7 +28,8 @@ func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string
 	}
 
 	solutionRandEnvTmpl, err := template.New("solution_rand").Funcs(template.FuncMap{
-		"rand_string": utils.RandString,
+		"rand_string":       utils.RandString,
+		"rand_string_minus": utils.RandStringWithMinus,
 	}).Parse(string(solutionConfigFile))
 	if err != nil {
 		return nil, err
