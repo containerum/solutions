@@ -150,6 +150,7 @@ func RunSolution(ctx *gin.Context) {
 
 	if err := validation.ValidateSolution(request); err != nil {
 		gonic.Gonic(err, ctx)
+		return
 	}
 
 	if request.Branch == "" {
