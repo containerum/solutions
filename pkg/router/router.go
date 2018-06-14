@@ -63,7 +63,6 @@ func initRoutes(app *gin.Engine) {
 		templates.POST("/:solution/activate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.ActivateTemplate)
 		templates.POST("/:solution/deactivate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.DeactivateTemplate)
 		templates.PUT("/:solution", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.UpdateTemplate)
-		templates.DELETE("/:solution", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.DeleteTemplate)
 	}
 	solutions := app.Group("/solutions")
 	{

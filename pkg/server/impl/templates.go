@@ -112,10 +112,3 @@ func (s *serverImpl) DeactivateTemplate(ctx context.Context, solution string) er
 	})
 	return s.handleDBError(err)
 }
-
-func (s *serverImpl) DeleteTemplate(ctx context.Context, solution string) error {
-	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeleteTemplate(ctx, solution)
-	})
-	return s.handleDBError(err)
-}

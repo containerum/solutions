@@ -76,7 +76,7 @@ func (pgdb *pgDB) DeactivateTemplate(ctx context.Context, solution string) error
 }
 
 func (pgdb *pgDB) DeleteTemplate(ctx context.Context, solution string) error {
-	pgdb.log.Infoln("Updating solution template")
+	pgdb.log.Infoln("deleting solution template")
 
 	res, err := pgdb.eLog.ExecContext(ctx,
 		`DELETE FROM templates WHERE name = $1`, solution)

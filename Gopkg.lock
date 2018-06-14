@@ -20,8 +20,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "98e5397873b0e25dfa83fee83f28e7b7a7e10479"
-  version = "v0.21.1"
+  revision = "64b358cf38b55d4a526a520a454aa69033e870d2"
+  version = "v0.21.2"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -51,7 +51,7 @@
   branch = "master"
   name = "github.com/gin-gonic/contrib"
   packages = ["ginrus"]
-  revision = "6ea35d32286ce194572a0dc2a3398aac0091228d"
+  revision = "39cfb9727134fef3120d2458fce5fab14265a46c"
 
 [[projects]]
   name = "github.com/gin-gonic/gin"
@@ -178,7 +178,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
+  revision = "37a17fe027db43f76fd88b056ddf588563fc8722"
 
 [[projects]]
   branch = "master"
@@ -199,7 +199,7 @@
     "unix",
     "windows"
   ]
-  revision = "8ee9f3e146b708d082f4bab861e5759d1edf8c00"
+  revision = "56ede360ec1c541828fb88741b3f1049406d28f5"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -249,6 +249,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "79bfe9bf308192f6723445d1113fa97cf0bddb32644892d64bb70f3b54a82b37"
+  inputs-digest = "e1f13365d2dc6c415c7515edb5124386e4bb64ac3aa089e4ac0442f39ca737e5"
   solver-name = "gps-cdcl"
   solver-version = 1
