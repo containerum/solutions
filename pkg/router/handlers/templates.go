@@ -280,35 +280,3 @@ func DeactivateTemplate(ctx *gin.Context) {
 
 	ctx.Status(http.StatusAccepted)
 }
-
-// swagger:operation DELETE /templates/{solution} Templates DeleteTemplate
-// Delete template.
-//
-// ---
-// x-method-visibility: public
-// parameters:
-//  - $ref: '#/parameters/UserRoleHeader'
-//  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
-// responses:
-//  '202':
-//    description: solution deleted
-//  default:
-//    $ref: '#/responses/error'
-func DeleteTemplate(ctx *gin.Context) {
-	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	if err := ss.DeleteTemplate(ctx.Request.Context(), ctx.Param("solution")); err != nil {
-		if cherr, ok := err.(*cherry.Err); ok {
-			gonic.Gonic(cherr, ctx)
-		} else {
-			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableDeleteTemplate(), ctx)
-		}
-		return
-	}
-
-	ctx.Status(http.StatusAccepted)
-}
