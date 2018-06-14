@@ -55,7 +55,7 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_ty
 
 	ret.Solutions = make([]kube_types.UserSolution, 0)
 
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.Name, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.name, templates.url, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
 		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.is_deleted !='true'", userID)
 	if err != nil {
 		return nil, err
@@ -64,7 +64,7 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_ty
 	for rows.Next() {
 		solution := kube_types.UserSolution{}
 		var env string
-		err := rows.Scan(&solution.Template, &solution.ID, &solution.Name, &solution.Namespace, &env, &solution.Branch)
+		err := rows.Scan(&solution.Template, &solution.URL, &solution.ID, &solution.Name, &solution.Namespace, &env, &solution.Branch)
 		if err != nil {
 			return nil, err
 		}
@@ -72,6 +72,7 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_ty
 			return nil, err
 		}
 
+		solution.URL = solution.URL + "/tree/" + solution.Branch
 		ret.Solutions = append(ret.Solutions, solution)
 	}
 
