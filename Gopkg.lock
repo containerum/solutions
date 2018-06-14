@@ -20,8 +20,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "64b358cf38b55d4a526a520a454aa69033e870d2"
-  version = "v0.21.2"
+  revision = "4c82a344b98f2f8631642be59f57beaaeebb5541"
+  version = "v0.21.3"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -199,7 +199,7 @@
     "unix",
     "windows"
   ]
-  revision = "56ede360ec1c541828fb88741b3f1049406d28f5"
+  revision = "8883426083c04a2627e6e59d84d5f6fb63d16c91"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -249,6 +249,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e1f13365d2dc6c415c7515edb5124386e4bb64ac3aa089e4ac0442f39ca737e5"
+  inputs-digest = "4e333b9f511d4ba0defa4d7e30893e358cf47a59c156055f2d7d5c357a6b4080"
   solver-name = "gps-cdcl"
   solver-version = 1
