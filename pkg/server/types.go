@@ -15,7 +15,6 @@ import (
 type SolutionsService interface {
 	AddTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
 	UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
-	DeleteTemplate(ctx context.Context, solution string) error
 	GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error)
 	GetTemplatesEnvList(ctx context.Context, name string, branch string) (*kube_types.SolutionEnv, error)
 	GetTemplatesResourcesList(ctx context.Context, name string, branch string) (*kube_types.SolutionResources, error)
