@@ -50,6 +50,41 @@ func GetSolutionsList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// swagger:operation GET /solutions/{solution} Solutions GetSolution
+// Get running solution.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '200':
+//    description: running solution
+//    schema:
+//      $ref: '#/definitions/UserSolutionsList'
+//  default:
+//    $ref: '#/responses/error'
+func GetSolution(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	resp, err := ss.GetSolution(ctx.Request.Context(), ctx.Param("solution"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	if err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
 // swagger:operation GET /solutions/{solution}/deployments Solutions GetSolutionsDeployments
 // Get solution deployments.
 //

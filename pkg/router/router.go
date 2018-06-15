@@ -67,6 +67,7 @@ func initRoutes(app *gin.Engine) {
 	solutions := app.Group("/solutions")
 	{
 		solutions.GET("", h.GetSolutionsList)
+		solutions.GET("/:solution", h.GetSolution)
 		solutions.GET("/:solution/deployments", h.GetSolutionsDeployments)
 		solutions.GET("/:solution/services", h.GetSolutionsServices)
 		solutions.POST("", h.RunSolution)
