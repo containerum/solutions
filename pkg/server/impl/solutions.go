@@ -222,7 +222,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, namespace, solutionName
 
 	s.log.Debugln("Deleting solution")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeleteSolution(ctx, solution.Name, solution.Namespace)
+		return s.svc.DB.DeleteSolution(ctx, solution.Namespace, solution.Name)
 	}); err != nil {
 		return s.handleDBError(err)
 	}
