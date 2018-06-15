@@ -22,6 +22,7 @@ type SolutionsService interface {
 	DeactivateTemplate(ctx context.Context, solution string) error
 
 	GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_types.UserSolutionsList, error)
+	GetSolution(ctx context.Context, solutionName string, isAdmin bool) (*kube_types.UserSolution, error)
 	RunSolution(ctx context.Context, solutionReq kube_types.UserSolution) (*kube_types.RunSolutionResponse, error)
 	DeleteSolution(ctx context.Context, solution string) error
 	GetSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error)

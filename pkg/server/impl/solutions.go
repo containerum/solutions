@@ -246,6 +246,19 @@ func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_
 	return resp, nil
 }
 
+func (s *serverImpl) GetSolution(ctx context.Context, solutionName string, isAdmin bool) (*kube_types.UserSolution, error) {
+	resp, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isAdmin {
+		resp.ID = ""
+	}
+
+	return resp, nil
+}
+
 func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error) {
 	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
 	if err := s.handleDBError(err); err != nil {

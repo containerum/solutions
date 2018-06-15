@@ -84,8 +84,8 @@ func (pgdb *pgDB) GetSolution(ctx context.Context, userID, solutionName string) 
 
 	var solution kube_types.UserSolution
 
-	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT id, name, namespace "+
-		"FROM solutions WHERE user_id=$1 AND name=$2 AND is_deleted !='true'", userID, solutionName)
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.name, templates.url, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.name=$2 AND solutions.is_deleted !='true'", userID, solutionName)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,16 @@ func (pgdb *pgDB) GetSolution(ctx context.Context, userID, solutionName string) 
 		}
 	}
 
-	err = rows.StructScan(&solution)
+	var env string
+	err = rows.Scan(&solution.Template, &solution.URL, &solution.ID, &solution.Name, &solution.Namespace, &env, &solution.Branch)
+	if err != nil {
+		return nil, err
+	}
+	if err := jsoniter.UnmarshalFromString(env, &solution.Env); err != nil {
+		return nil, err
+	}
+
+	solution.URL = solution.URL + "/tree/" + solution.Branch
 
 	return &solution, rows.Err()
 }
