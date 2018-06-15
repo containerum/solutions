@@ -80,5 +80,4 @@ func initRoutes(app *gin.Engine) {
 		namespaceSolutions.DELETE("/:solution", m.DeleteAccess, h.DeleteSolution)
 		namespaceSolutions.DELETE("", m.DeleteAccess, h.DeleteNamespaceSolutions)
 	}
-
 }

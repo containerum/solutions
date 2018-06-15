@@ -207,7 +207,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 
 func (s *serverImpl) DeleteSolution(ctx context.Context, namespace, solutionName string) error {
 	s.log.Infoln("Deleting solution ", solutionName)
-	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
+	solution, err := s.svc.DB.GetSolution(ctx, namespace, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, namespace, solutionName
 
 	s.log.Debugln("Deleting solution")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeleteSolution(ctx, solution.Name, solution.Namespace, httputil.MustGetUserID(ctx))
+		return s.svc.DB.DeleteSolution(ctx, solution.Name, solution.Namespace)
 	}); err != nil {
 		return s.handleDBError(err)
 	}
@@ -247,7 +247,7 @@ func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_
 }
 
 func (s *serverImpl) GetNamespaceSolutionsList(ctx context.Context, namespace string, isAdmin bool) (*kube_types.UserSolutionsList, error) {
-	resp, err := s.svc.DB.GetNamespaceSolutionsList(ctx, namespace, httputil.MustGetUserID(ctx))
+	resp, err := s.svc.DB.GetNamespaceSolutionsList(ctx, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -262,7 +262,7 @@ func (s *serverImpl) GetNamespaceSolutionsList(ctx context.Context, namespace st
 }
 
 func (s *serverImpl) GetSolution(ctx context.Context, namespace, solutionName string, isAdmin bool) (*kube_types.UserSolution, error) {
-	resp, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
+	resp, err := s.svc.DB.GetSolution(ctx, namespace, solutionName)
 	if err != nil {
 		return nil, err
 	}
@@ -275,7 +275,7 @@ func (s *serverImpl) GetSolution(ctx context.Context, namespace, solutionName st
 }
 
 func (s *serverImpl) GetSolutionDeployments(ctx context.Context, namespace, solutionName string) (*kube_types.DeploymentsList, error) {
-	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
+	solution, err := s.svc.DB.GetSolution(ctx, namespace, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
@@ -289,7 +289,7 @@ func (s *serverImpl) GetSolutionDeployments(ctx context.Context, namespace, solu
 }
 
 func (s *serverImpl) GetSolutionServices(ctx context.Context, namespace, solutionName string) (*kube_types.ServicesList, error) {
-	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
+	solution, err := s.svc.DB.GetSolution(ctx, namespace, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
