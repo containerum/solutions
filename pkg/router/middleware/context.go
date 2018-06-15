@@ -6,6 +6,10 @@ import (
 )
 
 const (
+	UserNamespaces = "user-namespaces"
+	UserRole       = "user-role"
+	UserID         = "user-id"
+
 	//SolutionsServices is key for services
 	SolutionsServices = "s-service"
 )

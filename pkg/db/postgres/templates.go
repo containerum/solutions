@@ -38,7 +38,7 @@ func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution kube_types.Availa
 	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
+		return sErrors.ErrTemplateNotExist()
 	}
 	return err
 }
@@ -54,7 +54,7 @@ func (pgdb *pgDB) ActivateTemplate(ctx context.Context, solution string) error {
 	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
+		return sErrors.ErrTemplateNotExist()
 	}
 	return err
 }
@@ -130,7 +130,7 @@ func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*kube_types.Ava
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, sErrors.ErrSolutionNotExist()
+		return nil, sErrors.ErrTemplateNotExist()
 	}
 
 	solution := kube_types.AvailableSolution{Limits: &kube_types.SolutionLimits{}}

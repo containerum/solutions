@@ -34,7 +34,7 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService, enableCORS bool
 		cfg := cors.DefaultConfig()
 		cfg.AllowAllOrigins = true
 		cfg.AddAllowMethods(http.MethodDelete)
-		cfg.AddAllowHeaders(httputil.UserIDXHeader, httputil.UserRoleXHeader)
+		cfg.AddAllowHeaders(httputil.UserIDXHeader, httputil.UserRoleXHeader, httputil.UserNamespacesXHeader)
 		e.Use(cors.New(cfg))
 	}
 	e.Group("/static").
@@ -43,9 +43,10 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService, enableCORS bool
 	e.Use(ginrus.Ginrus(logrus.WithField("component", "gin"), time.RFC3339, true))
 	e.Use(gonic.Recovery(sErrors.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
 	/* Custom */
-	e.Use(m.RegisterServices(ss))
-	e.Use(httputil.PrepareContext)
 	e.Use(httputil.SaveHeaders)
+	e.Use(httputil.PrepareContext)
+	e.Use(m.RequiredUserHeaders())
+	e.Use(m.RegisterServices(ss))
 }
 
 // SetupRoutes sets up http router needed to handle requests from clients.
@@ -67,10 +68,17 @@ func initRoutes(app *gin.Engine) {
 	solutions := app.Group("/solutions")
 	{
 		solutions.GET("", h.GetSolutionsList)
-		solutions.GET("/:solution", h.GetSolution)
-		solutions.GET("/:solution/deployments", h.GetSolutionsDeployments)
-		solutions.GET("/:solution/services", h.GetSolutionsServices)
-		solutions.POST("", h.RunSolution)
-		solutions.DELETE("/:solution", h.DeleteSolution)
+		solutions.DELETE("", h.DeleteUserSolutions)
 	}
+	namespaceSolutions := app.Group("/namespaces/:namespace/solutions")
+	{
+		namespaceSolutions.GET("", m.ReadAccess, h.GetNamespaceSolutions)
+		namespaceSolutions.GET("/:solution", m.ReadAccess, h.GetSolution)
+		namespaceSolutions.GET("/:solution/deployments", m.ReadAccess, h.GetSolutionsDeployments)
+		namespaceSolutions.GET("/:solution/services", m.ReadAccess, h.GetSolutionsServices)
+		namespaceSolutions.POST("", m.WriteAccess, h.RunSolution)
+		namespaceSolutions.DELETE("/:solution", m.DeleteAccess, h.DeleteSolution)
+		namespaceSolutions.DELETE("", m.DeleteAccess, h.DeleteNamespaceSolutions)
+	}
+
 }

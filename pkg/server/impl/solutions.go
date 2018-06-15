@@ -205,9 +205,9 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 	return &ret, nil
 }
 
-func (s *serverImpl) DeleteSolution(ctx context.Context, solutionName string) error {
+func (s *serverImpl) DeleteSolution(ctx context.Context, namespace, solutionName string) error {
 	s.log.Infoln("Deleting solution ", solutionName)
-	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
+	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, solutionName string) er
 
 	s.log.Debugln("Deleting solution")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeleteSolution(ctx, solution.Name, httputil.MustGetUserID(ctx))
+		return s.svc.DB.DeleteSolution(ctx, solution.Name, solution.Namespace, httputil.MustGetUserID(ctx))
 	}); err != nil {
 		return s.handleDBError(err)
 	}
@@ -246,8 +246,23 @@ func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_
 	return resp, nil
 }
 
-func (s *serverImpl) GetSolution(ctx context.Context, solutionName string, isAdmin bool) (*kube_types.UserSolution, error) {
-	resp, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
+func (s *serverImpl) GetNamespaceSolutionsList(ctx context.Context, namespace string, isAdmin bool) (*kube_types.UserSolutionsList, error) {
+	resp, err := s.svc.DB.GetNamespaceSolutionsList(ctx, namespace, httputil.MustGetUserID(ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	if !isAdmin {
+		for i := range resp.Solutions {
+			resp.Solutions[i].ID = ""
+		}
+	}
+
+	return resp, nil
+}
+
+func (s *serverImpl) GetSolution(ctx context.Context, namespace, solutionName string, isAdmin bool) (*kube_types.UserSolution, error) {
+	resp, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
 	if err != nil {
 		return nil, err
 	}
@@ -259,8 +274,8 @@ func (s *serverImpl) GetSolution(ctx context.Context, solutionName string, isAdm
 	return resp, nil
 }
 
-func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName string) (*kube_types.DeploymentsList, error) {
-	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
+func (s *serverImpl) GetSolutionDeployments(ctx context.Context, namespace, solutionName string) (*kube_types.DeploymentsList, error) {
+	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
@@ -273,8 +288,8 @@ func (s *serverImpl) GetSolutionDeployments(ctx context.Context, solutionName st
 	return userdepl, nil
 }
 
-func (s *serverImpl) GetSolutionServices(ctx context.Context, solutionName string) (*kube_types.ServicesList, error) {
-	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), solutionName)
+func (s *serverImpl) GetSolutionServices(ctx context.Context, namespace, solutionName string) (*kube_types.ServicesList, error) {
+	solution, err := s.svc.DB.GetSolution(ctx, httputil.MustGetUserID(ctx), namespace, solutionName)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
@@ -285,4 +300,26 @@ func (s *serverImpl) GetSolutionServices(ctx context.Context, solutionName strin
 	}
 
 	return usersvc, nil
+}
+
+func (s *serverImpl) DeleteUserSolutions(ctx context.Context) error {
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.CompletelyDeleteUserSolutions(ctx, httputil.MustGetUserID(ctx))
+	}); err != nil {
+		return s.handleDBError(err)
+	}
+
+	s.log.Debugln("Solutions deleted")
+	return nil
+}
+
+func (s *serverImpl) DeleteNamespaceSolutions(ctx context.Context, namespace string) error {
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+		return s.svc.DB.CompletelyDeleteNamespaceSolutions(ctx, namespace)
+	}); err != nil {
+		return s.handleDBError(err)
+	}
+
+	s.log.Debugln("Solutions deleted")
+	return nil
 }

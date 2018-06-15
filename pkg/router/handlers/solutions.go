@@ -50,6 +50,22 @@ func GetSolutionsList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+func GetNamespaceSolutions(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	resp, err := ss.GetNamespaceSolutionsList(ctx.Request.Context(), ctx.Param("namespace"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	if err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
+}
+
 // swagger:operation GET /solutions/{solution} Solutions GetSolution
 // Get running solution.
 //
@@ -71,7 +87,7 @@ func GetSolutionsList(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func GetSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetSolution(ctx.Request.Context(), ctx.Param("solution"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	resp, err := ss.GetSolution(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("solution"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -106,7 +122,7 @@ func GetSolution(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func GetSolutionsDeployments(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetSolutionDeployments(ctx.Request.Context(), ctx.Param("solution"))
+	resp, err := ss.GetSolutionDeployments(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -141,7 +157,7 @@ func GetSolutionsDeployments(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func GetSolutionsServices(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetSolutionServices(ctx.Request.Context(), ctx.Param("solution"))
+	resp, err := ss.GetSolutionServices(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("solution"))
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -182,6 +198,8 @@ func RunSolution(ctx *gin.Context) {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
+
+	request.Namespace = ctx.Param("namespace")
 
 	if err := validation.ValidateSolution(request); err != nil {
 		gonic.Gonic(err, ctx)
@@ -225,7 +243,37 @@ func RunSolution(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func DeleteSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	if err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("solution")); err != nil {
+	if err := ss.DeleteSolution(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("solution")); err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
+		}
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func DeleteUserSolutions(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	if err := ss.DeleteUserSolutions(ctx.Request.Context()); err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
+		}
+		return
+	}
+
+	ctx.Status(http.StatusAccepted)
+}
+
+func DeleteNamespaceSolutions(ctx *gin.Context) {
+	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
+	if err := ss.DeleteNamespaceSolutions(ctx.Request.Context(), ctx.Param("namespace")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {

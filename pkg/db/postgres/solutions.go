@@ -79,13 +79,43 @@ func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_ty
 	return &ret, rows.Err()
 }
 
-func (pgdb *pgDB) GetSolution(ctx context.Context, userID, solutionName string) (*kube_types.UserSolution, error) {
+func (pgdb *pgDB) GetNamespaceSolutionsList(ctx context.Context, namespace, userID string) (*kube_types.UserSolutionsList, error) {
+	pgdb.log.Infoln("Get solutions list")
+	var ret kube_types.UserSolutionsList
+
+	ret.Solutions = make([]kube_types.UserSolution, 0)
+
+	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.name, templates.url, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
+		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.namespace=$2 AND solutions.is_deleted !='true'", userID, namespace)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		solution := kube_types.UserSolution{}
+		var env string
+		err := rows.Scan(&solution.Template, &solution.URL, &solution.ID, &solution.Name, &solution.Namespace, &env, &solution.Branch)
+		if err != nil {
+			return nil, err
+		}
+		if err := jsoniter.UnmarshalFromString(env, &solution.Env); err != nil {
+			return nil, err
+		}
+
+		solution.URL = solution.URL + "/tree/" + solution.Branch
+		ret.Solutions = append(ret.Solutions, solution)
+	}
+
+	return &ret, rows.Err()
+}
+
+func (pgdb *pgDB) GetSolution(ctx context.Context, userID, namespace, solutionName string) (*kube_types.UserSolution, error) {
 	pgdb.log.Infoln("Get solution")
 
 	var solution kube_types.UserSolution
 
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT templates.name, templates.url, solutions.id, solutions.name, solutions.namespace, parameters.env, parameters.branch "+
-		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.name=$2 AND solutions.is_deleted !='true'", userID, solutionName)
+		"FROM solutions JOIN parameters ON solutions.id = parameters.solution_id JOIN templates ON solutions.template_id = templates.ID WHERE solutions.user_id=$1 AND solutions.name=$2 AND solutions.namespace=$3 AND solutions.is_deleted !='true'", userID, solutionName, namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -113,10 +143,10 @@ func (pgdb *pgDB) GetSolution(ctx context.Context, userID, solutionName string) 
 	return &solution, rows.Err()
 }
 
-func (pgdb *pgDB) DeleteSolution(ctx context.Context, name string, userID string) error {
+func (pgdb *pgDB) DeleteSolution(ctx context.Context, userID, namespace, solutionName string) error {
 	pgdb.log.Infoln("Deleting solution")
 
-	res, err := pgdb.eLog.ExecContext(ctx, `UPDATE solutions SET is_deleted = 'true', deleted_at=$1 WHERE name=$2 AND user_id=$3 AND is_deleted != 'true'`, time.Now(), name, userID)
+	res, err := pgdb.eLog.ExecContext(ctx, `UPDATE solutions SET is_deleted = 'true', deleted_at=$1 WHERE name=$2 AND user_id=$3 AND namespace=$4 AND is_deleted != 'true'`, time.Now(), solutionName, userID, namespace)
 	if err != nil {
 		return err
 	}
@@ -139,6 +169,24 @@ func (pgdb *pgDB) CompletelyDeleteSolution(ctx context.Context, name string, use
 	rows, err := res.RowsAffected()
 	if rows == 0 {
 		return sErrors.ErrSolutionNotExist()
+	}
+	return nil
+}
+
+func (pgdb *pgDB) CompletelyDeleteUserSolutions(ctx context.Context, userID string) error {
+	pgdb.log.Infoln("Deleting user solutions")
+
+	if _, err := pgdb.eLog.ExecContext(ctx, "DELETE FROM solutions WHERE user_id=$1", userID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (pgdb *pgDB) CompletelyDeleteNamespaceSolutions(ctx context.Context, namespace string) error {
+	pgdb.log.Infoln("Deleting namespace solution")
+
+	if _, err := pgdb.eLog.ExecContext(ctx, "DELETE FROM solutions WHERE namespace=$1", namespace); err != nil {
+		return err
 	}
 	return nil
 }

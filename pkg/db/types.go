@@ -28,10 +28,13 @@ type DB interface {
 	DeactivateTemplate(ctx context.Context, solution string) error
 
 	GetSolutionsList(ctx context.Context, userID string) (*kube_types.UserSolutionsList, error)
-	GetSolution(ctx context.Context, userID, solutionName string) (*kube_types.UserSolution, error)
+	GetNamespaceSolutionsList(ctx context.Context, namespace, userID string) (*kube_types.UserSolutionsList, error)
+	GetSolution(ctx context.Context, userID, namespace, solutionName string) (*kube_types.UserSolution, error)
 	AddSolution(ctx context.Context, solution kube_types.UserSolution, userID, templateID, uuid, env string) error
-	DeleteSolution(ctx context.Context, name string, userID string) error
+	DeleteSolution(ctx context.Context, userID, namespace, solutionName string) error
 	CompletelyDeleteSolution(ctx context.Context, name string, userID string) error
+	CompletelyDeleteUserSolutions(ctx context.Context, userID string) error
+	CompletelyDeleteNamespaceSolutions(ctx context.Context, namespace string) error
 
 	// Perform operations inside transaction
 	// Transaction commits if `f` returns nil error, rollbacks and forwards error otherwise

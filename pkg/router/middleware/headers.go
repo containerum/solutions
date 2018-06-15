@@ -1,0 +1,78 @@
+package middleware
+
+import (
+	"errors"
+	"fmt"
+	"net/textproto"
+
+	"git.containerum.net/ch/solutions/pkg/model"
+	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"github.com/containerum/cherry/adaptors/gonic"
+	headers "github.com/containerum/utils/httputil"
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+)
+
+var (
+	ErrInvalidUserRole = errors.New("invalid user role")
+)
+
+func RequiredUserHeaders() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		log.WithField("Headers", ctx.Request.Header).Debug("Header list")
+		notFoundHeaders := requireHeaders(ctx, headers.UserRoleXHeader)
+		if len(notFoundHeaders) > 0 {
+			gonic.Gonic(sErrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
+			return
+		}
+		// Check User-Role and User-Namespace
+		if isUser, err := checkIsUserRole(GetHeader(ctx, headers.UserRoleXHeader)); err != nil {
+			log.WithField("Value", GetHeader(ctx, headers.UserRoleXHeader)).WithError(err).Warn("Check User-Role Error")
+			gonic.Gonic(sErrors.ErrInvalidRole(), ctx)
+		} else {
+			// User-Role: user, check User-Namespace
+			if isUser {
+				notFoundHeaders := requireHeaders(ctx, headers.UserRoleXHeader, headers.UserNamespacesXHeader, headers.UserIDXHeader)
+				if len(notFoundHeaders) > 0 {
+					gonic.Gonic(sErrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
+					return
+				}
+				userNs, errNs := checkUserNamespace(GetHeader(ctx, headers.UserNamespacesXHeader))
+				if errNs != nil {
+					log.WithField("Value", GetHeader(ctx, headers.UserNamespacesXHeader)).WithError(errNs).Warn("Check User-Namespace header Error")
+					gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetails(fmt.Sprintf("%v: %v", headers.UserNamespacesXHeader, errNs)), ctx)
+					return
+				}
+				ctx.Set(UserNamespaces, userNs)
+			}
+		}
+		ctx.Set(UserRole, GetHeader(ctx, headers.UserRoleXHeader))
+	}
+}
+
+func checkIsUserRole(userRole string) (bool, error) {
+	switch userRole {
+	case "", RoleAdmin:
+		return false, nil
+	case RoleUser:
+		return true, nil
+	}
+	return false, ErrInvalidUserRole
+}
+
+func checkUserNamespace(userNamespace string) (*model.UserHeaderDataMap, error) {
+	return model.ParseUserHeaderData(userNamespace)
+}
+
+func requireHeaders(ctx *gin.Context, headers ...string) (notFoundHeaders []string) {
+	for _, v := range headers {
+		if GetHeader(ctx, v) == "" {
+			notFoundHeaders = append(notFoundHeaders, v)
+		}
+	}
+	return
+}
+
+func GetHeader(ctx *gin.Context, header string) string {
+	return ctx.GetHeader(textproto.CanonicalMIMEHeaderKey(header))
+}

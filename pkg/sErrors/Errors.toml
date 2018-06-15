@@ -111,3 +111,15 @@ SID = "Solutions"
     StatusHTTP = 500
     Message = "Unable to activate template"
     Kind = 19
+
+[[error]]
+    Name = "ErrAccessError"
+    StatusHTTP = 403
+    Message = "Access denied"
+    Kind = 20
+
+[[error]]
+    Name = "ErrInvalidRole"
+    StatusHTTP = 403
+    Message = "Invalid user role"
+    Kind = 21
