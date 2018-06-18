@@ -50,6 +50,25 @@ func GetSolutionsList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
+// swagger:operation GET /namespaces/{namespace}/solutions Solutions GetNamespaceSolutions
+// Get running namespace solutions list.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '200':
+//    description: running namespace solutions list
+//    schema:
+//      $ref: '#/definitions/UserSolutionsList'
+//  default:
+//    $ref: '#/responses/error'
 func GetNamespaceSolutions(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	resp, err := ss.GetNamespaceSolutionsList(ctx.Request.Context(), ctx.Param("namespace"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
@@ -66,7 +85,7 @@ func GetNamespaceSolutions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution} Solutions GetSolution
+// swagger:operation GET /namespaces/{namespace}/solutions/{solution} Solutions GetSolution
 // Get running solution.
 //
 // ---
@@ -74,6 +93,10 @@ func GetNamespaceSolutions(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
 //  - name: solution
 //    in: path
 //    type: string
@@ -101,7 +124,7 @@ func GetSolution(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution}/deployments Solutions GetSolutionsDeployments
+// swagger:operation GET /namespaces/{namespace}/solutions/{solution}/deployments Solutions GetSolutionsDeployments
 // Get solution deployments.
 //
 // ---
@@ -109,6 +132,10 @@ func GetSolution(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
 //  - name: solution
 //    in: path
 //    type: string
@@ -136,7 +163,7 @@ func GetSolutionsDeployments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /solutions/{solution}/services Solutions GetSolutionsServices
+// swagger:operation GET /namespaces/{namespace}/solutions/{solution}/services Solutions GetSolutionsServices
 // Get solution services.
 //
 // ---
@@ -144,6 +171,10 @@ func GetSolutionsDeployments(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
 //  - name: solution
 //    in: path
 //    type: string
@@ -171,7 +202,7 @@ func GetSolutionsServices(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation POST /solutions Solutions RunSolution
+// swagger:operation POST /namespaces/{namespace}/solutions Solutions RunSolution
 // Run solution.
 //
 // ---
@@ -179,6 +210,10 @@ func GetSolutionsServices(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
 //  - name: body
 //    in: body
 //    schema:
@@ -224,7 +259,7 @@ func RunSolution(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, ret)
 }
 
-// swagger:operation DELETE /solutions/{solution} Solutions DeleteSolution
+// swagger:operation DELETE /namespaces/{namespace}/solutions/{solution} Solutions DeleteSolution
 // Delete solution.
 //
 // ---
@@ -232,6 +267,10 @@ func RunSolution(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
 //  - name: solution
 //    in: path
 //    type: string
@@ -256,6 +295,19 @@ func DeleteSolution(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+// swagger:operation DELETE /solutions Solutions DeleteUserSolutions
+// Delete user solution.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+// responses:
+//  '202':
+//    description: user solutions deleted
+//  default:
+//    $ref: '#/responses/error'
 func DeleteUserSolutions(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	if err := ss.DeleteUserSolutions(ctx.Request.Context()); err != nil {
@@ -271,6 +323,27 @@ func DeleteUserSolutions(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
+// swagger:operation DELETE /namespaces/{namespace}/solutions Solutions DeleteNamespaceSolutions
+// Delete all namespace solutions.
+//
+// ---
+// x-method-visibility: public
+// parameters:
+//  - $ref: '#/parameters/UserRoleHeader'
+//  - $ref: '#/parameters/UserIDHeader'
+//  - name: namespace
+//    in: path
+//    type: string
+//    required: true
+//  - name: solution
+//    in: path
+//    type: string
+//    required: true
+// responses:
+//  '202':
+//    description: solutions deleted
+//  default:
+//    $ref: '#/responses/error'
 func DeleteNamespaceSolutions(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 	if err := ss.DeleteNamespaceSolutions(ctx.Request.Context(), ctx.Param("namespace")); err != nil {
@@ -282,6 +355,5 @@ func DeleteNamespaceSolutions(ctx *gin.Context) {
 		}
 		return
 	}
-
 	ctx.Status(http.StatusAccepted)
 }

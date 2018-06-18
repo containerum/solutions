@@ -1,6 +1,276 @@
 {
   "swagger": "2.0",
   "paths": {
+    "/namespaces/{namespace}/solutions": {
+      "get": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Get running namespace solutions list.",
+        "operationId": "GetNamespaceSolutions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "running namespace solutions list",
+            "schema": {
+              "$ref": "#/definitions/UserSolutionsList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      },
+      "post": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Run solution.",
+        "operationId": "RunSolution",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UserSolution"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "solution created",
+            "schema": {
+              "$ref": "#/definitions/RunSolutionResponce"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      },
+      "delete": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Delete all namespace solutions.",
+        "operationId": "DeleteNamespaceSolutions",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "solutions deleted"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/namespaces/{namespace}/solutions/{solution}": {
+      "get": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Get running solution.",
+        "operationId": "GetSolution",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "running solution",
+            "schema": {
+              "$ref": "#/definitions/UserSolutionsList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      },
+      "delete": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Delete solution.",
+        "operationId": "DeleteSolution",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "solution deleted"
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/namespaces/{namespace}/solutions/{solution}/deployments": {
+      "get": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Get solution deployments.",
+        "operationId": "GetSolutionsDeployments",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "solution deployments",
+            "schema": {
+              "$ref": "#/definitions/DeploymentsList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
+    "/namespaces/{namespace}/solutions/{solution}/services": {
+      "get": {
+        "tags": [
+          "Solutions"
+        ],
+        "summary": "Get solution services.",
+        "operationId": "GetSolutionsServices",
+        "parameters": [
+          {
+            "$ref": "#/parameters/UserRoleHeader"
+          },
+          {
+            "$ref": "#/parameters/UserIDHeader"
+          },
+          {
+            "type": "string",
+            "name": "namespace",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "name": "solution",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "solutions services",
+            "schema": {
+              "$ref": "#/definitions/ServicesList"
+            }
+          },
+          "default": {
+            "$ref": "#/responses/error"
+          }
+        },
+        "x-method-visibility": "public"
+      }
+    },
     "/solutions": {
       "get": {
         "tags": [
@@ -29,135 +299,23 @@
         },
         "x-method-visibility": "public"
       },
-      "post": {
-        "tags": [
-          "Solutions"
-        ],
-        "summary": "Run solution.",
-        "operationId": "RunSolution",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/UserSolution"
-            }
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "solution created",
-            "schema": {
-              "$ref": "#/definitions/RunSolutionResponce"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
-    },
-    "/solutions/{solution}": {
       "delete": {
         "tags": [
           "Solutions"
         ],
-        "summary": "Delete solution.",
-        "operationId": "DeleteSolution",
+        "summary": "Delete user solution.",
+        "operationId": "DeleteUserSolutions",
         "parameters": [
           {
             "$ref": "#/parameters/UserRoleHeader"
           },
           {
             "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
           }
         ],
         "responses": {
           "202": {
-            "description": "solution deleted"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
-    },
-    "/solutions/{solution}/deployments": {
-      "get": {
-        "tags": [
-          "Solutions"
-        ],
-        "summary": "Get solution deployments.",
-        "operationId": "GetSolutionsDeployments",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "solution deployments",
-            "schema": {
-              "$ref": "#/definitions/DeploymentsList"
-            }
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      }
-    },
-    "/solutions/{solution}/services": {
-      "get": {
-        "tags": [
-          "Solutions"
-        ],
-        "summary": "Get solution services.",
-        "operationId": "GetSolutionsServices",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "solutions services",
-            "schema": {
-              "$ref": "#/definitions/ServicesList"
-            }
+            "description": "user solutions deleted"
           },
           "default": {
             "$ref": "#/responses/error"
@@ -257,36 +415,6 @@
         "responses": {
           "202": {
             "description": "solution updated"
-          },
-          "default": {
-            "$ref": "#/responses/error"
-          }
-        },
-        "x-method-visibility": "public"
-      },
-      "delete": {
-        "tags": [
-          "Templates"
-        ],
-        "summary": "Delete template.",
-        "operationId": "DeleteTemplate",
-        "parameters": [
-          {
-            "$ref": "#/parameters/UserRoleHeader"
-          },
-          {
-            "$ref": "#/parameters/UserIDHeader"
-          },
-          {
-            "type": "string",
-            "name": "solution",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "202": {
-            "description": "solution deleted"
           },
           "default": {
             "$ref": "#/responses/error"
@@ -512,6 +640,11 @@
         "data": {
           "$ref": "#/definitions/ConfigMapData"
         },
+        "deleted_at": {
+          "description": "delete date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DeletedAt"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
@@ -658,6 +791,21 @@
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
+    "CreateVolume": {
+      "description": "CreateVolume --",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "tariff_id": {
+          "type": "string",
+          "x-go-name": "TariffID"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
     "Deployment": {
       "description": "Deployment -- model for deployments",
       "type": "object",
@@ -667,12 +815,26 @@
         "replicas"
       ],
       "properties": {
+        "active": {
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
         "containers": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/Container"
           },
           "x-go-name": "Containers"
+        },
+        "created_at": {
+          "description": "creation date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "deleted_at": {
+          "description": "delete date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DeletedAt"
         },
         "name": {
           "type": "string",
@@ -686,6 +848,11 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "Replicas"
+        },
+        "solution_id": {
+          "description": "Solution ID (only if deployment is part of solution)",
+          "type": "string",
+          "x-go-name": "SolutionID"
         },
         "status": {
           "$ref": "#/definitions/DeploymentStatus"
@@ -701,6 +868,9 @@
           "type": "integer",
           "format": "uint64",
           "x-go-name": "TotalMemory"
+        },
+        "version": {
+          "$ref": "#/definitions/Version"
         }
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
@@ -713,11 +883,6 @@
           "type": "integer",
           "format": "int64",
           "x-go-name": "AvailableReplicas"
-        },
-        "created_at": {
-          "description": "creation date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "CreatedAt"
         },
         "ready_replicas": {
           "type": "integer",
@@ -734,15 +899,21 @@
           "format": "int64",
           "x-go-name": "UnavailableReplicas"
         },
-        "updated_at": {
-          "description": "update date in RFC3339 format",
-          "type": "string",
-          "x-go-name": "UpdatedAt"
-        },
         "updated_replicas": {
           "type": "integer",
           "format": "int64",
           "x-go-name": "UpdatedReplicas"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "DeploymentVersion": {
+      "description": "DeploymentVersion -- model for deployment version update",
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "x-go-name": "Version"
         }
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
@@ -841,6 +1012,18 @@
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/cherry"
     },
+    "Image": {
+      "type": "object",
+      "properties": {
+        "Name": {
+          "type": "string"
+        },
+        "Tag": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
     "Ingress": {
       "description": "Ingress -- model for ingress",
       "type": "object",
@@ -853,6 +1036,11 @@
           "description": "creation date in RFC3339 format",
           "type": "string",
           "x-go-name": "CreatedAt"
+        },
+        "deleted_at": {
+          "description": "delete date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DeletedAt"
         },
         "name": {
           "type": "string",
@@ -936,6 +1124,10 @@
         "resources": {
           "$ref": "#/definitions/Resources"
         },
+        "tariff_id": {
+          "type": "string",
+          "x-go-name": "TariffID"
+        },
         "users": {
           "type": "array",
           "items": {
@@ -959,6 +1151,23 @@
         }
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "PRVersion": {
+      "description": "PRVersion represents a PreRelease Version",
+      "type": "object",
+      "properties": {
+        "IsNum": {
+          "type": "boolean"
+        },
+        "VersionNum": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "VersionStr": {
+          "type": "string"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/blang/semver"
     },
     "Path": {
       "description": "Path -- ingress path",
@@ -1109,6 +1318,17 @@
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
+    "ResourceUpdateName": {
+      "description": "ResourceUpdateName -- contains new resource name",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
     "Resources": {
       "type": "object",
       "title": "Resources -- represents namespace limits and user resources.",
@@ -1195,6 +1415,11 @@
           },
           "x-go-name": "Data"
         },
+        "deleted_at": {
+          "description": "delete date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DeletedAt"
+        },
         "name": {
           "type": "string",
           "x-go-name": "Name"
@@ -1249,6 +1474,11 @@
           "type": "string",
           "x-go-name": "CreatedAt"
         },
+        "deleted_at": {
+          "description": "delete date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "DeletedAt"
+        },
         "deploy": {
           "type": "string",
           "x-go-name": "Deploy"
@@ -1278,6 +1508,11 @@
             "$ref": "#/definitions/ServicePort"
           },
           "x-go-name": "Ports"
+        },
+        "solution_id": {
+          "description": "Solution ID (only if service is part of solution)",
+          "type": "string",
+          "x-go-name": "SolutionID"
         }
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
@@ -1435,6 +1670,99 @@
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
+    "UserGroup": {
+      "description": "UserGroup -- group of users",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/UserGroupAccess"
+        },
+        "created_at": {
+          "description": "creation date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "CreatedAt"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "label": {
+          "type": "string",
+          "x-go-name": "Label"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserGroupMember"
+          },
+          "x-go-name": "Members"
+        },
+        "members_count": {
+          "type": "integer",
+          "format": "uint64",
+          "x-go-name": "MembersCount"
+        },
+        "owner_login": {
+          "type": "string",
+          "x-go-name": "OwnerLogin"
+        },
+        "owner_user_id": {
+          "type": "string",
+          "x-go-name": "OwnerID"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserGroupAccess": {
+      "type": "string",
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserGroupMember": {
+      "description": "UserGroupMember -- group member",
+      "type": "object",
+      "properties": {
+        "access": {
+          "$ref": "#/definitions/UserGroupAccess"
+        },
+        "id": {
+          "type": "string",
+          "x-go-name": "ID"
+        },
+        "username": {
+          "type": "string",
+          "x-go-name": "Username"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserGroupMembers": {
+      "description": "UserGroupMembers -- list of user group members",
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserGroupMember"
+          },
+          "x-go-name": "Members"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
+    "UserGroups": {
+      "description": "UserGroups -- list of user groups",
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserGroup"
+          },
+          "x-go-name": "Groups"
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
+    },
     "UserHeaderData": {
       "description": "represents header data for X-User-Namespace and X-User-Volume headers (encoded in base64)",
       "type": "object",
@@ -1495,6 +1823,10 @@
         "template": {
           "type": "string",
           "x-go-name": "Template"
+        },
+        "url": {
+          "type": "string",
+          "x-go-name": "URL"
         }
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
@@ -1513,6 +1845,37 @@
       },
       "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/containerum/kube-client/pkg/model"
     },
+    "Version": {
+      "description": "Version represents a semver compatible version",
+      "type": "object",
+      "properties": {
+        "Build": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "Major": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "Minor": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "Patch": {
+          "type": "integer",
+          "format": "uint64"
+        },
+        "Pre": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PRVersion"
+          }
+        }
+      },
+      "x-go-package": "git.containerum.net/ch/solutions/vendor/github.com/blang/semver"
+    },
     "Volume": {
       "description": "Volume -- volume representation",
       "type": "object",
@@ -1529,8 +1892,13 @@
           "x-go-name": "Capacity"
         },
         "created_at": {
+          "description": "creation date in RFC3339 format",
           "type": "string",
           "x-go-name": "CreatedAt"
+        },
+        "deleted_at": {
+          "type": "string",
+          "x-go-name": "DeletedAt"
         },
         "name": {
           "type": "string",
@@ -1544,9 +1912,18 @@
           "type": "string",
           "x-go-name": "OwnerLogin"
         },
+        "status": {
+          "description": "delete date in RFC3339 format",
+          "type": "string",
+          "x-go-name": "Status"
+        },
         "storage_name": {
           "type": "string",
           "x-go-name": "StorageName"
+        },
+        "tariff_id": {
+          "type": "string",
+          "x-go-name": "TariffID"
         },
         "users": {
           "type": "array",
