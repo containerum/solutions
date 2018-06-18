@@ -20,8 +20,8 @@
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "4c82a344b98f2f8631642be59f57beaaeebb5541"
-  version = "v0.21.3"
+  revision = "dbfd7cb7735022ac3e819a199a4e07a44772bb45"
+  version = "v0.23.2"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -115,7 +115,7 @@
     ".",
     "reflectx"
   ]
-  revision = "2aeb6a910c2b94f2d5eb53d9895d80e27264ec41"
+  revision = "0dae4fefe7c0e190f7b5a78dac28a1c82cc8d849"
 
 [[projects]]
   name = "github.com/json-iterator/go"
@@ -178,7 +178,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "37a17fe027db43f76fd88b056ddf588563fc8722"
+  revision = "027cca12c2d63e3d62b670d901e8a2c95854feec"
 
 [[projects]]
   branch = "master"
@@ -199,7 +199,7 @@
     "unix",
     "windows"
   ]
-  revision = "8883426083c04a2627e6e59d84d5f6fb63d16c91"
+  revision = "6c888cc515d3ed83fc103cf1d84468aad274b0a7"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -249,6 +249,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4e333b9f511d4ba0defa4d7e30893e358cf47a59c156055f2d7d5c357a6b4080"
+  inputs-digest = "5f6c626771a366e4c77969f0b3db00e21507038eda900742c5abeede2b64eaec"
   solver-name = "gps-cdcl"
   solver-version = 1

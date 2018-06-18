@@ -335,10 +335,6 @@ func DeleteUserSolutions(ctx *gin.Context) {
 //    in: path
 //    type: string
 //    required: true
-//  - name: solution
-//    in: path
-//    type: string
-//    required: true
 // responses:
 //  '202':
 //    description: solutions deleted
