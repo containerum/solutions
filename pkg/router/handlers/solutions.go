@@ -222,7 +222,7 @@ func GetSolutionsServices(ctx *gin.Context) {
 //  '202':
 //    description: solution created
 //    schema:
-//      $ref: '#/definitions/RunSolutionResponce'
+//      $ref: '#/definitions/RunSolutionResponse'
 //  default:
 //    $ref: '#/responses/error'
 func RunSolution(ctx *gin.Context) {
