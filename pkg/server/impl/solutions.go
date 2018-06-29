@@ -125,10 +125,10 @@ func createService(ctx context.Context, s *serverImpl, resourceConfig *server.Co
 	return err
 }
 
-func rollbackSolution(ctx context.Context, s *serverImpl, solutionName string) {
+func rollbackSolution(ctx context.Context, s *serverImpl, solutionName, solutionNamespace string) {
 	s.log.Infoln("No resources was created. Deleting solution...")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionName, httputil.MustGetUserID(ctx))
+		err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionNamespace, solutionName)
 		return err
 	}); err != nil {
 		s.log.Errorln(err)
@@ -195,7 +195,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Use
 	}
 
 	if ret.Created == 0 {
-		rollbackSolution(ctx, s, solutionReq.Name)
+		rollbackSolution(ctx, s, solutionReq.Name, solutionReq.Namespace)
 		return nil, sErrors.ErrUnableCreateSolution().AddDetails(ret.Errors...)
 	}
 

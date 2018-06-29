@@ -50,7 +50,6 @@ func NewHTTPResourceClient(serverURL string, debug bool) ResourceClient {
 
 func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace string, deployment kube_types.Deployment) error {
 	c.log.Info("Creating deployment")
-
 	resp, err := c.rest.R().SetContext(ctx).
 		SetBody(deployment).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).

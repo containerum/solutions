@@ -32,7 +32,7 @@ type DB interface {
 	GetSolution(ctx context.Context, namespace, solutionName string) (*kube_types.UserSolution, error)
 	AddSolution(ctx context.Context, solution kube_types.UserSolution, userID, templateID, uuid, env string) error
 	DeleteSolution(ctx context.Context, namespace, solutionName string) error
-	CompletelyDeleteSolution(ctx context.Context, name string, userID string) error
+	CompletelyDeleteSolution(ctx context.Context, namespace, solutionName string) error
 	CompletelyDeleteUserSolutions(ctx context.Context, userID string) error
 	CompletelyDeleteNamespaceSolutions(ctx context.Context, namespace string) error
 
