@@ -10,7 +10,7 @@ import (
 	"git.containerum.net/ch/solutions/static"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/cherry/adaptors/gonic"
-	cors "gopkg.in/gin-contrib/cors.v1"
+	"gopkg.in/gin-contrib/cors.v1"
 
 	"git.containerum.net/ch/solutions/pkg/server"
 

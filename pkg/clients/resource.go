@@ -96,7 +96,7 @@ func (c *httpResourceClient) DeleteServices(ctx context.Context, namespace, solu
 	c.log.Info("Deleting services")
 	resp, err := c.rest.R().SetContext(ctx).
 		SetHeaders(utils.RequestHeadersMap(ctx)).
-		Delete(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
+		Delete(fmt.Sprintf("/namespaces/%s/solutions/%s/services", namespace, solutionName))
 	if err != nil {
 		return err
 	}
