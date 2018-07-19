@@ -155,7 +155,7 @@ func (pgdb *pgDB) DeleteSolution(ctx context.Context, namespace, solutionName st
 	if rows == 0 {
 		return sErrors.ErrSolutionNotExist()
 	}
-	return nil
+	return err
 }
 
 func (pgdb *pgDB) CompletelyDeleteSolution(ctx context.Context, namespace, solutionName string) error {
@@ -170,7 +170,7 @@ func (pgdb *pgDB) CompletelyDeleteSolution(ctx context.Context, namespace, solut
 	if rows == 0 {
 		return sErrors.ErrSolutionNotExist()
 	}
-	return nil
+	return err
 }
 
 func (pgdb *pgDB) CompletelyDeleteUserSolutions(ctx context.Context, userID string) error {
