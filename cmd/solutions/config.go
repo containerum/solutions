@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"git.containerum.net/ch/solutions/pkg/db"
+	"git.containerum.net/ch/solutions/pkg/db/postgres"
 	"git.containerum.net/ch/solutions/pkg/server"
 	"git.containerum.net/ch/solutions/pkg/server/impl"
 	"github.com/gin-gonic/gin"
@@ -140,6 +141,7 @@ func getDB(c *cli.Context) (db.DB, error) {
 		if c.Bool(dbPGNoSSLFlag) {
 			url = url + "?sslmode=disable"
 		}
+		return postgres.DBConnect(url, c.String(dbMigrationsFlag))
 	default:
 		return nil, errors.New("invalid db")
 	}
