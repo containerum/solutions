@@ -1909,7 +1909,7 @@
       "type": "object",
       "properties": {
         "access": {
-          "$ref": "#/definitions/UserGroupAccess"
+          "$ref": "#/definitions/AccessLevel"
         },
         "created_at": {
           "description": "creation date in RFC3339 format",
@@ -1956,7 +1956,7 @@
       "type": "object",
       "properties": {
         "access": {
-          "$ref": "#/definitions/UserGroupAccess"
+          "$ref": "#/definitions/AccessLevel"
         },
         "id": {
           "type": "string",
