@@ -76,7 +76,7 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 		return nil, err
 	}
 
-	resp := kube_types.SolutionResources{map[string]int{}}
+	resp := kube_types.SolutionResources{Resources: map[string]int{}}
 
 	for _, r := range solutionStr.Run {
 		resp.Resources[r.Type]++
