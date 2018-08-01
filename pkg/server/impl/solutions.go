@@ -46,7 +46,7 @@ func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string
 	}
 
 	if len(solutionConfig.Env) == 0 {
-		solutionReq.Env = make(map[string]string, 0)
+		solutionReq.Env = make(map[string]string)
 	}
 
 	for k, v := range solutionReq.Env {
