@@ -19,16 +19,15 @@ env:
   global:
     CH_SOLUTIONS_DEBUG: "false"
     CH_SOLUTIONS_TEXTLOG: "false"
-    CH_SOLUTIONS_PORT: ":6767"
     CH_SOLUTIONS_DB: "postgres"
-    DB_BASE: "solutions"
-    DB_USER: "solutions"
-    DB_SSLMODE: "false"
+    CH_SOLUTIONS_PG_LOGIN: "solutions"
+    CH_SOLUTIONS_PG_DBNAME: "solutions"
+    CH_SOLUTIONS_PG_NOSSL: "true"
   local:
-    DB_HOST: "postgres-master.postgres.svc.cluster.local:5432"
+    CH_SOLUTIONS_PG_ADDR: "postgres-master.postgres.svc.cluster.local:5432"
     CH_SOLUTIONS_KUBE_API_URL: "http://kube-api:1214"
     CH_SOLUTIONS_RESOURCE_URL: "http://resource-service:1213"
-    DB_PASSWORD:
+    CH_SOLUTIONS_PG_PASSWORD:
 
 postgresql:
   persistence:
