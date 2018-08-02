@@ -124,9 +124,8 @@ func (pgdb *pgDB) GetSolution(ctx context.Context, namespace, solutionName strin
 	if !rows.Next() {
 		if rows.Err() != nil {
 			return nil, rows.Err()
-		} else {
-			return nil, sErrors.ErrSolutionNotExist()
 		}
+		return nil, sErrors.ErrSolutionNotExist()
 	}
 
 	var env string

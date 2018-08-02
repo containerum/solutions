@@ -129,7 +129,6 @@ func (pgdb *pgDB) Transactional(ctx context.Context, f func(ctx context.Context,
 			err = db.ErrTransactionCommit
 		}
 	}(f(ctx, arg))
-
 	return
 }
 
