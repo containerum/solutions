@@ -1,0 +1,48 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+  non-go = true
+
+  [[prune.project]]
+    name = "github.com/containerum/utils"
+    non-go = false
+
+  [[prune.project]]
+    name = "github.com/containerum/cherry"
+    non-go = false
+
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  version = "~1.2.0"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.0.5"
+
+[[constraint]]
+  name = "github.com/urfave/cli"
+  version = "1.20.0"
+
+[[constraint]]
+  name = "github.com/json-iterator/go"
+  version = "1.1.3"
+
+[[constraint]]
+  name = "github.com/containerum/utils"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/containerum/cherry"
+  version = "~v1.0.1-rc2"
+
+[[constraint]]
+  name = "github.com/containerum/kube-client"
+  version = "^0.23.2"
+
+[[constraint]]
+  name = "github.com/go-resty/resty"
+  version = "~1.6"
+
+[[constraint]]
+  name = "github.com/golang-migrate/migrate"
+  version = "3.2.0"

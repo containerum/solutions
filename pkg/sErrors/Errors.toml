@@ -1,0 +1,125 @@
+# File for noice errors generation
+
+Name = "sErrors"
+SID = "Solutions"
+
+# errors
+[[error]]
+    Name = "ErrAdminRequired"
+    StatusHTTP = 403
+    Message = "Admin access required"
+    Kind = 1
+
+[[error]]
+    Name = "ErrRequiredHeadersNotProvided"
+    StatusHTTP = 400
+    Message = "Required headers not provided"
+    Kind = 2
+
+[[error]]
+    Name = "ErrRequestValidationFailed"
+    StatusHTTP = 400
+    Message = "Request validation failed"
+    Kind = 3
+
+[[error]]
+    Name = "ErrUnableUpdateTemplate"
+    StatusHTTP = 500
+    Message = "Unable to update template"
+    Kind = 4
+
+[[error]]
+    Name = "ErrUnableGetTemplatesList"
+    StatusHTTP = 500
+    Message = "Unable to get solutions templates list"
+    Kind = 5
+
+[[error]]
+    Name = "ErrUnableGetTemplate"
+    StatusHTTP = 500
+    Message = "Unable to get solutions template"
+    Kind = 6
+
+[[error]]
+    Name = "ErrUnableGetSolutionsList"
+    StatusHTTP = 500
+    Message = "Unable to get user solutions list"
+    Kind = 7
+
+[[error]]
+    Name = "ErrUnableGetSolution"
+    StatusHTTP = 500
+    Message = "Unable to get user solution"
+    Kind = 8
+
+[[error]]
+    Name = "ErrUnableCreateSolution"
+    StatusHTTP = 500
+    Message = "Unable to create solution"
+    Kind = 9
+
+[[error]]
+    Name = "ErrUnableDeleteSolution"
+    StatusHTTP = 500
+    Message = "Unable to delete solution"
+    Kind = 10
+
+[[error]]
+    Name = "ErrSolutionNotExist"
+    StatusHTTP = 404
+    Message = "Solution with this name doesn't exist"
+    Kind = 12
+
+[[error]]
+    Name = "ErrInternalError"
+    StatusHTTP = 500
+    Message = "Internal error"
+    Kind = 13
+
+[[error]]
+    Name = "ErrUnableAddTemplate"
+    StatusHTTP = 500
+    Message = "Unable to add solution template"
+    Kind = 14
+
+[[error]]
+    Name = "ErrResourceAlreadyExists"
+    StatusHTTP = 409
+    Message = "Resource with this name already exists"
+    Kind = 15
+
+[[error]]
+    Name = "ErrTemplateNotExist"
+    StatusHTTP = 404
+    Message = "Template with this name doesn't exist"
+    Kind = 16
+
+[[error]]
+    Name = "ErrUnableActivateTemplate"
+    StatusHTTP = 500
+    Message = "Unable to activate template"
+    Kind = 17
+
+[[error]]
+    Name = "ErrUnableDeactivateTemplate"
+    StatusHTTP = 500
+    Message = "Unable to activate template"
+    Kind = 18
+
+[[error]]
+    Name = "ErrUnableDeleteTemplate"
+    StatusHTTP = 500
+    Message = "Unable to activate template"
+    Kind = 19
+
+[[error]]
+    Name = "ErrAccessError"
+    StatusHTTP = 403
+    Message = "Access denied"
+    Kind = 20
+
+[[error]]
+    Name = "ErrInvalidRole"
+    StatusHTTP = 403
+    Message = "Invalid user role"
+    Kind = 21
