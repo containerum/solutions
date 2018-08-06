@@ -28,7 +28,7 @@ import (
 //  '200':
 //    description: available solutions
 //    schema:
-//      $ref: '#/definitions/AvailableSolutionsList'
+//      $ref: '#/definitions/SolutionsTemplatesList'
 //  default:
 //    $ref: '#/responses/error'
 func GetTemplatesList(ctx *gin.Context) {
@@ -46,7 +46,7 @@ func GetTemplatesList(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /templates/{solution}/env Templates GetTemplatesEnv
+// swagger:operation GET /templates/{template}/env Templates GetTemplatesEnv
 // Get solution templates environment variables.
 //
 // ---
@@ -54,7 +54,7 @@ func GetTemplatesList(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
+//  - name: template
 //    in: path
 //    type: string
 //    required: true
@@ -85,7 +85,7 @@ func GetTemplatesEnv(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, resp)
 }
 
-// swagger:operation GET /templates/{solution}/resources Templates GetTemplatesResources
+// swagger:operation GET /templates/{template}/resources Templates GetTemplatesResources
 // Get solution templates resources.
 //
 // ---
@@ -93,7 +93,7 @@ func GetTemplatesEnv(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
+//  - name: template
 //    in: path
 //    type: string
 //    required: true
@@ -135,7 +135,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 //  - name: body
 //    in: body
 //    schema:
-//      $ref: '#/definitions/AvailableSolution'
+//      $ref: '#/definitions/SolutionTemplate'
 // responses:
 //  '201':
 //    description: solution added
@@ -143,7 +143,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func AddTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	var request kube_types.AvailableSolution
+	var request kube_types.SolutionTemplate
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
@@ -176,7 +176,7 @@ func AddTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
-// swagger:operation PUT /templates/{solution} Templates UpdateTemplate
+// swagger:operation PUT /templates/{template} Templates UpdateTemplate
 // Update template.
 //
 // ---
@@ -184,14 +184,14 @@ func AddTemplate(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
+//  - name: template
 //    in: path
 //    type: string
 //    required: true
 //  - name: body
 //    in: body
 //    schema:
-//      $ref: '#/definitions/AvailableSolution'
+//      $ref: '#/definitions/SolutionTemplate'
 // responses:
 //  '202':
 //    description: solution updated
@@ -200,7 +200,7 @@ func AddTemplate(ctx *gin.Context) {
 func UpdateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	var request kube_types.AvailableSolution
+	var request kube_types.SolutionTemplate
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
@@ -235,7 +235,7 @@ func UpdateTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// swagger:operation POST /templates/{solution}/activate Templates ActivateTemplate
+// swagger:operation POST /templates/{template}/activate Templates ActivateTemplate
 // Activate template.
 //
 // ---
@@ -243,7 +243,7 @@ func UpdateTemplate(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
+//  - name: template
 //    in: path
 //    type: string
 //    required: true
@@ -268,7 +268,7 @@ func ActivateTemplate(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// swagger:operation POST /templates/{solution}/deactivate Templates DeactivateTemplate
+// swagger:operation POST /templates/{template}/deactivate Templates DeactivateTemplate
 // Deactivate template.
 //
 // ---
@@ -276,7 +276,7 @@ func ActivateTemplate(ctx *gin.Context) {
 // parameters:
 //  - $ref: '#/parameters/UserRoleHeader'
 //  - $ref: '#/parameters/UserIDHeader'
-//  - name: solution
+//  - name: template
 //    in: path
 //    type: string
 //    required: true

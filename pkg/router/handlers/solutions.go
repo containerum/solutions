@@ -31,7 +31,7 @@ const (
 //  '200':
 //    description: running solutions list
 //    schema:
-//      $ref: '#/definitions/UserSolutionsList'
+//      $ref: '#/definitions/SolutionsList'
 //  default:
 //    $ref: '#/responses/error'
 func GetSolutionsList(ctx *gin.Context) {
@@ -66,7 +66,7 @@ func GetSolutionsList(ctx *gin.Context) {
 //  '200':
 //    description: running namespace solutions list
 //    schema:
-//      $ref: '#/definitions/UserSolutionsList'
+//      $ref: '#/definitions/SolutionsList'
 //  default:
 //    $ref: '#/responses/error'
 func GetNamespaceSolutions(ctx *gin.Context) {
@@ -105,7 +105,7 @@ func GetNamespaceSolutions(ctx *gin.Context) {
 //  '200':
 //    description: running solution
 //    schema:
-//      $ref: '#/definitions/UserSolutionsList'
+//      $ref: '#/definitions/SolutionsList'
 //  default:
 //    $ref: '#/responses/error'
 func GetSolution(ctx *gin.Context) {
@@ -217,7 +217,7 @@ func GetSolutionsServices(ctx *gin.Context) {
 //  - name: body
 //    in: body
 //    schema:
-//      $ref: '#/definitions/UserSolution'
+//      $ref: '#/definitions/Solution'
 // responses:
 //  '202':
 //    description: solution created
@@ -228,7 +228,7 @@ func GetSolutionsServices(ctx *gin.Context) {
 func RunSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	var request kube_types.UserSolution
+	var request kube_types.Solution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
 		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
@@ -295,7 +295,7 @@ func DeleteSolution(ctx *gin.Context) {
 	ctx.Status(http.StatusAccepted)
 }
 
-// swagger:operation DELETE /solutions Solutions DeleteUserSolutions
+// swagger:operation DELETE /solutions Solutions DeleteSolutions
 // Delete user solution.
 //
 // ---
@@ -308,9 +308,9 @@ func DeleteSolution(ctx *gin.Context) {
 //    description: user solutions deleted
 //  default:
 //    $ref: '#/responses/error'
-func DeleteUserSolutions(ctx *gin.Context) {
+func DeleteSolutions(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	if err := ss.DeleteUserSolutions(ctx.Request.Context()); err != nil {
+	if err := ss.DeleteSolutions(ctx.Request.Context()); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {

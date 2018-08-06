@@ -11,7 +11,7 @@ import (
 	"github.com/json-iterator/go"
 )
 
-func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error) {
+func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.SolutionsTemplatesList, error) {
 	resp, err := s.svc.DB.GetTemplatesList(ctx, isAdmin)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
@@ -85,14 +85,14 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 	return &resp, nil
 }
 
-func (s *serverImpl) AddTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
+func (s *serverImpl) AddTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		return s.svc.DB.CreateTemplate(ctx, solution)
 	})
 	return s.handleDBError(err)
 }
 
-func (s *serverImpl) UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
+func (s *serverImpl) UpdateTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		return s.svc.DB.UpdateTemplate(ctx, solution)
 	})
@@ -113,7 +113,7 @@ func (s *serverImpl) DeactivateTemplate(ctx context.Context, solution string) er
 	return s.handleDBError(err)
 }
 
-func (s *serverImpl) ValidateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
+func (s *serverImpl) ValidateTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
 	solurl, err := url.Parse(solution.URL)
 	if err != nil {
 		return err
