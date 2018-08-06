@@ -1,17 +1,19 @@
 stages:
   - test
-  - dev-release
-  - dev-deploy
-
-
+  - release
+  - deploy
 
 variables:
-  TAG_DEV: develop
-  TAG: production
   CONTAINER_IMAGE: ${CI_REGISTRY}/${CI_PROJECT_PATH}
-  DEVELOP_NAMESPACE: hosting
+  NAMESPACE: hosting
+  SECRET: gitlab-registry
+  REPOSITORY: ${CI_REGISTRY}/${CI_PROJECT_PATH}
+  SAND_PG_PASS: "ohpeize7IC7AeVoo"
 
-  
+.docker-login: &docker-login
+  before_script:
+    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
+
 test-build:
   services:
   image: docker:latest
@@ -19,8 +21,8 @@ test-build:
   tags:
     - build
   script:
-    - docker build -t ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF} .
-    - docker rmi --force ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}
+    - docker build -t ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8} .
+    - docker rmi --force ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8}
   except:
     - develop
     - master
@@ -29,20 +31,20 @@ test-build:
 
 dev-release:
   image: docker:latest
-  stage: dev-release
+  stage: release
   tags:
     - build
+  <<: *docker-login
   script:
-    - docker login -u gitlab-ci-token -p ${CI_BUILD_TOKEN} ${CI_REGISTRY}
-    - docker build -t ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}  .
-    - docker push ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}
-    - docker rmi --force ${CONTAINER_IMAGE}:${TAG_DEV}-${CI_BUILD_REF}
+    - docker build -t ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8} .
+    - docker push ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8}
+    - docker rmi --force ${CONTAINER_IMAGE}:${CI_COMMIT_SHA:0:8}
   only:
     - develop
 
 dev-deploy:
   image: exon/helm
-  stage: dev-deploy
+  stage: deploy
   tags:
     - develop
   before_script:
@@ -54,6 +56,39 @@ dev-deploy:
     name: develop
   script:
     - cd deploy
-    - helm upgrade --install  --namespace=${DEVELOP_NAMESPACE} ${CI_PROJECT_NAME} --set image.tag=${TAG_DEV}-${CI_BUILD_REF} --set environment=develop --values values.yaml --values env/develop.yaml .
+    - helm upgrade --install  --namespace=${NAMESPACE} ${CI_PROJECT_NAME} --set image.tag=${CI_COMMIT_SHA:0:8} --set image.repository=${REPOSITORY} --set environment=develop --values values.yaml --values env/develop.yaml .
+  only:
+    - develop
+
+pub-github:
+  image: alpine
+  stage: deploy
+  tags:
+    - build
+  before_script:
+    - apk update
+    - apk upgrade
+    - apk add --no-cache bash git openssh
+    - git config --global user.email "info@containerum.io"
+    - git config --global user.name "Containerum Bot"
+    - mkdir -p ~/.ssh
+    - echo ${ID_RSA_GITHUB} | base64 -d > ~/.ssh/id_rsa
+    - echo ${ID_RSA_PUB_GITHUB} | base64 -d > ~/.ssh/id_rsa.pub
+    - chmod 600 ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa.pub
+    - eval `ssh-agent -s`
+    - ssh-add ~/.ssh/id_rsa
+    - ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+  script:
+    - git remote show
+    - if [ $(git remote show | grep github) ]; then git remote rm github; fi
+    - if [ $(git branch --list | grep pub) ]; then git branch -d pub; fi
+    - git remote add github ${GITHUB_REMOTE}
+    - git pull origin develop
+    - git fetch github
+    - git checkout origin/develop
+    - git checkout -b pub
+    - git push -u github pub:develop --force
+    - git remote rm github
   only:
     - develop
