@@ -21,7 +21,7 @@ const (
 	unableToCreate = "unable to create %s %s: %s"
 )
 
-func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string, solutionReq kube_types.UserSolution) (*server.Solution, error) {
+func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string, solutionReq kube_types.Solution) (*server.Solution, error) {
 	solutionConfigFile, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/.containerum.json", solutionPath, solutionReq.Branch))
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func parseSolutionConfig(ctx context.Context, s *serverImpl, solutionPath string
 	return solutionConfig, nil
 }
 
-func createSolution(ctx context.Context, s *serverImpl, solutionConfig *server.Solution, templateID, solutionUUID string, solutionReq kube_types.UserSolution) error {
+func createSolution(ctx context.Context, s *serverImpl, solutionConfig *server.Solution, templateID, solutionUUID string, solutionReq kube_types.Solution) error {
 	solutionEnvironments, err := jsoniter.MarshalToString(solutionConfig.Env)
 	if err != nil {
 		return err
@@ -70,7 +70,7 @@ func createSolution(ctx context.Context, s *serverImpl, solutionConfig *server.S
 	return nil
 }
 
-func parseResource(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionConfig *server.Solution, solutionPath string, solutionReq kube_types.UserSolution) (*bytes.Buffer, error) {
+func parseResource(ctx context.Context, s *serverImpl, resourceConfig *server.ConfigFile, solutionConfig *server.Solution, solutionPath string, solutionReq kube_types.Solution) (*bytes.Buffer, error) {
 	s.log.Infof("Creating %s %s", resourceConfig.Type, resourceConfig.Name)
 	s.log.Debugln("Downloading resource")
 	resF, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", solutionPath, solutionReq.Branch, resourceConfig.Name))
@@ -135,7 +135,7 @@ func rollbackSolution(ctx context.Context, s *serverImpl, solutionName, solution
 	}
 }
 
-func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.UserSolution) (*kube_types.RunSolutionResponse, error) {
+func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Solution) (*kube_types.RunSolutionResponse, error) {
 	s.log.Infoln("Running solution ", solutionReq.Name)
 	s.log.Debugln("Getting template info from DB")
 	solutionTemplate, err := s.svc.DB.GetTemplate(ctx, solutionReq.Template)
@@ -231,7 +231,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, namespace, solutionName
 	return nil
 }
 
-func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_types.UserSolutionsList, error) {
+func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_types.SolutionsList, error) {
 	resp, err := s.svc.DB.GetSolutionsList(ctx, httputil.MustGetUserID(ctx))
 	if err != nil {
 		return nil, err
@@ -246,7 +246,7 @@ func (s *serverImpl) GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_
 	return resp, nil
 }
 
-func (s *serverImpl) GetNamespaceSolutionsList(ctx context.Context, namespace string, isAdmin bool) (*kube_types.UserSolutionsList, error) {
+func (s *serverImpl) GetNamespaceSolutionsList(ctx context.Context, namespace string, isAdmin bool) (*kube_types.SolutionsList, error) {
 	resp, err := s.svc.DB.GetNamespaceSolutionsList(ctx, namespace)
 	if err != nil {
 		return nil, err
@@ -261,7 +261,7 @@ func (s *serverImpl) GetNamespaceSolutionsList(ctx context.Context, namespace st
 	return resp, nil
 }
 
-func (s *serverImpl) GetSolution(ctx context.Context, namespace, solutionName string, isAdmin bool) (*kube_types.UserSolution, error) {
+func (s *serverImpl) GetSolution(ctx context.Context, namespace, solutionName string, isAdmin bool) (*kube_types.Solution, error) {
 	resp, err := s.svc.DB.GetSolution(ctx, namespace, solutionName)
 	if err != nil {
 		return nil, err
@@ -302,9 +302,9 @@ func (s *serverImpl) GetSolutionServices(ctx context.Context, namespace, solutio
 	return usersvc, nil
 }
 
-func (s *serverImpl) DeleteUserSolutions(ctx context.Context) error {
+func (s *serverImpl) DeleteSolutions(ctx context.Context) error {
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.CompletelyDeleteUserSolutions(ctx, httputil.MustGetUserID(ctx))
+		return s.svc.DB.CompletelyDeleteSolutions(ctx, httputil.MustGetUserID(ctx))
 	}); err != nil {
 		return s.handleDBError(err)
 	}
