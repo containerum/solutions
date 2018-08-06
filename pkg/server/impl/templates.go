@@ -112,3 +112,28 @@ func (s *serverImpl) DeactivateTemplate(ctx context.Context, solution string) er
 	})
 	return s.handleDBError(err)
 }
+
+func (s *serverImpl) ValidateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
+	solurl, err := url.Parse(solution.URL)
+	if err != nil {
+		return err
+	}
+
+	solutionJSON, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/master/.containerum.json", solurl.Path[1:]))
+	if err != nil {
+		return err
+	}
+
+	var solutionStr server.Solution
+	err = jsoniter.Unmarshal(solutionJSON, &solutionStr)
+	if err != nil {
+		return err
+	}
+
+	for _, r := range solutionStr.Run {
+		if _, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/master/%s", solurl.Path[1:], r.Name)); err != nil {
+			return err
+		}
+	}
+	return nil
+}

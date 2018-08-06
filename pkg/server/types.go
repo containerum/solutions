@@ -20,6 +20,7 @@ type SolutionsService interface {
 	GetTemplatesResourcesList(ctx context.Context, name, branch string) (*kube_types.SolutionResources, error)
 	ActivateTemplate(ctx context.Context, solution string) error
 	DeactivateTemplate(ctx context.Context, solution string) error
+	ValidateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error
 
 	GetSolutionsList(ctx context.Context, isAdmin bool) (*kube_types.UserSolutionsList, error)
 	GetNamespaceSolutionsList(ctx context.Context, namespace string, isAdmin bool) (*kube_types.UserSolutionsList, error)
