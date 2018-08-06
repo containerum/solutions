@@ -17,18 +17,13 @@ func ValidateTemplate(template kube_types.AvailableSolution) *cherry.Err {
 	if template.Name == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
 	}
-	if template.Limits == nil {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Limits"))
-	} else {
+	if template.Limits != nil {
 		if template.Limits.RAM == "" {
 			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "RAM"))
 		}
 		if template.Limits.CPU == "" {
 			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "CPU"))
 		}
-	}
-	if len(template.Images) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Images"))
 	}
 	if len(template.URL) == 0 {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
