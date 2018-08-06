@@ -131,7 +131,7 @@ func (s *serverImpl) ValidateTemplate(ctx context.Context, solution kube_types.A
 	}
 
 	for _, r := range solutionStr.Run {
-		if _, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/master/%s", solurl.Path[1:], r)); err != nil {
+		if _, err := s.svc.DownloadClient.DownloadFile(ctx, fmt.Sprintf("https://raw.githubusercontent.com/%s/master/%s", solurl.Path[1:], r.Name)); err != nil {
 			return err
 		}
 	}

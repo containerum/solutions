@@ -159,7 +159,7 @@ func AddTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrRequestValidationFailed(), ctx)
+			gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		}
 		return
 	}
@@ -228,7 +228,7 @@ func UpdateTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateTemplate(), ctx)
+			gonic.Gonic(sErrors.ErrUnableUpdateTemplate().AddDetailsErr(err), ctx)
 		}
 		return
 	}
