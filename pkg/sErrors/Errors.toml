@@ -123,3 +123,9 @@ SID = "Solutions"
     StatusHTTP = 403
     Message = "Invalid user role"
     Kind = 21
+
+[[error]]
+    Name = "ErrTemplateValidationFailed"
+    StatusHTTP = 400
+    Message = "Template validation failed"
+    Kind = 22
