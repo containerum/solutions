@@ -154,6 +154,16 @@ func AddTemplate(ctx *gin.Context) {
 		return
 	}
 
+	if err := ss.ValidateTemplate(ctx.Request.Context(), request); err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrRequestValidationFailed(), ctx)
+		}
+		return
+	}
+
 	if err := ss.AddTemplate(ctx.Request.Context(), request); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -200,6 +210,16 @@ func UpdateTemplate(ctx *gin.Context) {
 
 	if err := validation.ValidateTemplate(request); err != nil {
 		gonic.Gonic(err, ctx)
+		return
+	}
+
+	if err := ss.ValidateTemplate(ctx.Request.Context(), request); err != nil {
+		if cherr, ok := err.(*cherry.Err); ok {
+			gonic.Gonic(cherr, ctx)
+		} else {
+			ctx.Error(err)
+			gonic.Gonic(sErrors.ErrRequestValidationFailed(), ctx)
+		}
 		return
 	}
 
