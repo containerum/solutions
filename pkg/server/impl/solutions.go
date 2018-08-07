@@ -63,7 +63,7 @@ func createSolution(ctx context.Context, s *serverImpl, solutionConfig *server.S
 
 	s.log.Debugln("Creating solution")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), templateID, solutionUUID, solutionEnvironments)
+		return tx.AddSolution(ctx, solutionReq, httputil.MustGetUserID(ctx), templateID, solutionUUID, solutionEnvironments)
 	}); err != nil {
 		return s.handleDBError(err)
 	}
@@ -128,7 +128,7 @@ func createService(ctx context.Context, s *serverImpl, resourceConfig *server.Co
 func rollbackSolution(ctx context.Context, s *serverImpl, solutionName, solutionNamespace string) {
 	s.log.Infoln("No resources was created. Deleting solution...")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		err := s.svc.DB.CompletelyDeleteSolution(ctx, solutionNamespace, solutionName)
+		err := tx.CompletelyDeleteSolution(ctx, solutionNamespace, solutionName)
 		return err
 	}); err != nil {
 		s.log.Errorln(err)
@@ -222,7 +222,7 @@ func (s *serverImpl) DeleteSolution(ctx context.Context, namespace, solutionName
 
 	s.log.Debugln("Deleting solution")
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeleteSolution(ctx, solution.Namespace, solution.Name)
+		return tx.DeleteSolution(ctx, solution.Namespace, solution.Name)
 	}); err != nil {
 		return s.handleDBError(err)
 	}
@@ -304,7 +304,7 @@ func (s *serverImpl) GetSolutionServices(ctx context.Context, namespace, solutio
 
 func (s *serverImpl) DeleteSolutions(ctx context.Context) error {
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.CompletelyDeleteSolutions(ctx, httputil.MustGetUserID(ctx))
+		return tx.CompletelyDeleteSolutions(ctx, httputil.MustGetUserID(ctx))
 	}); err != nil {
 		return s.handleDBError(err)
 	}
@@ -315,7 +315,7 @@ func (s *serverImpl) DeleteSolutions(ctx context.Context) error {
 
 func (s *serverImpl) DeleteNamespaceSolutions(ctx context.Context, namespace string) error {
 	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.CompletelyDeleteNamespaceSolutions(ctx, namespace)
+		return tx.CompletelyDeleteNamespaceSolutions(ctx, namespace)
 	}); err != nil {
 		return s.handleDBError(err)
 	}

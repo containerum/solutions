@@ -12,7 +12,7 @@ import (
 )
 
 func (s *serverImpl) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.SolutionsTemplatesList, error) {
-	resp, err := s.svc.DB.GetTemplatesList(ctx, isAdmin)
+	resp, err := s.svc.DB.GetTemplatesList(ctx, false)
 	if err := s.handleDBError(err); err != nil {
 		return nil, err
 	}
@@ -86,29 +86,48 @@ func (s *serverImpl) GetTemplatesResourcesList(ctx context.Context, name string,
 }
 
 func (s *serverImpl) AddTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
-	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+	var err error
+	oldTmpl, err := s.svc.DB.GetTemplate(ctx, solution.Name)
+	if err == nil {
+		if !oldTmpl.Active {
+			if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+				return s.svc.DB.UpdateTemplate(ctx, solution)
+			}); err != nil {
+				return s.handleDBError(err)
+			}
+			if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
+				return s.svc.DB.ActivateTemplate(ctx, solution.Name)
+			}); err != nil {
+				return s.handleDBError(err)
+			}
+			return nil
+		}
+	}
+	if err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
 		return s.svc.DB.CreateTemplate(ctx, solution)
-	})
-	return s.handleDBError(err)
+	}); err != nil {
+		return s.handleDBError(err)
+	}
+	return nil
 }
 
 func (s *serverImpl) UpdateTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.UpdateTemplate(ctx, solution)
+		return tx.UpdateTemplate(ctx, solution)
 	})
 	return s.handleDBError(err)
 }
 
 func (s *serverImpl) ActivateTemplate(ctx context.Context, solution string) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.ActivateTemplate(ctx, solution)
+		return tx.ActivateTemplate(ctx, solution)
 	})
 	return s.handleDBError(err)
 }
 
 func (s *serverImpl) DeactivateTemplate(ctx context.Context, solution string) error {
 	err := s.svc.DB.Transactional(ctx, func(ctx context.Context, tx db.DB) error {
-		return s.svc.DB.DeactivateTemplate(ctx, solution)
+		return tx.DeactivateTemplate(ctx, solution)
 	})
 	return s.handleDBError(err)
 }
