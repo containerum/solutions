@@ -72,7 +72,7 @@ func GetTemplatesEnv(ctx *gin.Context) {
 		branch = ctx.Query("branch")
 	}
 
-	resp, err := ss.GetTemplatesEnvList(ctx.Request.Context(), ctx.Param("solution"), branch)
+	resp, err := ss.GetTemplatesEnvList(ctx.Request.Context(), ctx.Param("template"), branch)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -111,7 +111,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 		branch = ctx.Query("branch")
 	}
 
-	resp, err := ss.GetTemplatesResourcesList(ctx.Request.Context(), ctx.Param("solution"), branch)
+	resp, err := ss.GetTemplatesResourcesList(ctx.Request.Context(), ctx.Param("template"), branch)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
@@ -206,7 +206,7 @@ func UpdateTemplate(ctx *gin.Context) {
 		return
 	}
 
-	request.Name = ctx.Param("solution")
+	request.Name = ctx.Param("template")
 
 	if err := validation.ValidateTemplate(request); err != nil {
 		gonic.Gonic(err, ctx)
@@ -255,7 +255,7 @@ func UpdateTemplate(ctx *gin.Context) {
 func ActivateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	if err := ss.ActivateTemplate(ctx.Request.Context(), ctx.Param("solution")); err != nil {
+	if err := ss.ActivateTemplate(ctx.Request.Context(), ctx.Param("template")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
@@ -288,7 +288,7 @@ func ActivateTemplate(ctx *gin.Context) {
 func DeactivateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	if err := ss.DeactivateTemplate(ctx.Request.Context(), ctx.Param("solution")); err != nil {
+	if err := ss.DeactivateTemplate(ctx.Request.Context(), ctx.Param("template")); err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
