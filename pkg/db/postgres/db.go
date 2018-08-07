@@ -61,7 +61,7 @@ func DBConnect(pgConnStr string, migrationsPath string) (db.DB, error) {
 
 func (pgdb *pgDB) migrateUp(path string) (*migrate.Migrate, error) {
 	pgdb.log.Infof("Running migrations")
-	instance, err := migdrv.WithInstance(pgdb.conn.DB, &migdrv.Config{})
+	instance, err := migdrv.WithInstance(pgdb.conn.DB, &migdrv.Config{MigrationsTable: "migrations_solutions"})
 	if err != nil {
 		return nil, err
 	}
