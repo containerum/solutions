@@ -27,28 +27,6 @@ func (pgdb *pgDB) AddSolution(ctx context.Context, solution kube_types.Solution,
 	return err
 }
 
-func (pgdb *pgDB) AddDeployment(ctx context.Context, name string, solutionID string) error {
-	pgdb.log.Infoln("Adding deployment")
-
-	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO deployments (deploy_name, solution_id) "+
-		"VALUES ($1, $2)", name, solutionID)
-	if err != nil {
-		return err
-	}
-	return err
-}
-
-func (pgdb *pgDB) AddService(ctx context.Context, name string, solutionID string) error {
-	pgdb.log.Infoln("Adding service")
-
-	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO services (service_name, solution_id) "+
-		"VALUES ($1, $2)", name, solutionID)
-	if err != nil {
-		return err
-	}
-	return err
-}
-
 func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_types.SolutionsList, error) {
 	pgdb.log.Infoln("Get solutions list")
 	var ret kube_types.SolutionsList
