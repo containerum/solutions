@@ -3,8 +3,6 @@ package clients
 import (
 	"context"
 
-	"fmt"
-
 	kube_types "github.com/containerum/kube-client/pkg/model"
 
 	"github.com/containerum/cherry"
@@ -53,7 +51,11 @@ func (c *httpKubeAPIClient) GetUserDeployments(ctx context.Context, namespace, s
 	resp, err := c.rest.R().SetContext(ctx).
 		SetResult(&dlist).
 		SetHeaders(headersMap).
-		Get(fmt.Sprintf("/namespaces/%s/solutions/%s/deployments", namespace, solutionName))
+		SetPathParams(map[string]string{
+			"namespace": namespace,
+			"solution":  solutionName,
+		}).
+		Get("/namespaces/{namespace}/solutions/{solution}/deployments")
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +75,11 @@ func (c *httpKubeAPIClient) GetUserServices(ctx context.Context, namespace, solu
 	resp, err := c.rest.R().SetContext(ctx).
 		SetResult(&slist).
 		SetHeaders(headersMap).
-		Get(fmt.Sprintf("/namespaces/%s/solutions/%s/services", namespace, solutionName))
+		SetPathParams(map[string]string{
+			"namespace": namespace,
+			"solution":  solutionName,
+		}).
+		Get("/namespaces/{namespace}/solutions/{solution}/services")
 	if err != nil {
 		return nil, err
 	}

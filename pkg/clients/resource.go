@@ -53,7 +53,10 @@ func (c *httpResourceClient) CreateDeployment(ctx context.Context, namespace str
 	resp, err := c.rest.R().SetContext(ctx).
 		SetBody(deployment).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Post(fmt.Sprintf("/namespaces/%s/deployments", namespace))
+		SetPathParams(map[string]string{
+			"namespace": namespace,
+		}).
+		Post("/namespaces/{namespace}/deployments")
 	if err != nil {
 		return err
 	}
@@ -68,7 +71,10 @@ func (c *httpResourceClient) CreateService(ctx context.Context, namespace string
 	resp, err := c.rest.R().SetContext(ctx).
 		SetBody(service).
 		SetHeaders(httputil.RequestXHeadersMap(ctx)).
-		Post(fmt.Sprintf("/namespaces/%s/services", namespace))
+		SetPathParams(map[string]string{
+			"namespace": namespace,
+		}).
+		Post("/namespaces/{namespace}/services")
 	if err != nil {
 		return err
 	}
