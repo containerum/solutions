@@ -13,18 +13,16 @@ import (
 func (pgdb *pgDB) AddSolution(ctx context.Context, solution kube_types.Solution, userID, templateID, uuid, env string) error {
 	pgdb.log.Infoln("Saving solution")
 
-	_, err := pgdb.qLog.QueryxContext(ctx, "INSERT INTO solutions (id, template_id, name, namespace, user_id) "+
-		"VALUES ($1, $2, $3, $4, $5)", uuid, templateID, solution.Name, solution.Namespace, userID)
-	if err != nil {
+	if _, err := pgdb.eLog.ExecContext(ctx, "INSERT INTO solutions (id, template_id, name, namespace, user_id) "+
+		"VALUES ($1, $2, $3, $4, $5)", uuid, templateID, solution.Name, solution.Namespace, userID); err != nil {
 		return err
 	}
 
-	_, err = pgdb.qLog.QueryxContext(ctx, "INSERT INTO parameters (solution_id, branch, env) "+
-		"VALUES ($1, $2, $3)", uuid, solution.Branch, env)
-	if err != nil {
+	if _, err := pgdb.eLog.ExecContext(ctx, "INSERT INTO parameters (solution_id, branch, env) "+
+		"VALUES ($1, $2, $3)", uuid, solution.Branch, env); err != nil {
 		return err
 	}
-	return err
+	return nil
 }
 
 func (pgdb *pgDB) GetSolutionsList(ctx context.Context, userID string) (*kube_types.SolutionsList, error) {
