@@ -13,16 +13,12 @@ func (pgdb *pgDB) CreateTemplate(ctx context.Context, solution kube_types.Soluti
 
 	images, _ := jsoniter.Marshal(solution.Images)
 
-	rows, err := pgdb.qLog.QueryxContext(ctx,
-		`INSERT INTO templates (name, cpu, ram, images, url, active) VALUES ($1, $2, $3, $4, $5, $6);`, solution.Name, solution.Limits.CPU, solution.Limits.RAM, string(images), solution.URL, "true")
-	if err != nil {
+	if _, err := pgdb.eLog.ExecContext(ctx,
+		`INSERT INTO templates (name, cpu, ram, images, url, active) VALUES ($1, $2, $3, $4, $5, $6);`, solution.Name, solution.Limits.CPU, solution.Limits.RAM, string(images), solution.URL, "true"); err != nil {
 		return err
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return rows.Err()
-	}
-	return err
+
+	return nil
 }
 
 func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
