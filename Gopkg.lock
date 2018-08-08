@@ -14,14 +14,14 @@
     "adaptors/cherrylog",
     "adaptors/gonic"
   ]
-  revision = "34f7a2a139b36c20a34b93738dda33476efad47d"
-  version = "v1.0.1"
+  revision = "f4fe137f837222131dcefcfa49845d189b5fc6f2"
+  version = "v1.0.2"
 
 [[projects]]
   name = "github.com/containerum/kube-client"
   packages = ["pkg/model"]
-  revision = "37641c903bb9814885c1a619d7fdf69bb6fea877"
-  version = "v0.23.18"
+  revision = "62744cdef634829ca891002bca1dc2616fd98b45"
+  version = "v0.23.21"
 
 [[projects]]
   name = "github.com/containerum/utils"
@@ -120,8 +120,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "ab8a2e0c74be9d3be70b3184d9acc634935ded82"
-  version = "1.1.4"
+  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
+  version = "1.1.5"
 
 [[projects]]
   branch = "master"
@@ -178,7 +178,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+  revision = "56440b844dfe139a8ac053f4ecac0b20b79058f4"
 
 [[projects]]
   branch = "master"
@@ -190,7 +190,7 @@
     "webdav",
     "webdav/internal/xml"
   ]
-  revision = "c4299a1a0d8524c11563db160fbf9bddbceadb21"
+  revision = "f4c29de78a2a91c00474a2e689954305c350adf9"
 
 [[projects]]
   branch = "master"
@@ -199,7 +199,7 @@
     "unix",
     "windows"
   ]
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "34b17bdb430002e9db9ae7ddc8480b9fa05edc22"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -249,6 +249,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5f6c626771a366e4c77969f0b3db00e21507038eda900742c5abeede2b64eaec"
+  inputs-digest = "d3172df77d915c10d9eeaf1af7a02ba93d3c82c1b7204beed6493c6a93bbded8"
   solver-name = "gps-cdcl"
   solver-version = 1

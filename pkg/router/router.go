@@ -58,17 +58,17 @@ func initRoutes(app *gin.Engine) {
 	templates := app.Group("/templates")
 	{
 		templates.GET("", h.GetTemplatesList)
-		templates.GET("/:solution/env", h.GetTemplatesEnv)
-		templates.GET("/:solution/resources", h.GetTemplatesResources)
+		templates.GET("/:template/env", h.GetTemplatesEnv)
+		templates.GET("/:template/resources", h.GetTemplatesResources)
 		templates.POST("", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.AddTemplate)
-		templates.POST("/:solution/activate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.ActivateTemplate)
-		templates.POST("/:solution/deactivate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.DeactivateTemplate)
-		templates.PUT("/:solution", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.UpdateTemplate)
+		templates.POST("/:template/activate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.ActivateTemplate)
+		templates.POST("/:template/deactivate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.DeactivateTemplate)
+		templates.PUT("/:template", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.UpdateTemplate)
 	}
 	solutions := app.Group("/solutions")
 	{
 		solutions.GET("", h.GetSolutionsList)
-		solutions.DELETE("", h.DeleteUserSolutions)
+		solutions.DELETE("", h.DeleteSolutions)
 	}
 	namespaceSolutions := app.Group("/namespaces/:namespace/solutions")
 	{

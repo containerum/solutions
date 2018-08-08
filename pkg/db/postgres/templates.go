@@ -8,24 +8,20 @@ import (
 	"github.com/json-iterator/go"
 )
 
-func (pgdb *pgDB) CreateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
+func (pgdb *pgDB) CreateTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
 	pgdb.log.Infoln("Saving solution template")
 
 	images, _ := jsoniter.Marshal(solution.Images)
 
-	rows, err := pgdb.qLog.QueryxContext(ctx,
-		`INSERT INTO templates (name, cpu, ram, images, url, active) VALUES ($1, $2, $3, $4, $5, $6);`, solution.Name, solution.Limits.CPU, solution.Limits.RAM, string(images), solution.URL, "true")
-	if err != nil {
+	if _, err := pgdb.eLog.ExecContext(ctx,
+		`INSERT INTO templates (name, cpu, ram, images, url, active) VALUES ($1, $2, $3, $4, $5, $6);`, solution.Name, solution.Limits.CPU, solution.Limits.RAM, string(images), solution.URL, "true"); err != nil {
 		return err
 	}
-	defer rows.Close()
-	if !rows.Next() {
-		return rows.Err()
-	}
-	return err
+
+	return nil
 }
 
-func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution kube_types.AvailableSolution) error {
+func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution kube_types.SolutionTemplate) error {
 	pgdb.log.Infoln("Updating solution template")
 
 	images, _ := jsoniter.Marshal(solution.Images)
@@ -90,9 +86,9 @@ func (pgdb *pgDB) DeleteTemplate(ctx context.Context, solution string) error {
 	return err
 }
 
-func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.AvailableSolutionsList, error) {
+func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_types.SolutionsTemplatesList, error) {
 	pgdb.log.Infoln("Get solutions templates list")
-	var ret kube_types.AvailableSolutionsList
+	var ret kube_types.SolutionsTemplatesList
 
 	query := "SELECT name, id, cpu, ram, images, url, active FROM templates"
 
@@ -106,7 +102,7 @@ func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_typ
 	}
 	defer rows.Close()
 	for rows.Next() {
-		solution := kube_types.AvailableSolution{Limits: &kube_types.SolutionLimits{}}
+		solution := kube_types.SolutionTemplate{Limits: &kube_types.SolutionLimits{}}
 		var images string
 		err := rows.Scan(&solution.Name, &solution.ID, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL, &solution.Active)
 		if err != nil {
@@ -122,7 +118,7 @@ func (pgdb *pgDB) GetTemplatesList(ctx context.Context, isAdmin bool) (*kube_typ
 	return &ret, rows.Err()
 }
 
-func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*kube_types.AvailableSolution, error) {
+func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*kube_types.SolutionTemplate, error) {
 	pgdb.log.Infoln("Get solution template ", name)
 	rows, err := pgdb.qLog.QueryxContext(ctx, "SELECT id, name, cpu, ram, images, url FROM templates WHERE name = $1 AND active = 'true'", name)
 	if err != nil {
@@ -133,7 +129,7 @@ func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*kube_types.Ava
 		return nil, sErrors.ErrTemplateNotExist()
 	}
 
-	solution := kube_types.AvailableSolution{Limits: &kube_types.SolutionLimits{}}
+	solution := kube_types.SolutionTemplate{Limits: &kube_types.SolutionLimits{}}
 	var images string
 	err = rows.Scan(&solution.ID, &solution.Name, &solution.Limits.CPU, &solution.Limits.RAM, &images, &solution.URL)
 	if err != nil {

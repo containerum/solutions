@@ -12,23 +12,10 @@ const (
 	fieldShouldExist = "field %v should be provided"
 )
 
-func ValidateTemplate(template kube_types.AvailableSolution) *cherry.Err {
+func ValidateTemplate(template kube_types.SolutionTemplate) *cherry.Err {
 	valerrs := []error{}
 	if template.Name == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Name"))
-	}
-	if template.Limits == nil {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Limits"))
-	} else {
-		if template.Limits.RAM == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "RAM"))
-		}
-		if template.Limits.CPU == "" {
-			valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "CPU"))
-		}
-	}
-	if len(template.Images) == 0 {
-		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Images"))
 	}
 	if len(template.URL) == 0 {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
@@ -39,7 +26,7 @@ func ValidateTemplate(template kube_types.AvailableSolution) *cherry.Err {
 	return nil
 }
 
-func ValidateSolution(solution kube_types.UserSolution) *cherry.Err {
+func ValidateSolution(solution kube_types.Solution) *cherry.Err {
 	valerrs := []error{}
 	if solution.Template == "" {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Template"))
