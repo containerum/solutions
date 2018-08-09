@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"git.containerum.net/ch/solutions/pkg/validation"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
-	kube_types "github.com/containerum/kube-client/pkg/model"
+	kubeTypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin/binding"
 )
@@ -33,13 +33,13 @@ import (
 //    $ref: '#/responses/error'
 func GetTemplatesList(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetTemplatesList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	resp, err := ss.GetTemplatesList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == m.RoleAdmin)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetTemplatesList(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetTemplatesList(), ctx)
 		}
 		return
 	}
@@ -78,7 +78,7 @@ func GetTemplatesEnv(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetTemplate(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetTemplate(), ctx)
 		}
 		return
 	}
@@ -117,7 +117,7 @@ func GetTemplatesResources(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetTemplate(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetTemplate(), ctx)
 		}
 		return
 	}
@@ -143,9 +143,9 @@ func GetTemplatesResources(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func AddTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	var request kube_types.SolutionTemplate
+	var request kubeTypes.SolutionTemplate
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
+		gonic.Gonic(solerrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
@@ -159,7 +159,7 @@ func AddTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrTemplateValidationFailed().AddDetailsErr(err), ctx)
+			gonic.Gonic(solerrors.ErrTemplateValidationFailed().AddDetailsErr(err), ctx)
 		}
 		return
 	}
@@ -169,7 +169,7 @@ func AddTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableAddTemplate(), ctx)
+			gonic.Gonic(solerrors.ErrUnableAddTemplate(), ctx)
 		}
 		return
 	}
@@ -200,9 +200,9 @@ func AddTemplate(ctx *gin.Context) {
 func UpdateTemplate(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	var request kube_types.SolutionTemplate
+	var request kubeTypes.SolutionTemplate
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
+		gonic.Gonic(solerrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
@@ -218,7 +218,7 @@ func UpdateTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrTemplateValidationFailed().AddDetailsErr(err), ctx)
+			gonic.Gonic(solerrors.ErrTemplateValidationFailed().AddDetailsErr(err), ctx)
 		}
 		return
 	}
@@ -228,7 +228,7 @@ func UpdateTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableUpdateTemplate(), ctx)
+			gonic.Gonic(solerrors.ErrUnableUpdateTemplate(), ctx)
 		}
 		return
 	}
@@ -260,7 +260,7 @@ func ActivateTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableActivateTemplate(), ctx)
+			gonic.Gonic(solerrors.ErrUnableActivateTemplate(), ctx)
 		}
 		return
 	}
@@ -293,7 +293,7 @@ func DeactivateTemplate(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableDeactivateTemplate(), ctx)
+			gonic.Gonic(solerrors.ErrUnableDeactivateTemplate(), ctx)
 		}
 		return
 	}

@@ -8,8 +8,8 @@ import (
 	"net/url"
 
 	"git.containerum.net/ch/solutions/pkg/db"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"git.containerum.net/ch/solutions/pkg/utils"
 	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
@@ -196,7 +196,7 @@ func (s *serverImpl) RunSolution(ctx context.Context, solutionReq kube_types.Sol
 
 	if ret.Created == 0 {
 		rollbackSolution(ctx, s, solutionReq.Name, solutionReq.Namespace)
-		return nil, sErrors.ErrUnableCreateSolution().AddDetails(ret.Errors...)
+		return nil, solerrors.ErrUnableCreateSolution().AddDetails(ret.Errors...)
 	}
 
 	ret.NotCreated = len(ret.Errors)

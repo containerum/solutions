@@ -6,7 +6,7 @@ import (
 
 	h "git.containerum.net/ch/solutions/pkg/router/handlers"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"git.containerum.net/ch/solutions/static"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/cherry/adaptors/gonic"
@@ -41,7 +41,7 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService, enableCORS bool
 		StaticFS("/", static.HTTP)
 	/* System */
 	e.Use(ginrus.Ginrus(logrus.WithField("component", "gin"), time.RFC3339, true))
-	e.Use(gonic.Recovery(sErrors.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
+	e.Use(gonic.Recovery(solerrors.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
 	/* Custom */
 	e.Use(httputil.SaveHeaders)
 	e.Use(httputil.PrepareContext)
@@ -51,7 +51,7 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService, enableCORS bool
 
 // SetupRoutes sets up http router needed to handle requests from clients.
 func initRoutes(app *gin.Engine) {
-	requireIdentityHeaders := httputil.RequireHeaders(sErrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
+	requireIdentityHeaders := httputil.RequireHeaders(solerrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
 
 	app.Use(requireIdentityHeaders)
 
@@ -60,10 +60,10 @@ func initRoutes(app *gin.Engine) {
 		templates.GET("", h.GetTemplatesList)
 		templates.GET("/:template/env", h.GetTemplatesEnv)
 		templates.GET("/:template/resources", h.GetTemplatesResources)
-		templates.POST("", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.AddTemplate)
-		templates.POST("/:template/activate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.ActivateTemplate)
-		templates.POST("/:template/deactivate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.DeactivateTemplate)
-		templates.PUT("/:template", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.UpdateTemplate)
+		templates.POST("", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.AddTemplate)
+		templates.POST("/:template/activate", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.ActivateTemplate)
+		templates.POST("/:template/deactivate", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.DeactivateTemplate)
+		templates.PUT("/:template", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.UpdateTemplate)
 	}
 	solutions := app.Group("/solutions")
 	{

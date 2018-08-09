@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 
-	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
@@ -34,7 +34,7 @@ func (pgdb *pgDB) UpdateTemplate(ctx context.Context, solution kube_types.Soluti
 	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrTemplateNotExist()
+		return solerrors.ErrTemplateNotExist()
 	}
 	return err
 }
@@ -50,7 +50,7 @@ func (pgdb *pgDB) ActivateTemplate(ctx context.Context, solution string) error {
 	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrTemplateNotExist()
+		return solerrors.ErrTemplateNotExist()
 	}
 	return err
 }
@@ -66,7 +66,7 @@ func (pgdb *pgDB) DeactivateTemplate(ctx context.Context, solution string) error
 	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
+		return solerrors.ErrSolutionNotExist()
 	}
 	return err
 }
@@ -81,7 +81,7 @@ func (pgdb *pgDB) DeleteTemplate(ctx context.Context, solution string) error {
 	}
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
+		return solerrors.ErrSolutionNotExist()
 	}
 	return err
 }
@@ -126,7 +126,7 @@ func (pgdb *pgDB) GetTemplate(ctx context.Context, name string) (*kube_types.Sol
 	}
 	defer rows.Close()
 	if !rows.Next() {
-		return nil, sErrors.ErrTemplateNotExist()
+		return nil, solerrors.ErrTemplateNotExist()
 	}
 
 	solution := kube_types.SolutionTemplate{Limits: &kube_types.SolutionLimits{}}
