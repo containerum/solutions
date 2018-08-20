@@ -44,14 +44,14 @@ spec:
               value: "{{ .Values.env.local.CH_SOLUTIONS_KUBE_API_URL }}"
             {{- else }}
             - name: CH_SOLUTIONS_KUBE_API_URL
-              value: "{{ .Release.Name }}-kube:1214"
+              value: "http://{{ .Release.Name }}-kube:1214"
             {{- end }}
             {{- if .Values.env.local.CH_SOLUTIONS_RESOURCE_URL }}
             - name: CH_SOLUTIONS_RESOURCE_URL
               value: "{{ .Values.env.local.CH_SOLUTIONS_RESOURCE_URL }}"
             {{- else }}
             - name: CH_SOLUTIONS_RESOURCE_URL
-              value: "{{ .Release.Name }}-resource:1213"
+              value: "http://{{ .Release.Name }}-resource:1213"
             {{- end }}
             {{- if .Values.env.local.CH_SOLUTIONS_PG_PASSWORD }}
             - name: CH_SOLUTIONS_PG_PASSWORD
