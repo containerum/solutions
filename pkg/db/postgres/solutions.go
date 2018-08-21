@@ -5,7 +5,7 @@ import (
 
 	"time"
 
-	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	kube_types "github.com/containerum/kube-client/pkg/model"
 	"github.com/json-iterator/go"
 )
@@ -101,7 +101,7 @@ func (pgdb *pgDB) GetSolution(ctx context.Context, namespace, solutionName strin
 		if rows.Err() != nil {
 			return nil, rows.Err()
 		}
-		return nil, sErrors.ErrSolutionNotExist()
+		return nil, solerrors.ErrSolutionNotExist()
 	}
 
 	var env string
@@ -128,7 +128,7 @@ func (pgdb *pgDB) DeleteSolution(ctx context.Context, namespace, solutionName st
 
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
+		return solerrors.ErrSolutionNotExist()
 	}
 	return err
 }
@@ -143,7 +143,7 @@ func (pgdb *pgDB) CompletelyDeleteSolution(ctx context.Context, namespace, solut
 
 	rows, err := res.RowsAffected()
 	if rows == 0 {
-		return sErrors.ErrSolutionNotExist()
+		return solerrors.ErrSolutionNotExist()
 	}
 	return err
 }

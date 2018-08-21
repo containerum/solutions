@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"git.containerum.net/ch/solutions/pkg/model"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"github.com/containerum/cherry/adaptors/gonic"
 	kubeModel "github.com/containerum/kube-client/pkg/model"
 	headers "github.com/containerum/utils/httputil"
@@ -36,7 +36,7 @@ const (
 
 func IsAdmin(ctx *gin.Context) {
 	if role := GetHeader(ctx, headers.UserRoleXHeader); role != RoleAdmin {
-		gonic.Gonic(sErrors.ErrAdminRequired(), ctx)
+		gonic.Gonic(solerrors.ErrAdminRequired(), ctx)
 		return
 	}
 }
@@ -68,20 +68,19 @@ func CheckAccess(ctx *gin.Context, level []kubeModel.AccessLevel) {
 			if ok := containsAccess(userNsData.Access, level...); ok {
 				return
 			}
-			gonic.Gonic(sErrors.ErrAccessError(), ctx)
+			gonic.Gonic(solerrors.ErrAccessError(), ctx)
 			return
 		}
-		gonic.Gonic(sErrors.ErrSolutionNotExist().AddDetails("project is not found"), ctx)
+		gonic.Gonic(solerrors.ErrSolutionNotExist().AddDetails("project is not found"), ctx)
 		return
 	}
 }
 
 func containsAccess(access kubeModel.AccessLevel, in ...kubeModel.AccessLevel) bool {
-	contains := false
 	for _, acc := range in {
 		if acc == access {
 			return true
 		}
 	}
-	return contains
+	return false
 }

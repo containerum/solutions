@@ -4,44 +4,34 @@ import (
 	"net/http"
 	"time"
 
+	"git.containerum.net/ch/auth/static"
 	h "git.containerum.net/ch/solutions/pkg/router/handlers"
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
-	"git.containerum.net/ch/solutions/static"
+	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"github.com/containerum/cherry/adaptors/cherrylog"
 	"github.com/containerum/cherry/adaptors/gonic"
-	"gopkg.in/gin-contrib/cors.v1"
-
-	"git.containerum.net/ch/solutions/pkg/server"
+	"github.com/containerum/kube-client/pkg/model"
 
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/contrib/ginrus"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"gopkg.in/gin-contrib/cors.v1"
 )
 
 //CreateRouter initialises router and middlewares
-func CreateRouter(ss *server.SolutionsService, enableCORS bool) http.Handler {
+func CreateRouter(ss *server.SolutionsService, status *model.ServiceStatus, enableCORS bool) http.Handler {
 	e := gin.New()
-	initMiddlewares(e, ss, enableCORS)
-	initRoutes(e)
+	initMiddlewares(e, ss)
+	initRoutes(e, status, enableCORS)
 	return e
 }
 
-func initMiddlewares(e *gin.Engine, ss *server.SolutionsService, enableCORS bool) {
-	/* CORS */
-	if enableCORS {
-		cfg := cors.DefaultConfig()
-		cfg.AllowAllOrigins = true
-		cfg.AddAllowMethods(http.MethodDelete)
-		cfg.AddAllowHeaders(httputil.UserIDXHeader, httputil.UserRoleXHeader, httputil.UserNamespacesXHeader)
-		e.Use(cors.New(cfg))
-	}
-	e.Group("/static").
-		StaticFS("/", static.HTTP)
+func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 	/* System */
 	e.Use(ginrus.Ginrus(logrus.WithField("component", "gin"), time.RFC3339, true))
-	e.Use(gonic.Recovery(sErrors.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
+	e.Use(gonic.Recovery(solerrors.ErrInternalError, cherrylog.NewLogrusAdapter(logrus.WithField("component", "gin"))))
 	/* Custom */
 	e.Use(httputil.SaveHeaders)
 	e.Use(httputil.PrepareContext)
@@ -50,8 +40,20 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService, enableCORS bool
 }
 
 // SetupRoutes sets up http router needed to handle requests from clients.
-func initRoutes(app *gin.Engine) {
-	requireIdentityHeaders := httputil.RequireHeaders(sErrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
+func initRoutes(app *gin.Engine, status *model.ServiceStatus, enableCORS bool) {
+	requireIdentityHeaders := httputil.RequireHeaders(solerrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
+
+	if enableCORS {
+		cfg := cors.DefaultConfig()
+		cfg.AllowAllOrigins = true
+		cfg.AddAllowMethods(http.MethodDelete)
+		cfg.AddAllowHeaders(httputil.UserIDXHeader, httputil.UserRoleXHeader, httputil.UserNamespacesXHeader)
+		app.Use(cors.New(cfg))
+	}
+	app.Group("/static").
+		StaticFS("/", static.HTTP)
+
+	app.GET("/status", httputil.ServiceStatus(status))
 
 	app.Use(requireIdentityHeaders)
 
@@ -60,10 +62,10 @@ func initRoutes(app *gin.Engine) {
 		templates.GET("", h.GetTemplatesList)
 		templates.GET("/:template/env", h.GetTemplatesEnv)
 		templates.GET("/:template/resources", h.GetTemplatesResources)
-		templates.POST("", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.AddTemplate)
-		templates.POST("/:template/activate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.ActivateTemplate)
-		templates.POST("/:template/deactivate", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.DeactivateTemplate)
-		templates.PUT("/:template", httputil.RequireAdminRole(sErrors.ErrAdminRequired), h.UpdateTemplate)
+		templates.POST("", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.AddTemplate)
+		templates.POST("/:template/activate", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.ActivateTemplate)
+		templates.POST("/:template/deactivate", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.DeactivateTemplate)
+		templates.PUT("/:template", httputil.RequireAdminRole(solerrors.ErrAdminRequired), h.UpdateTemplate)
 	}
 	solutions := app.Group("/solutions")
 	{

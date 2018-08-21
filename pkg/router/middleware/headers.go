@@ -6,7 +6,7 @@ import (
 	"net/textproto"
 
 	"git.containerum.net/ch/solutions/pkg/model"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"github.com/containerum/cherry/adaptors/gonic"
 	headers "github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
@@ -22,25 +22,25 @@ func RequiredUserHeaders() gin.HandlerFunc {
 		log.WithField("Headers", ctx.Request.Header).Debug("Header list")
 		notFoundHeaders := requireHeaders(ctx, headers.UserRoleXHeader)
 		if len(notFoundHeaders) > 0 {
-			gonic.Gonic(sErrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
+			gonic.Gonic(solerrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
 			return
 		}
 		// Check User-Role and User-Namespace
 		if isUser, err := checkIsUserRole(GetHeader(ctx, headers.UserRoleXHeader)); err != nil {
 			log.WithField("Value", GetHeader(ctx, headers.UserRoleXHeader)).WithError(err).Warn("Check User-Role Error")
-			gonic.Gonic(sErrors.ErrInvalidRole(), ctx)
+			gonic.Gonic(solerrors.ErrInvalidRole(), ctx)
 		} else {
 			// User-Role: user, check User-Namespace
 			if isUser {
 				notFoundHeaders := requireHeaders(ctx, headers.UserRoleXHeader, headers.UserNamespacesXHeader, headers.UserIDXHeader)
 				if len(notFoundHeaders) > 0 {
-					gonic.Gonic(sErrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
+					gonic.Gonic(solerrors.ErrRequiredHeadersNotProvided().AddDetails(notFoundHeaders...), ctx)
 					return
 				}
 				userNs, errNs := checkUserNamespace(GetHeader(ctx, headers.UserNamespacesXHeader))
 				if errNs != nil {
 					log.WithField("Value", GetHeader(ctx, headers.UserNamespacesXHeader)).WithError(errNs).Warn("Check User-Namespace header Error")
-					gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetails(fmt.Sprintf("%v: %v", headers.UserNamespacesXHeader, errNs)), ctx)
+					gonic.Gonic(solerrors.ErrRequestValidationFailed().AddDetails(fmt.Sprintf("%v: %v", headers.UserNamespacesXHeader, errNs)), ctx)
 					return
 				}
 				ctx.Set(UserNamespaces, userNs)

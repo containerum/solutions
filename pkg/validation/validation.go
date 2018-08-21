@@ -3,7 +3,7 @@ package validation
 import (
 	"fmt"
 
-	"git.containerum.net/ch/solutions/pkg/sErrors"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"github.com/containerum/cherry"
 	kube_types "github.com/containerum/kube-client/pkg/model"
 )
@@ -21,7 +21,7 @@ func ValidateTemplate(template kube_types.SolutionTemplate) *cherry.Err {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "URL"))
 	}
 	if len(valerrs) > 0 {
-		return sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...)
+		return solerrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...)
 	}
 	return nil
 }
@@ -38,7 +38,7 @@ func ValidateSolution(solution kube_types.Solution) *cherry.Err {
 		valerrs = append(valerrs, fmt.Errorf(fieldShouldExist, "Namespace"))
 	}
 	if len(valerrs) > 0 {
-		return sErrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...)
+		return solerrors.ErrRequestValidationFailed().AddDetailsErr(valerrs...)
 	}
 	return nil
 }

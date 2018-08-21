@@ -7,8 +7,8 @@ import (
 	"errors"
 
 	"git.containerum.net/ch/solutions/pkg/db"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 
 	"github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -57,7 +57,7 @@ func (s *serverImpl) handleDBError(err error) error {
 		if pqerr, ok := err.(*pq.Error); ok {
 			switch pqerr.Code {
 			case "23505": //unique_violation
-				return sErrors.ErrResourceAlreadyExists()
+				return solerrors.ErrResourceAlreadyExists()
 			default:
 				s.log.WithError(pqerr)
 			}
