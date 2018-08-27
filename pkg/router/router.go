@@ -23,6 +23,7 @@ import (
 //CreateRouter initialises router and middlewares
 func CreateRouter(ss *server.SolutionsService, status *model.ServiceStatus, enableCORS bool) http.Handler {
 	e := gin.New()
+	e.GET("/status", httputil.ServiceStatus(status))
 	initMiddlewares(e, ss)
 	initRoutes(e, status, enableCORS)
 	return e
@@ -52,8 +53,6 @@ func initRoutes(app *gin.Engine, status *model.ServiceStatus, enableCORS bool) {
 	}
 	app.Group("/static").
 		StaticFS("/", static.HTTP)
-
-	app.GET("/status", httputil.ServiceStatus(status))
 
 	app.Use(requireIdentityHeaders)
 
