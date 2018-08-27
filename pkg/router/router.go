@@ -25,7 +25,7 @@ func CreateRouter(ss *server.SolutionsService, status *model.ServiceStatus, enab
 	e := gin.New()
 	e.GET("/status", httputil.ServiceStatus(status))
 	initMiddlewares(e, ss)
-	initRoutes(e, status, enableCORS)
+	initRoutes(e, enableCORS)
 	return e
 }
 
@@ -41,7 +41,7 @@ func initMiddlewares(e *gin.Engine, ss *server.SolutionsService) {
 }
 
 // SetupRoutes sets up http router needed to handle requests from clients.
-func initRoutes(app *gin.Engine, status *model.ServiceStatus, enableCORS bool) {
+func initRoutes(app *gin.Engine, enableCORS bool) {
 	requireIdentityHeaders := httputil.RequireHeaders(solerrors.ErrRequiredHeadersNotProvided, httputil.UserIDXHeader, httputil.UserRoleXHeader)
 
 	if enableCORS {
