@@ -56,7 +56,7 @@ dev-deploy:
   environment:
     name: develop
   script:
-    - cd deploy
+    - cd charts/solutions
     - helm upgrade --install --debug --namespace=${NAMESPACE} ${PROJECT} --set image.tag=${CI_COMMIT_SHA:0:8} --set image.repository=${REPOSITORY} --set service.externalIP=88.99.247.59 --set env.local.CH_SOLUTIONS_PG_PASSWORD=${SAND_PG_PASS} --values values.yaml .
   only:
     - develop
