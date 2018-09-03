@@ -16,6 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"git.containerum.net/ch/solutions/pkg/clients"
+	"github.com/containerum/kube-client/pkg/model"
 	"github.com/urfave/cli"
 )
 
@@ -41,7 +42,13 @@ func initServer(c *cli.Context) error {
 	})
 	exitOnErr(err)
 
-	app := router.CreateRouter(&solutionssrv, c.Bool(corsFlag))
+	status := model.ServiceStatus{
+		Name:     c.App.Name,
+		Version:  c.App.Version,
+		StatusOK: true,
+	}
+
+	app := router.CreateRouter(&solutionssrv, &status, c.Bool(corsFlag))
 
 	// for graceful shutdown
 	srv := &http.Server{

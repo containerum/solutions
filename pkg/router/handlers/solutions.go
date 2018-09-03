@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	m "git.containerum.net/ch/solutions/pkg/router/middleware"
-	"git.containerum.net/ch/solutions/pkg/sErrors"
 	"git.containerum.net/ch/solutions/pkg/server"
+	"git.containerum.net/ch/solutions/pkg/solerrors"
 	"git.containerum.net/ch/solutions/pkg/validation"
 	"github.com/containerum/cherry"
 	"github.com/containerum/cherry/adaptors/gonic"
-	kube_types "github.com/containerum/kube-client/pkg/model"
+	kubeTypes "github.com/containerum/kube-client/pkg/model"
 	"github.com/containerum/utils/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -36,13 +36,13 @@ const (
 //    $ref: '#/responses/error'
 func GetSolutionsList(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetSolutionsList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	resp, err := ss.GetSolutionsList(ctx.Request.Context(), ctx.GetHeader(httputil.UserRoleXHeader) == m.RoleAdmin)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolutionsList(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetSolutionsList(), ctx)
 		}
 		return
 	}
@@ -71,13 +71,13 @@ func GetSolutionsList(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func GetNamespaceSolutions(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetNamespaceSolutionsList(ctx.Request.Context(), ctx.Param("namespace"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	resp, err := ss.GetNamespaceSolutionsList(ctx.Request.Context(), ctx.Param("namespace"), ctx.GetHeader(httputil.UserRoleXHeader) == m.RoleAdmin)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
@@ -110,13 +110,13 @@ func GetNamespaceSolutions(ctx *gin.Context) {
 //    $ref: '#/responses/error'
 func GetSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
-	resp, err := ss.GetSolution(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("solution"), ctx.GetHeader(httputil.UserRoleXHeader) == "admin")
+	resp, err := ss.GetSolution(ctx.Request.Context(), ctx.Param("namespace"), ctx.Param("solution"), ctx.GetHeader(httputil.UserRoleXHeader) == m.RoleAdmin)
 	if err != nil {
 		if cherr, ok := err.(*cherry.Err); ok {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
@@ -155,7 +155,7 @@ func GetSolutionsDeployments(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
@@ -194,7 +194,7 @@ func GetSolutionsServices(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableGetSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableGetSolution(), ctx)
 		}
 		return
 	}
@@ -228,9 +228,9 @@ func GetSolutionsServices(ctx *gin.Context) {
 func RunSolution(ctx *gin.Context) {
 	ss := ctx.MustGet(m.SolutionsServices).(server.SolutionsService)
 
-	var request kube_types.Solution
+	var request kubeTypes.Solution
 	if err := ctx.ShouldBindWith(&request, binding.JSON); err != nil {
-		gonic.Gonic(sErrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
+		gonic.Gonic(solerrors.ErrRequestValidationFailed().AddDetailsErr(err), ctx)
 		return
 	}
 
@@ -251,7 +251,7 @@ func RunSolution(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableCreateSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableCreateSolution(), ctx)
 		}
 		return
 	}
@@ -287,7 +287,7 @@ func DeleteSolution(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableDeleteSolution(), ctx)
 		}
 		return
 	}
@@ -315,7 +315,7 @@ func DeleteSolutions(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableDeleteSolution(), ctx)
 		}
 		return
 	}
@@ -347,7 +347,7 @@ func DeleteNamespaceSolutions(ctx *gin.Context) {
 			gonic.Gonic(cherr, ctx)
 		} else {
 			ctx.Error(err)
-			gonic.Gonic(sErrors.ErrUnableDeleteSolution(), ctx)
+			gonic.Gonic(solerrors.ErrUnableDeleteSolution(), ctx)
 		}
 		return
 	}
