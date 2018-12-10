@@ -15,8 +15,8 @@ Solutions is a service for launching pre-built application configurations in [Co
 ```
 
 ## Contributions
-Please submit all contributions concerning Kube-importer component to this repository. Contributing guidelines are available [here](https://github.com/containerum/containerum/blob/master/CONTRIBUTING.md).
+Please submit all contributions concerning Solutions component to this repository. Contributing guidelines are available [here](https://github.com/containerum/containerum/blob/master/CONTRIBUTING.md).
 
 ## License
-Kube-importer project is licensed under the terms of the Apache License Version 2.0. Please see LICENSE in this repository for more details.
+Solutions project is licensed under the terms of the Apache License Version 2.0. Please see LICENSE in this repository for more details.
 
